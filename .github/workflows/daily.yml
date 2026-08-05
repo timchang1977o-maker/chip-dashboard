@@ -1,0 +1,56 @@
+name: Chip Dashboard Daily (Pages)
+
+on:
+  schedule:
+    # TW 平日 16:10 = UTC 08:10（TAIFEX 三大法人未平倉、TWSE 融資餘額盤後已揭露）
+    - cron: "10 8 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chip-daily
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Fetch chip data + regenerate HTML
+        env:
+          TZ: Asia/Taipei
+        run: |
+          python dashboard/chip_tracker.py
+          python build_page.py
+
+      - name: Commit + push（觸發 Pages 重新部署）
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html \
+                  "chip_reports/籌碼儀表板.html" \
+                  "chip_reports/籌碼儀表板_artifact.html" \
+                  dashboard/chip_data.json
+          if git diff --staged --quiet; then
+            echo "No chip changes to commit"
+          else
+            git commit -m "chore(chip): daily snapshot $(TZ=Asia/Taipei date +%Y-%m-%d)"
+            pushed=0
+            for i in 1 2 3; do
+              git pull --rebase --autostash origin main && git push && { pushed=1; break; }
+              sleep 5
+            done
+            if [ "$pushed" != 1 ]; then
+              echo "::error::chip push failed after 3 retries"
+              exit 1
+            fi
+          fi
