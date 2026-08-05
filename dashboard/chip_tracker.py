@@ -283,13 +283,20 @@ header{display:flex;align-items:baseline;justify-content:space-between;flex-wrap
 h1{font-size:20px;font-weight:700;letter-spacing:.3px;margin:0}
 .sub{color:var(--muted);font-size:12.5px}
 .sub b{color:var(--ink);font-weight:600}
+.controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 2px 12px}
 .ranges{display:inline-flex;gap:3px;background:var(--panel);border:1px solid var(--hair);
-  border-radius:10px;padding:3px;box-shadow:var(--shadow);margin:0 2px 12px}
+  border-radius:10px;padding:3px;box-shadow:var(--shadow)}
 .ranges button{border:0;background:transparent;color:var(--muted);font-family:var(--font);
-  font-size:12.5px;font-weight:600;padding:5px 13px;border-radius:8px;cursor:pointer;
+  font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:8px;cursor:pointer;
   letter-spacing:.2px;transition:background .12s,color .12s}
 .ranges button:hover{color:var(--ink)}
 .ranges button.on{background:var(--fill);color:#fff}
+.linktoggle{border:1px solid var(--hair);background:var(--panel);color:var(--muted);
+  font-family:var(--font);font-size:12.5px;font-weight:600;padding:8px 13px;border-radius:10px;
+  cursor:pointer;box-shadow:var(--shadow);letter-spacing:.2px;
+  transition:background .12s,color .12s,border-color .12s}
+.linktoggle:hover{color:var(--ink)}
+.linktoggle.on{background:var(--fill);color:#fff;border-color:var(--fill)}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:760px){.grid{grid-template-columns:1fr}}
 .panel{background:var(--panel);border:1px solid var(--hair);border-radius:14px;
@@ -324,8 +331,11 @@ footer a{color:var(--foreign);text-decoration:none}
     <h1>台股籌碼儀表板</h1>
     <div class="sub">資料截至 <b>__GEN__</b> · <span id="rlabel">近 1 年</span> · 來源：TAIFEX 期交所／TWSE 證交所（官方免費）</div>
   </header>
-  <div class="ranges" id="ranges">
-    <button data-r="6M">6M</button><button data-r="YTD">YTD</button><button data-r="1Y">1Y</button><button data-r="2Y">2Y</button>
+  <div class="controls">
+    <div class="ranges" id="ranges">
+      <button data-r="1W">1W</button><button data-r="1M">1M</button><button data-r="6M">6M</button><button data-r="YTD">YTD</button><button data-r="1Y">1Y</button><button data-r="2Y">2Y</button>
+    </div>
+    <button id="linkBtn" class="linktoggle" type="button" aria-pressed="false" title="開啟後：滑過任一張圖，四張圖會在同一天同步顯示十字線與數值">🔗 四圖連動</button>
   </div>
   <div class="grid" id="grid"></div>
   <footer>
@@ -336,16 +346,20 @@ footer a{color:var(--foreign);text-decoration:none}
 <script>
 const DATA = /*__DATA__*/;
 
-const RANGES={"6M":"近 6 個月","YTD":"今年以來","1Y":"近 1 年","2Y":"近 2 年"};
+const RANGES={"1W":"近 1 週","1M":"近 1 個月","6M":"近 6 個月","YTD":"今年以來","1Y":"近 1 年","2Y":"近 2 年"};
 let RANGE="1Y";
 try{ if(RANGES[localStorage.getItem("chipRange")]) RANGE=localStorage.getItem("chipRange"); }catch(e){}
+// 四圖連動（crosshair / tooltip 跨圖同步，依日期對齊）；localStorage 記住
+window.LINK=false;
+try{ window.LINK = localStorage.getItem("chipLink")==="1"; }catch(e){}
 
 // 依目前區間算最早保留日期（ISO 字串比較即可）；"" = 不裁切
+const RANGE_DAYS={"1W":7,"1M":31,"6M":183,"1Y":365};
 function rangeCutoff(){
   const gen = DATA.generated || "";
   if(RANGE==="2Y" || !gen) return "";
   if(RANGE==="YTD") return gen.slice(0,4)+"-01-01";
-  const days = RANGE==="6M" ? 183 : 365;
+  const days = RANGE_DAYS[RANGE] || 365;
   const end = new Date(gen+"T00:00:00");
   return new Date(end.getTime()-days*86400000).toISOString().slice(0,10);
 }
@@ -454,16 +468,16 @@ function drawChart(cfg){
 
   box.innerHTML=""; box.appendChild(svg);
 
-  // tooltip / crosshair
+  // tooltip / crosshair（可跨圖連動）
   const tt=document.createElement("div"); tt.className="tt"; box.appendChild(tt);
   const cross=mk("line",{x1:0,y1:padT,x2:0,y2:padT+ih,stroke:cssv("--axis"),"stroke-width":1,
     "stroke-dasharray":"3 3",opacity:0}); svg.appendChild(cross);
   const dots=cfg.lines.map(l=>{const c=mk("circle",{r:3.3,fill:cssv("--panel"),stroke:l.color,
     "stroke-width":2,opacity:0});svg.appendChild(c);return c;});
-  function move(ev){
-    const r=box.getBoundingClientRect();
-    const px=((ev.touches?ev.touches[0].clientX:ev.clientX)-r.left)/r.width*W;
-    let idx=Math.round((px-padL)/(iw)*(n-1)); idx=Math.max(0,Math.min(n-1,idx));
+  // 日期正規化（TAIFEX 2025/08/05 與 TWSE 2025-08-05 統一成 dash，供跨圖日期對齊）
+  const norm=labels.map(d=>d.split("/").join("-"));
+  function showIdx(idx){
+    idx=Math.max(0,Math.min(n-1,idx));
     const x=X(idx);
     cross.setAttribute("x1",x);cross.setAttribute("x2",x);cross.setAttribute("opacity",1);
     let rows="";
@@ -475,10 +489,22 @@ function drawChart(cfg){
     });
     tt.innerHTML=`<div class="d">${labels[idx].replaceAll("-","/")}</div>${rows}`;
     tt.style.opacity=1;
+    const r=box.getBoundingClientRect();
     let lx=x/W*r.width; lx=Math.max(52,Math.min(r.width-52,lx));
     tt.style.left=lx+"px"; tt.style.top=(padT+8)+"px";
   }
-  function leave(){tt.style.opacity=0;cross.setAttribute("opacity",0);dots.forEach(d=>d.setAttribute("opacity",0));}
+  function hide(){tt.style.opacity=0;cross.setAttribute("opacity",0);dots.forEach(d=>d.setAttribute("opacity",0));}
+  // 連動控制器：依日期定位（找最後一個 <= 目標日期的索引，各圖交易日不同也對得上）
+  const ctrl={norm,showByDate(dateISO){let idx=0;for(let i=0;i<norm.length;i++){if(norm[i]<=dateISO)idx=i;else break;}showIdx(idx);},hide};
+  window.__charts.push(ctrl);
+  function move(ev){
+    const r=box.getBoundingClientRect();
+    const px=((ev.touches?ev.touches[0].clientX:ev.clientX)-r.left)/r.width*W;
+    let idx=Math.round((px-padL)/(iw)*(n-1)); idx=Math.max(0,Math.min(n-1,idx));
+    showIdx(idx);
+    if(window.LINK){const date=norm[idx];window.__charts.forEach(c=>{if(c!==ctrl)c.showByDate(date);});}
+  }
+  function leave(){hide();if(window.LINK){window.__charts.forEach(c=>{if(c!==ctrl)c.hide();});}}
   box.addEventListener("mousemove",move); box.addEventListener("mouseleave",leave);
   box.addEventListener("touchstart",move,{passive:true}); box.addEventListener("touchmove",move,{passive:true});
   box.addEventListener("touchend",leave);
@@ -488,6 +514,7 @@ function drawChart(cfg){
 function build(){
   const grid=document.getElementById("grid");
   const panels=[];
+  window.__charts=[];   // 每次重繪重置連動控制器清單
   const CUT=rangeCutoff();
   // 日期 key 有兩種格式（TAIFEX=2025/08/05、TWSE margin=2025-08-05），比較前統一成 dash
   const inRange=d=>!CUT||d.split("/").join("-")>=CUT;
@@ -552,6 +579,17 @@ document.querySelectorAll("#ranges button").forEach(b=>{
   });
 });
 syncRangeUI();
+
+// 四圖連動開關
+const linkBtn=document.getElementById("linkBtn");
+function syncLinkUI(){linkBtn.classList.toggle("on",window.LINK);linkBtn.setAttribute("aria-pressed",window.LINK?"true":"false");}
+linkBtn.addEventListener("click",()=>{
+  window.LINK=!window.LINK;
+  try{localStorage.setItem("chipLink",window.LINK?"1":"0");}catch(e){}
+  syncLinkUI();
+});
+syncLinkUI();
+
 build();
 
 // 只在「寬度」變化時重繪：手機捲動時網址列收合只改高度，
