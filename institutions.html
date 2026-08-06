@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>法人買賣超前十大</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#eef1f5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="籌碼">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" href="favicon.ico">
+
+<style>
+:root{
+  --bg:#eef1f5; --panel:#ffffff; --ink:#1a2230; --muted:#6b7686; --hair:#e4e8ee;
+  --grid:#eef1f5; --axis:#aab2be; --sub:#8b95a4;
+  --up:#d0342c; --down:#1f9d57;               /* 台股慣例：紅買綠賣 */
+  --foreign:#2f6df0; --trust:#e8912b; --fill:#3d7bf0;
+  --buybg:rgba(208,52,44,.09); --sellbg:rgba(31,157,87,.10);
+  --shadow:0 1px 2px rgba(20,30,50,.05),0 6px 20px rgba(20,30,50,.06);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0e1218; --panel:#161c26; --ink:#e8edf4; --muted:#8b97a8; --hair:#242c38;
+    --grid:#1c232e; --axis:#3a4552; --sub:#7c8798;
+    --up:#ff5a4d; --down:#25c274; --foreign:#4d89ff; --trust:#f0a53a; --fill:#4d89ff;
+    --buybg:rgba(255,90,77,.13); --sellbg:rgba(37,194,116,.13);
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="light"]{
+  --bg:#eef1f5; --panel:#ffffff; --ink:#1a2230; --muted:#6b7686; --hair:#e4e8ee;
+  --grid:#eef1f5; --axis:#aab2be; --sub:#8b95a4;
+  --up:#d0342c; --down:#1f9d57; --foreign:#2f6df0; --trust:#e8912b; --fill:#3d7bf0;
+  --buybg:rgba(208,52,44,.09); --sellbg:rgba(31,157,87,.10);
+  --shadow:0 1px 2px rgba(20,30,50,.05),0 6px 20px rgba(20,30,50,.06);
+}
+:root[data-theme="dark"]{
+  --bg:#0e1218; --panel:#161c26; --ink:#e8edf4; --muted:#8b97a8; --hair:#242c38;
+  --grid:#1c232e; --axis:#3a4552; --sub:#7c8798;
+  --up:#ff5a4d; --down:#25c274; --foreign:#4d89ff; --trust:#f0a53a; --fill:#4d89ff;
+  --buybg:rgba(255,90,77,.13); --sellbg:rgba(37,194,116,.13);
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
+  -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;
+  padding:max(14px,env(safe-area-inset-top)) 14px calc(24px + env(safe-area-inset-bottom));}
+.wrap{max-width:1180px;margin:0 auto}
+header{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;
+  gap:6px 14px;margin:2px 2px 14px}
+h1{font-size:20px;font-weight:700;letter-spacing:.3px;margin:0}
+.sub{color:var(--muted);font-size:12.5px}
+.sub b{color:var(--ink);font-weight:600}
+.controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 2px 14px}
+.seg{display:inline-flex;gap:3px;background:var(--panel);border:1px solid var(--hair);
+  border-radius:10px;padding:3px;box-shadow:var(--shadow)}
+.seg button{border:0;background:transparent;color:var(--muted);font-family:var(--font);
+  font-size:12.5px;font-weight:600;padding:5px 14px;border-radius:8px;cursor:pointer;
+  letter-spacing:.2px;transition:background .12s,color .12s}
+.seg button:hover{color:var(--ink)}
+.seg button.on{background:var(--fill);color:#fff}
+.pill{border:1px solid var(--hair);background:var(--panel);color:var(--muted);
+  font-family:var(--font);font-size:12.5px;font-weight:600;padding:8px 13px;border-radius:10px;
+  cursor:pointer;box-shadow:var(--shadow);letter-spacing:.2px}
+.pill:hover{color:var(--ink)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:840px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--hair);border-radius:14px;
+  padding:14px 15px 12px;box-shadow:var(--shadow);min-width:0}
+.ptitle{font-size:15px;font-weight:700;letter-spacing:.2px;margin:0 0 2px;display:flex;
+  align-items:center;gap:8px}
+.ptitle .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+.ptitle.foreign .dot{background:var(--foreign)} .ptitle.trust .dot{background:var(--trust)}
+.ptitle .pnote{color:var(--sub);font-size:11.5px;font-weight:500;margin-left:auto}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+@media (max-width:520px){.cols{grid-template-columns:1fr}}
+.side-h{font-size:12px;font-weight:700;letter-spacing:.3px;margin:2px 2px 6px;
+  display:flex;align-items:center;justify-content:space-between}
+.side-h.buy{color:var(--up)} .side-h.sell{color:var(--down)}
+.side-h span{color:var(--sub);font-weight:500;font-size:10.5px}
+table{width:100%;border-collapse:collapse}
+td{padding:5px 4px;border-bottom:1px solid var(--hair);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.rk{color:var(--sub);font-size:11px;width:16px;text-align:center}
+.nm{line-height:1.2}
+.nm b{font-size:13px;font-weight:600}
+.nm .cd{color:var(--sub);font-size:10.5px;margin-left:1px}
+.net{text-align:right;font-weight:700;font-size:13px;white-space:nowrap}
+.net.buy{color:var(--up)} .net.sell{color:var(--down)}
+.net .u{color:var(--sub);font-weight:500;font-size:10px;margin-left:1px}
+.stk{text-align:right;white-space:nowrap;width:64px}
+.badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:6px;letter-spacing:.2px}
+.badge.b{color:var(--up);background:var(--buybg)}
+.badge.s{color:var(--down);background:var(--sellbg)}
+.badge.none{color:var(--sub);background:transparent;font-weight:500}
+.empty{color:var(--sub);font-size:12px;padding:10px 2px}
+footer{color:var(--muted);font-size:11.5px;text-align:center;margin-top:18px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<style id="topnav-style">
+.topnav{display:flex;gap:6px;margin:0 2px 12px;flex-wrap:wrap}
+.topnav a{font:600 13px var(--font,-apple-system,"PingFang TC",sans-serif);
+  color:var(--muted,#6b7686);text-decoration:none;padding:7px 14px;border-radius:10px;
+  border:1px solid var(--hair,#e4e8ee);background:var(--panel,#fff);letter-spacing:.2px;
+  box-shadow:var(--shadow,0 1px 2px rgba(20,30,50,.05));transition:color .12s,background .12s}
+.topnav a:hover{color:var(--ink,#1a2230)}
+.topnav a.on{background:var(--fill,#3d7bf0);color:#fff;border-color:var(--fill,#3d7bf0)}
+</style>
+<nav class="topnav"><a href="index.html">📊 籌碼總覽</a><a href="institutions.html" class="on">🏦 法人買賣超</a></nav>
+  <header>
+    <h1>法人買賣超前十大</h1>
+    <div class="sub">資料截至 <b>2026-08-06</b> · <span id="plabel">近 1 日</span> · 上市（TWSE T86，官方免費）</div>
+  </header>
+  <div class="controls">
+    <div class="seg" id="periods">
+      <button data-p="1">1日</button><button data-p="5">5日</button><button data-p="20">20日</button>
+    </div>
+    <button id="themeBtn" class="pill" type="button" title="切換淺色／深色主題">🌙 深色</button>
+  </div>
+  <div class="grid" id="grid"></div>
+  <footer>
+    買賣超單位＝張（股數/1000），<span style="color:var(--up)">紅=買超</span> / <span style="color:var(--down)">綠=賣超</span> ·
+    連買/連賣＝該法人每日淨額同號連續天數 · 僅上市 4 碼普通股（排除 ETF/權證）<br>
+    外資＝外陸資買賣超（不含外資自營商）· 投信＝投信買賣超 · 數字取自 TWSE 官方，未經加工
+  </footer>
+</div>
+<script>
+const DATA = {"generated": "2026-08-06", "dates": ["2026-07-03", "2026-07-06", "2026-07-07", "2026-07-08", "2026-07-09", "2026-07-13", "2026-07-14", "2026-07-15", "2026-07-16", "2026-07-17", "2026-07-20", "2026-07-21", "2026-07-22", "2026-07-23", "2026-07-24", "2026-07-27", "2026-07-28", "2026-07-29", "2026-07-30", "2026-07-31", "2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06"], "foreign": {"1": {"buy": [{"code": "6770", "name": "力積電", "net": 38629, "streak": 1}, {"code": "3481", "name": "群創", "net": 37748, "streak": 1}, {"code": "2317", "name": "鴻海", "net": 21743, "streak": 5}, {"code": "2002", "name": "中鋼", "net": 16223, "streak": 2}, {"code": "2027", "name": "大成鋼", "net": 14914, "streak": 4}, {"code": "1402", "name": "遠東新", "net": 14490, "streak": 18}, {"code": "2303", "name": "聯電", "net": 14463, "streak": 1}, {"code": "1101", "name": "台泥", "net": 14353, "streak": 2}, {"code": "2337", "name": "旺宏", "net": 13593, "streak": 1}, {"code": "1216", "name": "統一", "net": 9685, "streak": 8}], "sell": [{"code": "2834", "name": "臺企銀", "net": -23309, "streak": -4}, {"code": "2892", "name": "第一金", "net": -21664, "streak": -4}, {"code": "2812", "name": "台中銀", "net": -20938, "streak": -5}, {"code": "2883", "name": "凱基金", "net": -19748, "streak": -1}, {"code": "2344", "name": "華邦電", "net": -18757, "streak": -1}, {"code": "1718", "name": "中纖", "net": -18215, "streak": -3}, {"code": "2886", "name": "兆豐金", "net": -16131, "streak": -4}, {"code": "2887", "name": "台新新光金", "net": -15939, "streak": -1}, {"code": "2880", "name": "華南金", "net": -11104, "streak": -8}, {"code": "3231", "name": "緯創", "net": -10143, "streak": -1}]}, "5": {"buy": [{"code": "2317", "name": "鴻海", "net": 120846, "streak": 5}, {"code": "2618", "name": "長榮航", "net": 90385, "streak": 22}, {"code": "2883", "name": "凱基金", "net": 78126, "streak": -1}, {"code": "3231", "name": "緯創", "net": 76197, "streak": -1}, {"code": "2610", "name": "華航", "net": 67525, "streak": -1}, {"code": "2301", "name": "光寶科", "net": 61642, "streak": -1}, {"code": "2324", "name": "仁寶", "net": 59913, "streak": 5}, {"code": "2891", "name": "中信金", "net": 55446, "streak": 6}, {"code": "2887", "name": "台新新光金", "net": 53049, "streak": -1}, {"code": "2408", "name": "南亞科", "net": 51645, "streak": 4}], "sell": [{"code": "2303", "name": "聯電", "net": -126086, "streak": 1}, {"code": "2834", "name": "臺企銀", "net": -89592, "streak": -4}, {"code": "2801", "name": "彰銀", "net": -75321, "streak": -4}, {"code": "1303", "name": "南亞", "net": -65879, "streak": 1}, {"code": "2892", "name": "第一金", "net": -62759, "streak": -4}, {"code": "2812", "name": "台中銀", "net": -62622, "streak": -5}, {"code": "1718", "name": "中纖", "net": -58227, "streak": -3}, {"code": "2886", "name": "兆豐金", "net": -38369, "streak": -4}, {"code": "3481", "name": "群創", "net": -36222, "streak": 1}, {"code": "9904", "name": "寶成", "net": -32542, "streak": 1}]}, "20": {"buy": [{"code": "2618", "name": "長榮航", "net": 439720, "streak": 22}, {"code": "3231", "name": "緯創", "net": 247314, "streak": -1}, {"code": "2002", "name": "中鋼", "net": 207798, "streak": 2}, {"code": "2610", "name": "華航", "net": 184706, "streak": -1}, {"code": "2883", "name": "凱基金", "net": 184450, "streak": -1}, {"code": "2884", "name": "玉山金", "net": 182889, "streak": -4}, {"code": "2891", "name": "中信金", "net": 151254, "streak": 6}, {"code": "5880", "name": "合庫金", "net": 146245, "streak": -4}, {"code": "2867", "name": "三商壽", "net": 132515, "streak": 11}, {"code": "2317", "name": "鴻海", "net": 131811, "streak": 5}], "sell": [{"code": "1303", "name": "南亞", "net": -243570, "streak": 1}, {"code": "6770", "name": "力積電", "net": -193424, "streak": 1}, {"code": "2303", "name": "聯電", "net": -160711, "streak": 1}, {"code": "2330", "name": "台積電", "net": -126138, "streak": -1}, {"code": "2801", "name": "彰銀", "net": -106402, "streak": -4}, {"code": "2834", "name": "臺企銀", "net": -101061, "streak": -4}, {"code": "2887", "name": "台新新光金", "net": -97673, "streak": -1}, {"code": "2880", "name": "華南金", "net": -97487, "streak": -8}, {"code": "1314", "name": "中石化", "net": -91838, "streak": -1}, {"code": "2449", "name": "京元電子", "net": -73522, "streak": -11}]}}, "trust": {"1": {"buy": [{"code": "2880", "name": "華南金", "net": 10426, "streak": 15}, {"code": "2886", "name": "兆豐金", "net": 7520, "streak": 15}, {"code": "2892", "name": "第一金", "net": 7361, "streak": 16}, {"code": "2337", "name": "旺宏", "net": 5080, "streak": 2}, {"code": "2883", "name": "凱基金", "net": 4112, "streak": 1}, {"code": "4958", "name": "臻鼎-KY", "net": 2715, "streak": 5}, {"code": "3189", "name": "景碩", "net": 2502, "streak": 3}, {"code": "2313", "name": "華通", "net": 2072, "streak": 1}, {"code": "6213", "name": "聯茂", "net": 1760, "streak": 1}, {"code": "2855", "name": "統一證", "net": 1200, "streak": 1}], "sell": [{"code": "2303", "name": "聯電", "net": -6459, "streak": -1}, {"code": "2881", "name": "富邦金", "net": -3184, "streak": -2}, {"code": "2890", "name": "永豐金", "net": -1880, "streak": -4}, {"code": "2885", "name": "元大金", "net": -1821, "streak": -1}, {"code": "2327", "name": "國巨*", "net": -1648, "streak": -1}, {"code": "5876", "name": "上海商銀", "net": -1395, "streak": -1}, {"code": "2887", "name": "台新新光金", "net": -1311, "streak": -4}, {"code": "1303", "name": "南亞", "net": -1205, "streak": -2}, {"code": "2204", "name": "中華", "net": -991, "streak": -4}, {"code": "1216", "name": "統一", "net": -958, "streak": -4}]}, "5": {"buy": [{"code": "2880", "name": "華南金", "net": 38972, "streak": 15}, {"code": "3231", "name": "緯創", "net": 23839, "streak": -1}, {"code": "2886", "name": "兆豐金", "net": 22812, "streak": 15}, {"code": "2337", "name": "旺宏", "net": 14252, "streak": 2}, {"code": "2892", "name": "第一金", "net": 13543, "streak": 16}, {"code": "2882", "name": "國泰金", "net": 12756, "streak": 1}, {"code": "2883", "name": "凱基金", "net": 12613, "streak": 1}, {"code": "2344", "name": "華邦電", "net": 11330, "streak": 3}, {"code": "2885", "name": "元大金", "net": 11113, "streak": -1}, {"code": "2881", "name": "富邦金", "net": 10072, "streak": -2}], "sell": [{"code": "2027", "name": "大成鋼", "net": -8152, "streak": -1}, {"code": "2618", "name": "長榮航", "net": -5187, "streak": -4}, {"code": "5876", "name": "上海商銀", "net": -3939, "streak": -1}, {"code": "1216", "name": "統一", "net": -3935, "streak": -4}, {"code": "8150", "name": "南茂", "net": -3869, "streak": 0}, {"code": "1402", "name": "遠東新", "net": -3838, "streak": 2}, {"code": "3090", "name": "日電貿", "net": -3754, "streak": -1}, {"code": "1102", "name": "亞泥", "net": -3666, "streak": 2}, {"code": "3026", "name": "禾伸堂", "net": -3088, "streak": -6}, {"code": "2360", "name": "致茂", "net": -2678, "streak": -4}]}, "20": {"buy": [{"code": "2887", "name": "台新新光金", "net": 160257, "streak": -4}, {"code": "1303", "name": "南亞", "net": 158128, "streak": -2}, {"code": "2880", "name": "華南金", "net": 110260, "streak": 15}, {"code": "2886", "name": "兆豐金", "net": 71576, "streak": 15}, {"code": "2892", "name": "第一金", "net": 63938, "streak": 16}, {"code": "2801", "name": "彰銀", "net": 59154, "streak": -2}, {"code": "2890", "name": "永豐金", "net": 46437, "streak": -4}, {"code": "2542", "name": "興富發", "net": 38432, "streak": 3}, {"code": "1216", "name": "統一", "net": 31702, "streak": -4}, {"code": "3231", "name": "緯創", "net": 27858, "streak": -1}], "sell": [{"code": "3481", "name": "群創", "net": -76724, "streak": -4}, {"code": "2303", "name": "聯電", "net": -67578, "streak": -1}, {"code": "2618", "name": "長榮航", "net": -47606, "streak": -4}, {"code": "2344", "name": "華邦電", "net": -25322, "streak": 3}, {"code": "2327", "name": "國巨*", "net": -25251, "streak": -1}, {"code": "2353", "name": "宏碁", "net": -24116, "streak": 2}, {"code": "6005", "name": "群益證", "net": -23724, "streak": 0}, {"code": "2356", "name": "英業達", "net": -20152, "streak": 1}, {"code": "3090", "name": "日電貿", "net": -18579, "streak": -1}, {"code": "9904", "name": "寶成", "net": -17606, "streak": 3}]}}};
+let P = "1";
+try{ if(["1","5","20"].includes(localStorage.getItem("instP"))) P=localStorage.getItem("instP"); }catch(e){}
+const PLABEL={"1":"近 1 日","5":"近 5 日","20":"近 20 日"};
+
+let THEME="light";
+try{ if(localStorage.getItem("chipTheme")==="dark") THEME="dark"; }catch(e){}
+document.documentElement.setAttribute("data-theme",THEME);
+
+const fmt = n => (n<0?"-":"")+Math.abs(n).toLocaleString("en-US");
+function badge(st){
+  if(st>0) return `<span class="badge b">連買${st}</span>`;
+  if(st<0) return `<span class="badge s">連賣${-st}</span>`;
+  return `<span class="badge none">—</span>`;
+}
+function rows(list, side){
+  if(!list||!list.length) return `<div class="empty">無資料</div>`;
+  return `<table>${list.map((r,i)=>`
+    <tr>
+      <td class="rk">${i+1}</td>
+      <td class="nm"><b>${r.name}</b><span class="cd">${r.code}</span></td>
+      <td class="net ${side}">${fmt(r.net)}<span class="u">張</span></td>
+      <td class="stk">${badge(r.streak)}</td>
+    </tr>`).join("")}</table>`;
+}
+function panel(who, title, cls){
+  const d = DATA[who][P] || {buy:[],sell:[]};
+  return `<div class="panel">
+    <div class="ptitle ${cls}"><span class="dot"></span>${title}
+      <span class="pnote">${PLABEL[P]}買賣超</span></div>
+    <div class="cols">
+      <div><div class="side-h buy">買超前十<span>張</span></div>${rows(d.buy,"buy")}</div>
+      <div><div class="side-h sell">賣超前十<span>張</span></div>${rows(d.sell,"sell")}</div>
+    </div>
+  </div>`;
+}
+function build(){
+  document.getElementById("grid").innerHTML =
+    panel("foreign","外資","foreign") + panel("trust","投信","trust");
+  document.getElementById("plabel").textContent = PLABEL[P];
+  document.querySelectorAll("#periods button").forEach(b=>b.classList.toggle("on",b.dataset.p===P));
+}
+document.querySelectorAll("#periods button").forEach(b=>{
+  b.addEventListener("click",()=>{P=b.dataset.p;try{localStorage.setItem("instP",P);}catch(e){}build();});
+});
+const themeBtn=document.getElementById("themeBtn");
+function syncTheme(){themeBtn.textContent=THEME==="dark"?"☀️ 淺色":"🌙 深色";}
+themeBtn.addEventListener("click",()=>{
+  THEME=THEME==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",THEME);
+  try{localStorage.setItem("chipTheme",THEME);}catch(e){}
+  syncTheme();
+});
+syncTheme();
+build();
+</script>
+</body>
+</html>

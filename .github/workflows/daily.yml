@@ -2,8 +2,11 @@ name: Chip Dashboard Daily (Pages)
 
 on:
   schedule:
-    # TW 平日 16:10 = UTC 08:10（TAIFEX 三大法人未平倉、TWSE 融資餘額盤後已揭露）
+    # TW 平日 16:10 = UTC 08:10（TAIFEX 三大法人未平倉盤後已揭露、T86 個股買賣超已出）
     - cron: "10 8 * * 1-5"
+    # 傍晚 catch-up：TW 平日 20:30 = UTC 12:30。TWSE 融資餘額(MI_MARGN)常傍晚才定稿，
+    # 16:10 那班（且 GHA cron 常延遲）容易漏當天融資 → 這班補抓；沒新資料就不會 commit。
+    - cron: "30 12 * * 1-5"
   workflow_dispatch: {}
 
 permissions:
@@ -25,21 +28,25 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Fetch chip data + regenerate HTML
+      - name: Fetch chip data + institution rankings + regenerate HTML
         env:
           TZ: Asia/Taipei
         run: |
           python dashboard/chip_tracker.py
+          python dashboard/institution_tracker.py
           python build_page.py
 
       - name: Commit + push（觸發 Pages 重新部署）
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html \
+          git add index.html institutions.html \
                   "chip_reports/籌碼儀表板.html" \
                   "chip_reports/籌碼儀表板_artifact.html" \
-                  dashboard/chip_data.json
+                  "chip_reports/法人買賣超.html" \
+                  dashboard/chip_data.json \
+                  dashboard/institution_data.json \
+                  dashboard/institution_cache.json
           if git diff --staged --quiet; then
             echo "No chip changes to commit"
           else
