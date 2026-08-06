@@ -234,7 +234,7 @@ def main():
 # ----------------------------- HTML template -----------------------------
 # NOTE: 標記 /*__DATA__*/ 會被換成 JSON；__GEN__ 換成產生日期。
 _TEMPLATE = r"""<!doctype html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -316,11 +316,15 @@ h1{font-size:20px;font-weight:700;letter-spacing:.3px;margin:0}
 .chart svg{display:block;width:100%;height:auto;overflow:visible;touch-action:pan-y}
 .tt{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--hair);
   border-radius:9px;box-shadow:var(--shadow);padding:7px 9px;font-size:11.5px;opacity:0;
-  transition:opacity .08s;transform:translate(-50%,-104%);white-space:nowrap;z-index:5}
-.tt .d{color:var(--muted);margin-bottom:3px;font-size:11px}
-.tt .row{display:flex;align-items:center;gap:6px;justify-content:space-between}
-.tt .row b{font-weight:600}
-.tt i{width:9px;height:3px;border-radius:2px;display:inline-block}
+  transition:opacity .08s;white-space:nowrap;z-index:5}
+.tt .d{color:var(--muted);margin-bottom:4px;font-size:11px}
+.tt .ttt{border-collapse:collapse}
+.tt .ttt td{padding:1.5px 7px;text-align:right;font-variant-numeric:tabular-nums;line-height:1.3}
+.tt .ttt td.nm{text-align:left;color:var(--muted);padding-left:0;padding-right:11px}
+.tt .ttt td.nm i{width:9px;height:3px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle}
+.tt .ttt tr.hd td{color:var(--sub);font-size:10px;padding-bottom:3px;font-weight:600}
+.tt .ttt td.cur{color:var(--ink);font-weight:700}
+.tt .ttt td.mut{color:var(--sub)}
 footer{color:var(--muted);font-size:11.5px;text-align:center;margin-top:18px;line-height:1.6}
 footer a{color:var(--foreign);text-decoration:none}
 </style>
@@ -336,6 +340,7 @@ footer a{color:var(--foreign);text-decoration:none}
       <button data-r="1W">1W</button><button data-r="1M">1M</button><button data-r="6M">6M</button><button data-r="YTD">YTD</button><button data-r="1Y">1Y</button><button data-r="2Y">2Y</button>
     </div>
     <button id="linkBtn" class="linktoggle" type="button" aria-pressed="false" title="開啟後：滑過任一張圖，四張圖會在同一天同步顯示十字線與數值">🔗 四圖連動</button>
+    <button id="themeBtn" class="linktoggle" type="button" title="切換淺色／深色主題">🌙 深色</button>
   </div>
   <div class="grid" id="grid"></div>
   <footer>
@@ -352,6 +357,10 @@ try{ if(RANGES[localStorage.getItem("chipRange")]) RANGE=localStorage.getItem("c
 // 四圖連動（crosshair / tooltip 跨圖同步，依日期對齊）；localStorage 記住
 window.LINK=false;
 try{ window.LINK = localStorage.getItem("chipLink")==="1"; }catch(e){}
+// 主題：預設淺色（白底），localStorage 記住；<html data-theme="light"> 先擋首屏閃深色
+let THEME="light";
+try{ if(localStorage.getItem("chipTheme")==="dark") THEME="dark"; }catch(e){}
+document.documentElement.setAttribute("data-theme",THEME);
 
 // 依目前區間算最早保留日期（ISO 字串比較即可）；"" = 不裁切
 const RANGE_DAYS={"1W":7,"1M":31,"6M":183,"1Y":365};
@@ -476,22 +485,35 @@ function drawChart(cfg){
     "stroke-width":2,opacity:0});svg.appendChild(c);return c;});
   // 日期正規化（TAIFEX 2025/08/05 與 TWSE 2025-08-05 統一成 dash，供跨圖日期對齊）
   const norm=labels.map(d=>d.split("/").join("-"));
+  const md=i=> labels[i].replaceAll("-","/").slice(5);   // MM/DD
   function showIdx(idx){
     idx=Math.max(0,Math.min(n-1,idx));
     const x=X(idx);
     cross.setAttribute("x1",x);cross.setAttribute("x2",x);cross.setAttribute("opacity",1);
+    const pi=idx>0?idx-1:null, ni=idx<n-1?idx+1:null;      // 前一筆 / 後一筆
+    const vf=v=> v==null?null:(cfg.vfmt?cfg.vfmt(v):fmtInt(v));
+    // 表頭：前 / 當日 / 後 三欄日期
+    const hcell=(i,cur)=> i==null?'<td class="mut">—</td>':`<td class="${cur?'cur':''}">${md(i)}</td>`;
+    let head=`<tr class="hd"><td></td>${hcell(pi,0)}${hcell(idx,1)}${hcell(ni,0)}</tr>`;
     let rows="";
     cfg.lines.forEach((l,k)=>{
       const v=l.data[idx];
-      if(v==null){dots[k].setAttribute("opacity",0);return;}
-      dots[k].setAttribute("cx",x);dots[k].setAttribute("cy",Y(v));dots[k].setAttribute("opacity",1);
-      rows+=`<div class="row"><span><i style="background:${l.color}"></i>${l.name}</span><b>${cfg.vfmt?cfg.vfmt(v):fmtInt(v)}</b></div>`;
+      if(v==null){dots[k].setAttribute("opacity",0);}
+      else{dots[k].setAttribute("cx",x);dots[k].setAttribute("cy",Y(v));dots[k].setAttribute("opacity",1);}
+      const cell=(i,cur)=>{const t=i==null?null:vf(l.data[i]);
+        return t==null?'<td class="mut">—</td>':`<td class="${cur?'cur':''}">${t}</td>`;};
+      rows+=`<tr><td class="nm"><i style="background:${l.color}"></i>${l.name}</td>`
+           +`${cell(pi,0)}${cell(idx,1)}${cell(ni,0)}</tr>`;
     });
-    tt.innerHTML=`<div class="d">${labels[idx].replaceAll("-","/")}</div>${rows}`;
+    tt.innerHTML=`<div class="d">${labels[idx].replaceAll("-","/")}</div><table class="ttt">${head}${rows}</table>`;
     tt.style.opacity=1;
+    // 定位：垂直留在圖內（不上飄到標題大數字），水平往指標另一側翻，避免遮到當日數值
     const r=box.getBoundingClientRect();
-    let lx=x/W*r.width; lx=Math.max(52,Math.min(r.width-52,lx));
-    tt.style.left=lx+"px"; tt.style.top=(padT+8)+"px";
+    const lx=x/W*r.width, tw=tt.offsetWidth;
+    let left = idx>n/2 ? lx-12-tw : lx+12;                 // 右半邊→往左放，左半邊→往右放
+    left=Math.max(4,Math.min(r.width-4-tw,left));
+    tt.style.transform="none";
+    tt.style.left=left+"px"; tt.style.top=(padT+6)+"px";
   }
   function hide(){tt.style.opacity=0;cross.setAttribute("opacity",0);dots.forEach(d=>d.setAttribute("opacity",0));}
   // 連動控制器：依日期定位（找最後一個 <= 目標日期的索引，各圖交易日不同也對得上）
@@ -589,6 +611,18 @@ linkBtn.addEventListener("click",()=>{
   syncLinkUI();
 });
 syncLinkUI();
+
+// 主題切換（淺色／深色）；切換後重繪，讓 SVG 內以 cssv() 讀的色彩（格線/軸/圓點）跟著更新
+const themeBtn=document.getElementById("themeBtn");
+function syncThemeUI(){themeBtn.textContent=THEME==="dark"?"☀️ 淺色":"🌙 深色";}
+themeBtn.addEventListener("click",()=>{
+  THEME=THEME==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",THEME);
+  try{localStorage.setItem("chipTheme",THEME);}catch(e){}
+  syncThemeUI();
+  document.getElementById("grid").innerHTML="";build();
+});
+syncThemeUI();
 
 build();
 

@@ -16,7 +16,7 @@ OUT = ROOT / "index.html"
 
 PWA_HEAD = """
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#0e1218">
+<meta name="theme-color" content="#eef1f5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
