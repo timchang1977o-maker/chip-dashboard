@@ -168,7 +168,7 @@ footer a{color:var(--foreign);text-decoration:none}
     </footer>
   </section>
   <section id="tab-etf" hidden>
-    <div class="etfnote">主動型 ETF 每日持股動態追蹤（與資產儀表板同源 /etf）。<a href="/etf" target="_blank" rel="noopener">↗ 另開整頁</a></div>
+    <div class="etfnote">主動型 ETF 每日持股動態追蹤（與資產儀表板同源 /etf）。<a href="etf.html" target="_blank" rel="noopener">↗ 另開整頁</a></div>
     <iframe id="etfFrame" title="主動 ETF 追蹤" loading="lazy"></iframe>
   </section>
 </div>
@@ -531,7 +531,7 @@ function showTab(t){
   document.getElementById("tab-chip").hidden = t!=="chip";
   document.getElementById("tab-etf").hidden  = t!=="etf";
   if(t==="etf"){
-    if(!etfFrame.getAttribute("src")) etfFrame.setAttribute("src","/etf");  // lazy load
+    if(!etfFrame.getAttribute("src")) etfFrame.setAttribute("src","etf.html");  // lazy load
     sizeEtf();
   }
   try{localStorage.setItem("chipTab",t);}catch(e){}

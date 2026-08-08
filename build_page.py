@@ -62,6 +62,10 @@ def build_one(src_name, out_name, current):
         print("skip（找不到來源）:", src)
         return
     html = src.read_text(encoding="utf-8")
+    # Pages 專屬：ETF 分頁在 Render 指向同源 /etf（需登入）；Pages 站沒有該路由，
+    # 改指本 repo 內的自含靜態頁 etf.html（免登入）。tracker 原始碼維持與私有 repo 同源。
+    html = html.replace('.setAttribute("src","/etf")', '.setAttribute("src","etf.html")')
+    html = html.replace('href="/etf"', 'href="etf.html"')
     if "manifest.webmanifest" not in html and "</title>" in html:
         html = html.replace("</title>", "</title>" + PWA_HEAD, 1)
     if 'class="topnav"' not in html and '<div class="wrap">' in html:
