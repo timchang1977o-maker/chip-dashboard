@@ -726,7 +726,7 @@ function renderStreaks(){
    +scard("外資・現貨",      sF.sign,  sF.count,  "買超",  "賣超",  netSub)
    +scard("投信・現貨",      sT.sign,  sT.count,  "買超",  "賣超",  "")
    +scard("自營・現貨",      sD.sign,  sD.count,  "買超",  "賣超",  "")
-   +scard("融資餘額・增減",  sM.sign,  sM.count,  "連續增","連續減",mSub);
+   +scard("融資餘額・增減",  sM.sign,  sM.count,  "增加",  "減少",  mSub);
 }
 
 // ---- 組資料 ----
