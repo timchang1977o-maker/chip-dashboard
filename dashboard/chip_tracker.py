@@ -248,8 +248,8 @@ def load_maintain(existing=None):
             hist = json.load(open(path, encoding="utf-8"))
             for k, e in hist.items():
                 iso = f"{k[:4]}-{k[4:6]}-{k[6:]}"
-                merged[iso] = [iso, e.get("total_ratio"),
-                               e.get("twse_ratio"), e.get("tpex_ratio")]
+                merged[iso] = [iso, e.get("total_ratio"), e.get("twse_ratio"),
+                               e.get("tpex_ratio"), e.get("total_ratio_exetf")]
         except Exception as ex:
             print(f"  maintain load failed: {ex}", file=sys.stderr)
     return [merged[d] for d in sorted(merged)]
@@ -422,6 +422,8 @@ h1{font-size:20px;font-weight:700;letter-spacing:.3px;margin:0}
 .tt .ttt tr.hd td{color:var(--sub);font-size:10px;padding-bottom:3px;font-weight:600}
 .tt .ttt td.cur{color:var(--ink);font-weight:700}
 .tt .ttt td.mut{color:var(--sub)}
+.tt .ttt .ar{font-size:8.5px;margin-left:3px;vertical-align:middle}
+.tt .ttt .ar.u{color:var(--up)} .tt .ttt .ar.d{color:var(--down)}
 footer{color:var(--muted);font-size:11.5px;text-align:center;margin-top:18px;line-height:1.6}
 footer a{color:var(--foreign);text-decoration:none}
 /* 分頁列（籌碼總覽 / 主動 ETF 追蹤） */
@@ -609,8 +611,10 @@ function drawChart(cfg){
   cfg.lines.forEach(l=>{
     let d="";
     l.data.forEach((v,i)=>{ if(v==null){return;} d+=(d?"L":"M")+X(i)+" "+Y(v);});
-    svg.appendChild(mk("path",{d,fill:"none",stroke:l.color,"stroke-width":l.width||(cfg.lines.length===1?1.7:1.4),
-      "stroke-linejoin":"round","stroke-linecap":"round"}));
+    const pa={d,fill:"none",stroke:l.color,"stroke-width":l.width||(cfg.lines.length===1?1.7:1.4),
+      "stroke-linejoin":"round","stroke-linecap":"round"};
+    if(l.dash) pa["stroke-dasharray"]=l.dash;
+    svg.appendChild(mk("path",pa));
     // endpoint dot
     for(let i=l.data.length-1;i>=0;i--){ if(l.data[i]!=null){
       svg.appendChild(mk("circle",{cx:X(i),cy:Y(l.data[i]),r:2.6,fill:l.color}));break;}}
@@ -642,7 +646,13 @@ function drawChart(cfg){
       if(v==null){dots[k].setAttribute("opacity",0);}
       else{dots[k].setAttribute("cx",x);dots[k].setAttribute("cy",Y(v));dots[k].setAttribute("opacity",1);}
       const cell=(i,cur)=>{const t=i==null?null:vf(l.data[i]);
-        return t==null?'<td class="mut">—</td>':`<td class="${cur?'cur':''}">${t}</td>`;};
+        if(t==null) return '<td class="mut">—</td>';
+        let ar="";                                    // 當日格：標示較前一筆上升▲/下降▼
+        if(cur && pi!=null && l.data[idx]!=null && l.data[pi]!=null && l.data[idx]!==l.data[pi]){
+          const up=l.data[idx]>l.data[pi];
+          ar=`<span class="ar ${up?'u':'d'}">${up?'▲':'▼'}</span>`;
+        }
+        return `<td class="${cur?'cur':''}">${t}${ar}</td>`;};
       rows+=`<tr><td class="nm"><i style="background:${l.color}"></i>${l.name}</td>`
            +`${cell(pi,0)}${cell(idx,1)}${cell(ni,0)}</tr>`;
     });
@@ -796,14 +806,15 @@ function build(){
   if(Array.isArray(DATA.maintain) && DATA.maintain.length){
     const R=DATA.maintain.filter(x=>inRange(x[0]));
     const k=R.map(x=>x[0]);
-    const TOT=R.map(x=>x[1]??null), TW=R.map(x=>x[2]??null), TP=R.map(x=>x[3]??null);
+    const TOT=R.map(x=>x[1]??null), TW=R.map(x=>x[2]??null), TP=R.map(x=>x[3]??null), EX=R.map(x=>x[4]??null);
     const last=TOT[TOT.length-1], prev=TOT[TOT.length-2];
     const dot=last==null?"":last<160?"🔴":last<170?"🟡":"🟢";
-    panels.push(panel({key:"maint",title:"大盤融資維持率",unit:"%",tunit:"%（上市+上櫃）",
+    panels.push(panel({key:"maint",title:"大盤融資維持率",unit:"%",tunit:"%（含ETF；虛線＝去ETF）",
       valueTxt:(last!=null?dot+" "+last.toFixed(2):"—"),
       delta:(last!=null&&prev!=null?last-prev:0),dfmt:v=>v.toFixed(2),labels:k,
       yfmt:v=>Math.round(v)+"%",
       lines:[{name:"整體",color:cssv("--fill"),data:TOT,width:2.4},
+             {name:"整體(去ETF)",color:cssv("--price"),data:EX,width:1.6,dash:"5 3"},
              {name:"上市",color:cssv("--dealer"),data:TW,width:1.2},
              {name:"上櫃",color:cssv("--trust"),data:TP,width:1.2}]}));
   }
