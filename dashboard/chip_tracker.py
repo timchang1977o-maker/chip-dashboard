@@ -422,11 +422,10 @@ footer a{color:var(--foreign);text-decoration:none}
 .scard.up .dir{color:var(--up)} .scard.up .bar{background:var(--up)}
 .scard.down .dir{color:var(--down)} .scard.down .bar{background:var(--down)}
 .scard.flat .dir{color:var(--muted)}
-/* ETF 分頁 iframe */
+/* ETF 分頁：無框、與頁面連續捲動（高度自動貼齊內容，不用內部捲軸）*/
 .etfnote{color:var(--muted);font-size:12px;margin:0 2px 10px}
 .etfnote a{color:var(--foreign);text-decoration:none;font-weight:600}
-#etfFrame{width:100%;border:1px solid var(--hair);border-radius:14px;background:var(--panel);
-  box-shadow:var(--shadow);display:block}
+#etfFrame{width:100%;border:0;background:transparent;display:block}
 </style>
 </head>
 <body>
@@ -456,7 +455,7 @@ footer a{color:var(--foreign);text-decoration:none}
     </footer>
   </section>
   <section id="tab-etf" hidden>
-    <div class="etfnote">主動型 ETF 每日持股動態追蹤（與資產儀表板同源 /etf）。<a href="/etf" target="_blank" rel="noopener">↗ 另開整頁</a></div>
+    <div class="etfnote">主動型 ETF 每日持股動態追蹤。<a href="/etf" target="_blank" rel="noopener">↗ 另開整頁</a></div>
     <iframe id="etfFrame" title="主動 ETF 追蹤" loading="lazy"></iframe>
   </section>
 </div>
@@ -812,7 +811,19 @@ const TABLIST=["chip","etf"];
 let TAB="chip";
 try{ if(TABLIST.includes(localStorage.getItem("chipTab"))) TAB=localStorage.getItem("chipTab"); }catch(e){}
 const etfFrame=document.getElementById("etfFrame");
-function sizeEtf(){ etfFrame.style.height=Math.max(480, innerHeight-120)+"px"; }
+// 高度自動貼齊 iframe 內容（同源可直接量）→ 無內部捲軸、與頁面連續捲動
+function sizeEtf(){
+  try{const d=etfFrame.contentDocument;
+    if(d&&d.body) etfFrame.style.height=Math.max(d.body.scrollHeight,d.documentElement.scrollHeight)+"px";
+  }catch(e){}
+}
+etfFrame.addEventListener("load",()=>{
+  sizeEtf();
+  try{const d=etfFrame.contentDocument;
+    new ResizeObserver(()=>sizeEtf()).observe(d.body);   // 切內頁/篩選使內容變高時自動重量
+    d.addEventListener("click",()=>{setTimeout(sizeEtf,80);setTimeout(sizeEtf,320);});
+  }catch(e){}
+});
 function showTab(t){
   TAB=t;
   document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
