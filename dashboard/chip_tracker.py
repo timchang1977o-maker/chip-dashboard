@@ -62,42 +62,63 @@ def _F(s):
 
 
 # ----------------------------- fetchers -----------------------------
-def fetch_futures(start, end):
-    """臺股期貨 三大法人 未平倉口數淨額（口）。"""
-    t = _post("https://www.taifex.com.tw/cht/3/futContractsDateDown",
-              {"firstDate": "", "lastDate": "", "queryStartDate": start,
-               "queryEndDate": end, "commodity_id": "TXF"})
-    fut = {}
-    for ln in t.splitlines():
-        c = ln.split(",")
-        if len(c) < 14 or c[1] != "臺股期貨":  # 臺股期貨
-            continue
-        r = fut.setdefault(c[0], {})
-        who = c[2]
-        if "外資" in who:            # 外資
-            r["foreign"] = _I(c[13])
-        elif who == "投信":          # 投信
-            r["trust"] = _I(c[13])
-        elif who == "自營商":    # 自營商
-            r["dealer"] = _I(c[13])
+def fetch_futures(start, end, existing=None):
+    """臺股期貨 三大法人 未平倉口數淨額（口）。
+
+    ⚠️ 失敗保底：TAIFEX 對雲端 IP 偶爾封鎖／回空。3 次重試，全空就「保留既有、不清空」
+    （未平倉為歷史不變值，全量成功時 merge 進既有＝自癒缺口；失敗時絕不覆蓋成空）。
+    """
+    fut = dict(existing or {})
+    for _ in range(3):
+        t = _post("https://www.taifex.com.tw/cht/3/futContractsDateDown",
+                  {"firstDate": "", "lastDate": "", "queryStartDate": start,
+                   "queryEndDate": end, "commodity_id": "TXF"})
+        new = {}
+        for ln in t.splitlines():
+            c = ln.split(",")
+            if len(c) < 14 or c[1] != "臺股期貨":  # 臺股期貨
+                continue
+            r = new.setdefault(c[0], {})
+            who = c[2]
+            if "外資" in who:            # 外資
+                r["foreign"] = _I(c[13])
+            elif who == "投信":          # 投信
+                r["trust"] = _I(c[13])
+            elif who == "自營商":    # 自營商
+                r["dealer"] = _I(c[13])
+        if new:
+            fut.update(new)
+            return fut
+        time.sleep(1.0)
+    print("  futures BAD → 保留既有不清空", file=sys.stderr)
     return fut
 
 
-def fetch_options(start, end):
-    """臺指選擇權 外資 未平倉口數買賣淨額（口）CALL / PUT。"""
-    t = _post("https://www.taifex.com.tw/cht/3/callsAndPutsDateDown",
-              {"firstDate": "", "lastDate": "", "queryStartDate": start,
-               "queryEndDate": end, "commodity_id": "TXO"})
-    opt = {}
-    for ln in t.splitlines():
-        c = ln.split(",")
-        if len(c) < 15 or c[1] != "臺指選擇權" or "外資" not in c[3]:
-            continue
-        r = opt.setdefault(c[0], {})
-        if c[2] == "CALL":
-            r["call"] = _I(c[14])
-        elif c[2] == "PUT":
-            r["put"] = _I(c[14])
+def fetch_options(start, end, existing=None):
+    """臺指選擇權 外資 未平倉口數買賣淨額（口）CALL / PUT。
+
+    ⚠️ 失敗保底同 fetch_futures：3 次重試，全空保留既有不清空。
+    """
+    opt = dict(existing or {})
+    for _ in range(3):
+        t = _post("https://www.taifex.com.tw/cht/3/callsAndPutsDateDown",
+                  {"firstDate": "", "lastDate": "", "queryStartDate": start,
+                   "queryEndDate": end, "commodity_id": "TXO"})
+        new = {}
+        for ln in t.splitlines():
+            c = ln.split(",")
+            if len(c) < 15 or c[1] != "臺指選擇權" or "外資" not in c[3]:
+                continue
+            r = new.setdefault(c[0], {})
+            if c[2] == "CALL":
+                r["call"] = _I(c[14])
+            elif c[2] == "PUT":
+                r["put"] = _I(c[14])
+        if new:
+            opt.update(new)
+            return opt
+        time.sleep(1.0)
+    print("  options BAD → 保留既有不清空", file=sys.stderr)
     return opt
 
 
@@ -219,12 +240,12 @@ def fetch_all(years=2, prior=None):
     end_date = datetime.date.today()
     start_date = end_date - datetime.timedelta(days=int(365 * years))
     s, e = start_date.strftime("%Y/%m/%d"), end_date.strftime("%Y/%m/%d")
-    # 期/選為單一區間請求（便宜可靠），全量重抓即自癒任何缺口
+    # 期/選單一區間全量請求；成功 merge 進既有＝自癒缺口，失敗保留既有不清空（防雲端 IP 被擋洗檔）
     print("fetching futures...", file=sys.stderr)
-    fut = fetch_futures(s, e)
+    fut = fetch_futures(s, e, existing=prior.get("futures"))
     print(f"  {len(fut)} days", file=sys.stderr)
     print("fetching options...", file=sys.stderr)
-    opt = fetch_options(s, e)
+    opt = fetch_options(s, e, existing=prior.get("options"))
     print(f"  {len(opt)} days", file=sys.stderr)
     # price/margin 為歷史不變值 → 增量（只補最近，歷史沿用既有）
     print("fetching price (incremental)...", file=sys.stderr)
