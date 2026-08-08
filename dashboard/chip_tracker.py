@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
-"""台股籌碼儀表板 pipeline — TAIFEX 三大法人期/選未平倉 + 台指期近月 + TWSE 上市融資餘額。
+"""台股籌碼儀表板 pipeline — TAIFEX 三大法人期/選未平倉 + TWSE 三大法人現貨買賣超/融資餘額。
 
-四個面板（對齊財經 M 平方風格）：
+五個面板（對齊財經 M 平方風格）：
   ① 臺股期貨·三大法人未平倉淨口數（外資/投信/自營）  ← TAIFEX futContractsDate
-  ② 台指期近月收盤價                                  ← TAIFEX futDataDown（TX 一般盤近月）
-  ③ 台指選擇權·外資未平倉淨口數（CALL/PUT）          ← TAIFEX callsAndPutsDate
-  ④ 上市融資餘額（億元·週）                           ← TWSE MI_MARGN 市場合計
+  ② 三大法人·現貨買賣超（外資/投信/自營，億元·日）   ← TWSE BFI82U 三大法人買賣金額
+  ③ 台指期近月收盤價                                  ← TAIFEX futDataDown（TX 一般盤近月）
+  ④ 台指選擇權·外資未平倉淨口數（CALL/PUT）          ← TAIFEX callsAndPutsDate
+  ⑤ 上市融資餘額（億元·日）                           ← TWSE MI_MARGN 市場合計
+
+頂部另有「連續方向」KPI：外資期貨部位淨多/淨空、加多/加空連續天數，
+及外資/投信/自營現貨連買/連賣連續天數（前端即時由 futures/institutions 算）。
 
 用法：
     python3 chip_tracker.py                 # 全抓 2 年區間 → data.json + 籌碼儀表板.html
@@ -165,6 +169,51 @@ def fetch_margin(start_date, end_date, existing=None):
     return margin
 
 
+def _inst_one(ds):
+    """單一交易日三大法人現貨買賣超（億元）；非交易日回 None。
+
+    TWSE BFI82U「買賣差額」以元計；三大法人淨額慣例：
+      外資 = 外資及陸資(不含外資自營商)   投信 = 投信   自營 = 自行買賣 + 避險
+    （外資自營商已計入自營商，且不納入三大法人合計，故 foreign 不重複加它，
+      dealer+trust+foreign 即等於官方「合計」列。）
+    """
+    url = f"https://www.twse.com.tw/rwd/zh/fund/BFI82U?dayDate={ds}&type=day&response=json"
+    for attempt in range(3):  # TWSE 對連續請求會 307 節流，退避重試
+        try:
+            j = json.loads(_get(url))
+            if j.get("stat") != "OK":
+                return None  # 非交易日：明確無資料，不重試
+            m = {str(r[0]): _I(r[3]) for r in j.get("data", []) if r}  # 買賣差額(元)
+            if not m:
+                return None
+            E = 1e8  # 元 → 億
+            dealer = m.get("自營商(自行買賣)", 0) + m.get("自營商(避險)", 0)
+            return {
+                "foreign": round(m.get("外資及陸資(不含外資自營商)", 0) / E, 2),
+                "trust": round(m.get("投信", 0) / E, 2),
+                "dealer": round(dealer / E, 2),
+            }
+        except Exception:
+            time.sleep(1.5 * (attempt + 1))  # 遇節流/暫時錯誤退避
+    return None
+
+
+def fetch_institutions(start_date, end_date, existing=None):
+    """三大法人現貨買賣超（億元），逐交易日抓；existing 為已有 [[date,{...}],..]（增量續抓）。"""
+    inst = list(existing or [])
+    have = {r[0] for r in inst}
+    d = start_date
+    while d <= end_date:
+        if d.weekday() < 5 and d.isoformat() not in have:  # 平日且未抓過
+            v = _inst_one(d.strftime("%Y%m%d"))
+            if v:
+                inst.append([d.isoformat(), v])
+            time.sleep(0.15)
+        d += datetime.timedelta(days=1)
+    inst.sort()
+    return inst
+
+
 def fetch_all(years=2, prior=None):
     prior = prior or {}
     end_date = datetime.date.today()
@@ -184,9 +233,13 @@ def fetch_all(years=2, prior=None):
     print("fetching margin (incremental)...", file=sys.stderr)
     margin = fetch_margin(start_date, end_date, existing=prior.get("margin"))
     print(f"  {len(margin)} days", file=sys.stderr)
+    print("fetching institutions (incremental)...", file=sys.stderr)
+    inst = fetch_institutions(start_date, end_date, existing=prior.get("institutions"))
+    print(f"  {len(inst)} days", file=sys.stderr)
     return {
         "generated": end_date.isoformat(),
         "futures": fut, "price": price, "options": opt, "margin": margin,
+        "institutions": inst,
     }
 
 
@@ -327,6 +380,32 @@ h1{font-size:20px;font-weight:700;letter-spacing:.3px;margin:0}
 .tt .ttt td.mut{color:var(--sub)}
 footer{color:var(--muted);font-size:11.5px;text-align:center;margin-top:18px;line-height:1.6}
 footer a{color:var(--foreign);text-decoration:none}
+/* 分頁列（籌碼總覽 / 主動 ETF 追蹤） */
+.tabs{display:inline-flex;gap:4px;background:var(--panel);border:1px solid var(--hair);
+  border-radius:11px;padding:4px;box-shadow:var(--shadow);margin:0 2px 14px}
+.tabs button{border:0;background:transparent;color:var(--muted);font-family:var(--font);
+  font-size:13.5px;font-weight:700;padding:7px 16px;border-radius:8px;cursor:pointer;
+  letter-spacing:.3px;transition:background .12s,color .12s}
+.tabs button:hover{color:var(--ink)}
+.tabs button.on{background:var(--fill);color:#fff}
+/* 連續方向 KPI 卡片 */
+.streaks{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;margin:0 2px 14px}
+.scard{background:var(--panel);border:1px solid var(--hair);border-radius:12px;
+  padding:10px 13px 11px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.scard .bar{position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--muted)}
+.scard .lab{font-size:11.5px;color:var(--muted);font-weight:600;letter-spacing:.2px}
+.scard .dir{font-size:18px;font-weight:800;margin-top:2px;letter-spacing:.4px;
+  display:flex;align-items:baseline;gap:7px;line-height:1.2}
+.scard .cnt{font-size:12.5px;font-weight:700;color:var(--muted)}
+.scard .sub{font-size:11px;color:var(--sub);margin-top:2px}
+.scard.up .dir{color:var(--up)} .scard.up .bar{background:var(--up)}
+.scard.down .dir{color:var(--down)} .scard.down .bar{background:var(--down)}
+.scard.flat .dir{color:var(--muted)}
+/* ETF 分頁 iframe */
+.etfnote{color:var(--muted);font-size:12px;margin:0 2px 10px}
+.etfnote a{color:var(--foreign);text-decoration:none;font-weight:600}
+#etfFrame{width:100%;border:1px solid var(--hair);border-radius:14px;background:var(--panel);
+  box-shadow:var(--shadow);display:block}
 </style>
 </head>
 <body>
@@ -335,18 +414,30 @@ footer a{color:var(--foreign);text-decoration:none}
     <h1>台股籌碼儀表板</h1>
     <div class="sub">資料截至 <b>__GEN__</b> · <span id="rlabel">近 1 年</span> · 來源：TAIFEX 期交所／TWSE 證交所（官方免費）</div>
   </header>
-  <div class="controls">
-    <div class="ranges" id="ranges">
-      <button data-r="1W">1W</button><button data-r="1M">1M</button><button data-r="6M">6M</button><button data-r="YTD">YTD</button><button data-r="1Y">1Y</button><button data-r="2Y">2Y</button>
-    </div>
-    <button id="linkBtn" class="linktoggle" type="button" aria-pressed="false" title="開啟後：滑過任一張圖，四張圖會在同一天同步顯示十字線與數值">🔗 四圖連動</button>
-    <button id="themeBtn" class="linktoggle" type="button" title="切換淺色／深色主題">🌙 深色</button>
+  <div class="tabs" id="tabs">
+    <button data-tab="chip" class="on">籌碼總覽</button>
+    <button data-tab="etf">主動 ETF 追蹤</button>
   </div>
-  <div class="grid" id="grid"></div>
-  <footer>
-    未平倉淨口數為多空未平倉口數淨額（口），正=淨多、負=淨空 · 融資餘額為上市市場合計、每交易日<br>
-    數字直接取自官方公開資料，未經第三方加工 · 台股慣例 <span style="color:var(--up)">紅漲</span> / <span style="color:var(--down)">綠跌</span>
-  </footer>
+  <section id="tab-chip">
+    <div class="controls">
+      <div class="ranges" id="ranges">
+        <button data-r="1W">1W</button><button data-r="1M">1M</button><button data-r="6M">6M</button><button data-r="YTD">YTD</button><button data-r="1Y">1Y</button><button data-r="2Y">2Y</button>
+      </div>
+      <button id="linkBtn" class="linktoggle" type="button" aria-pressed="false" title="開啟後：滑過任一張圖，各圖會在同一天同步顯示十字線與數值">🔗 多圖連動</button>
+      <button id="themeBtn" class="linktoggle" type="button" title="切換淺色／深色主題">🌙 深色</button>
+    </div>
+    <div class="streaks" id="streaks"></div>
+    <div class="grid" id="grid"></div>
+    <footer>
+      未平倉淨口數為多空未平倉口數淨額（口），正=淨多、負=淨空 · 現貨買賣超/融資餘額為上市市場合計、每交易日<br>
+      三大法人現貨買賣超取 TWSE BFI82U「買賣差額」（外資＝外資及陸資，自營＝自行買賣＋避險）<br>
+      數字直接取自官方公開資料，未經第三方加工 · 台股慣例 <span style="color:var(--up)">紅漲</span> / <span style="color:var(--down)">綠跌</span>
+    </footer>
+  </section>
+  <section id="tab-etf" hidden>
+    <div class="etfnote">主動型 ETF 每日持股動態追蹤（與資產儀表板同源 /etf）。<a href="/etf" target="_blank" rel="noopener">↗ 另開整頁</a></div>
+    <iframe id="etfFrame" title="主動 ETF 追蹤" loading="lazy"></iframe>
+  </section>
 </div>
 <script>
 const DATA = /*__DATA__*/;
@@ -375,6 +466,7 @@ function rangeCutoff(){
 
 const fmtInt = n => (n<0?"-":"")+Math.abs(Math.round(n)).toLocaleString("en-US");
 const fmtSign = n => (n>0?"+":n<0?"-":"")+Math.abs(Math.round(n)).toLocaleString("en-US");
+const fmtSign1 = n => (n>0?"+":n<0?"-":"")+Math.abs(n).toFixed(1);   // 億元帶 1 位小數＋正負號
 const cssv = k => getComputedStyle(document.documentElement).getPropertyValue(k).trim();
 
 // 把 {日期:值} 或 {日期:{..}} 轉成排序後的 labels / rows
@@ -452,17 +544,22 @@ function drawChart(cfg){
     tx.textContent=parts[0]+"/"+parts[1];
     svg.appendChild(tx);
   }
-  // area fill (single series)
-  if(cfg.fill && cfg.lines.length===1){
-    const l=cfg.lines[0]; let d="";
-    l.data.forEach((v,i)=>{ if(v==null)return; d+=(d?"L":"M")+X(i)+" "+Y(v);});
+  // area fill：單序列較濃、多序列各自淡填（與融資圖一致的漸層填色風格）
+  if(cfg.fill){
+    const single=cfg.lines.length===1;
     const base=cfg.baseline?Y(0):(padT+ih);
-    d+=`L ${X(n-1)} ${base} L ${X(0)} ${base} Z`;
-    const grad=mk("linearGradient",{id:"g_"+cfg.key,x1:0,y1:0,x2:0,y2:1});
-    grad.appendChild(mk("stop",{offset:"0%","stop-color":l.color,"stop-opacity":.22}));
-    grad.appendChild(mk("stop",{offset:"100%","stop-color":l.color,"stop-opacity":0}));
-    svg.appendChild(grad);
-    svg.appendChild(mk("path",{d,fill:`url(#g_${cfg.key})`,stroke:"none"}));
+    cfg.lines.forEach((l,li)=>{
+      let d="", first=null, last=null;
+      l.data.forEach((v,i)=>{ if(v==null)return; if(first==null)first=i; last=i; d+=(d?"L":"M")+X(i)+" "+Y(v);});
+      if(first==null) return;
+      d+=`L ${X(last)} ${base} L ${X(first)} ${base} Z`;
+      const gid="g_"+cfg.key+"_"+li;
+      const grad=mk("linearGradient",{id:gid,x1:0,y1:0,x2:0,y2:1});
+      grad.appendChild(mk("stop",{offset:"0%","stop-color":l.color,"stop-opacity":single?.22:.13}));
+      grad.appendChild(mk("stop",{offset:"100%","stop-color":l.color,"stop-opacity":0}));
+      svg.appendChild(grad);
+      svg.appendChild(mk("path",{d,fill:`url(#${gid})`,stroke:"none"}));
+    });
   }
   // lines
   cfg.lines.forEach(l=>{
@@ -532,6 +629,55 @@ function drawChart(cfg){
   box.addEventListener("touchend",leave);
 }
 
+// ---- 連續方向（streak）----
+// 從序列尾端往回數，計算「最近值同號」連續筆數；0 或 null 中斷（null 跳過不中斷）
+function signStreak(arr){
+  let i=arr.length-1; while(i>=0 && arr[i]==null) i--;
+  if(i<0) return {sign:0,count:0};
+  const s=Math.sign(arr[i]); if(!s) return {sign:0,count:0};
+  let c=0;
+  for(let j=i;j>=0;j--){ const v=arr[j]; if(v==null) continue;
+    if(Math.sign(v)===s) c++; else break; }
+  return {sign:s,count:c};
+}
+// 日變化序列（未平倉口數的逐日增減，用來判斷加多/加空）
+function deltaSeries(arr){
+  const out=[]; let prev=null;
+  for(const v of arr){ if(v==null){out.push(null);continue;}
+    out.push(prev==null?null:v-prev); prev=v; }
+  return out;
+}
+function scard(lab, sign, count, posLabel, negLabel, sub){
+  const cls=sign>0?"up":sign<0?"down":"flat";
+  const dir=sign>0?posLabel:sign<0?negLabel:"—";
+  const cnt=count>0?`連 ${count} 日`:"";
+  return `<div class="scard ${cls}"><span class="bar"></span>`
+    +`<div class="lab">${lab}</div>`
+    +`<div class="dir">${dir}<span class="cnt">${cnt}</span></div>`
+    +(sub?`<div class="sub">${sub}</div>`:"")+`</div>`;
+}
+// streak 為「最近事實」，不隨區間裁切，一律用全量資料計算
+function renderStreaks(){
+  const box=document.getElementById("streaks"); if(!box) return;
+  const futK=Object.keys(DATA.futures||{}).sort();
+  const F=futK.map(d=>DATA.futures[d].foreign??null);
+  const pos=signStreak(F);                       // 淨多／淨空（部位正負）
+  const add=signStreak(deltaSeries(F));          // 加多／加空（未平倉逐日增減）
+  const lastF=F.length?F[F.length-1]:null;
+  const posSub=lastF!=null?`${lastF<0?"淨空":"淨多"} ${fmtInt(Math.abs(lastF))} 口`:"";
+  const inst=(DATA.institutions||[]).slice().sort((a,b)=>a[0]<b[0]?-1:1);
+  const iF=inst.map(x=>x[1].foreign??null), iT=inst.map(x=>x[1].trust??null), iD=inst.map(x=>x[1].dealer??null);
+  const sF=signStreak(iF), sT=signStreak(iT), sD=signStreak(iD);
+  const lastNet=iF.length?iF[iF.length-1]:null;
+  const netSub=lastNet!=null?`最新 ${fmtSign1(lastNet)} 億`:"";
+  box.innerHTML=
+    scard("外資期貨・部位",  pos.sign, pos.count, "淨多",  "淨空",  posSub)
+   +scard("外資期貨・加減碼",add.sign, add.count, "加多單","加空單","未平倉逐日增減")
+   +scard("外資・現貨",      sF.sign,  sF.count,  "買超",  "賣超",  netSub)
+   +scard("投信・現貨",      sT.sign,  sT.count,  "買超",  "賣超",  "")
+   +scard("自營・現貨",      sD.sign,  sD.count,  "買超",  "賣超",  "");
+}
+
 // ---- 組資料 ----
 function build(){
   const grid=document.getElementById("grid");
@@ -552,7 +698,20 @@ function build(){
              {name:"投信",color:cssv("--trust"),data:T},
              {name:"自營",color:cssv("--dealer"),data:D}]}));
   }
-  // ② 台指期近月
+  // ② 三大法人・現貨買賣超（上市）
+  if(Array.isArray(DATA.institutions) && DATA.institutions.length){
+    const rows=DATA.institutions.filter(x=>inRange(x[0]));
+    const k=rows.map(x=>x[0]);
+    const F=rows.map(x=>x[1].foreign??null), T=rows.map(x=>x[1].trust??null), D=rows.map(x=>x[1].dealer??null);
+    const last=F[F.length-1], prev=F[F.length-2];
+    panels.push(panel({key:"inst",title:"三大法人・現貨買賣超（上市）",unit:"億元",who:"外資",
+      valueTxt:fmtSign1(last),delta:last-prev,baseline:true,fill:true,labels:k,
+      vfmt:v=>fmtSign1(v),yfmt:v=>fmtInt(v),
+      lines:[{name:"外資",color:cssv("--foreign"),data:F},
+             {name:"投信",color:cssv("--trust"),data:T},
+             {name:"自營",color:cssv("--dealer"),data:D}]}));
+  }
+  // ③ 台指期近月
   {
     const s=series(DATA.price), k=s.labels.filter(inRange);
     const P=k.map(d=>s.get(d));
@@ -562,7 +721,7 @@ function build(){
       yfmt:v=>Math.round(v/1000)+"k",
       lines:[{name:"近月",color:cssv("--price"),data:P}]}));
   }
-  // ③ 選擇權外資
+  // ④ 選擇權外資
   {
     const s=series(DATA.options), k=s.labels.filter(inRange);
     const C=k.map(d=>s.get(d).call??null), U=k.map(d=>s.get(d).put??null);
@@ -572,7 +731,7 @@ function build(){
       lines:[{name:"CALL",color:cssv("--call"),data:C},
              {name:"PUT",color:cssv("--put"),data:U}]}));
   }
-  // ④ 上市融資餘額
+  // ⑤ 上市融資餘額
   {
     const M=DATA.margin.filter(x=>inRange(x[0]));
     const k=M.map(x=>x[0]), V=M.map(x=>x[1]);
@@ -585,6 +744,7 @@ function build(){
 
   panels.forEach(p=>{grid.appendChild(p._el); drawChart(p);});
   window.__panels=panels;
+  renderStreaks();
 }
 // 區間按鈕
 function syncRangeUI(){
@@ -626,10 +786,33 @@ syncThemeUI();
 
 build();
 
+// 分頁：籌碼總覽 / 主動 ETF 追蹤（ETF 用同源 iframe 嵌 /etf，首次點擊才載入）
+const TABLIST=["chip","etf"];
+let TAB="chip";
+try{ if(TABLIST.includes(localStorage.getItem("chipTab"))) TAB=localStorage.getItem("chipTab"); }catch(e){}
+const etfFrame=document.getElementById("etfFrame");
+function sizeEtf(){ etfFrame.style.height=Math.max(480, innerHeight-120)+"px"; }
+function showTab(t){
+  TAB=t;
+  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+  document.getElementById("tab-chip").hidden = t!=="chip";
+  document.getElementById("tab-etf").hidden  = t!=="etf";
+  if(t==="etf"){
+    if(!etfFrame.getAttribute("src")) etfFrame.setAttribute("src","/etf");  // lazy load
+    sizeEtf();
+  }
+  try{localStorage.setItem("chipTab",t);}catch(e){}
+}
+document.querySelectorAll("#tabs button").forEach(b=>{
+  b.addEventListener("click",()=>showTab(b.dataset.tab));
+});
+showTab(TAB);
+
 // 只在「寬度」變化時重繪：手機捲動時網址列收合只改高度，
 // 若也重繪會清空 grid → 頁面瞬間變短 → 捲動位置被彈回頂端。
 let rt, lastW=innerWidth;
 addEventListener("resize",()=>{
+  if(TAB==="etf") sizeEtf();          // ETF iframe 高度需跟著視窗高度
   if(innerWidth===lastW) return;
   lastW=innerWidth;
   clearTimeout(rt);rt=setTimeout(()=>{
