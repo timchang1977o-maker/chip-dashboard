@@ -235,6 +235,26 @@ def fetch_institutions(start_date, end_date, existing=None):
     return inst
 
 
+def load_maintain(existing=None):
+    """大盤融資維持率序列 [date, total%, 上市%, 上櫃%]。
+
+    來源＝同目錄 tw_margin_history.json（korea-leverage workflow 每日算好 commit）。
+    檔案不在的 runner（如 Pages GHA、Mac clone 沒帶檔時）就沿用既有、不清空
+    （由「有帶檔」的 runner＝workspace GHA / Mac 先抓檔 來刷新）。"""
+    merged = {r[0]: r for r in (existing or [])}
+    path = HERE / "tw_margin_history.json"
+    if path.exists():
+        try:
+            hist = json.load(open(path, encoding="utf-8"))
+            for k, e in hist.items():
+                iso = f"{k[:4]}-{k[4:6]}-{k[6:]}"
+                merged[iso] = [iso, e.get("total_ratio"),
+                               e.get("twse_ratio"), e.get("tpex_ratio")]
+        except Exception as ex:
+            print(f"  maintain load failed: {ex}", file=sys.stderr)
+    return [merged[d] for d in sorted(merged)]
+
+
 def fetch_all(years=2, prior=None):
     prior = prior or {}
     end_date = datetime.date.today()
@@ -257,10 +277,12 @@ def fetch_all(years=2, prior=None):
     print("fetching institutions (incremental)...", file=sys.stderr)
     inst = fetch_institutions(start_date, end_date, existing=prior.get("institutions"))
     print(f"  {len(inst)} days", file=sys.stderr)
+    maintain = load_maintain(prior.get("maintain"))
+    print(f"  maintain {len(maintain)} days", file=sys.stderr)
     return {
         "generated": end_date.isoformat(),
         "futures": fut, "price": price, "options": opt, "margin": margin,
-        "institutions": inst,
+        "institutions": inst, "maintain": maintain,
     }
 
 
@@ -284,6 +306,7 @@ def main():
     args = sys.argv[1:]
     if "--from-cache" in args and DATA_PATH.exists():
         data = json.load(open(DATA_PATH, encoding="utf-8"))
+        data["maintain"] = load_maintain(data.get("maintain"))  # 維持率從歷史檔補上/刷新
     else:
         years = 2
         if "--years" in args:
@@ -451,6 +474,7 @@ footer a{color:var(--foreign);text-decoration:none}
     <footer>
       未平倉淨口數為多空未平倉口數淨額（口），正=淨多、負=淨空 · 現貨買賣超/融資餘額為上市市場合計、每交易日<br>
       三大法人現貨買賣超取 TWSE BFI82U「買賣差額」（外資＝外資及陸資，自營＝自行買賣＋避險）<br>
+      大盤融資維持率＝Σ融資股票市值 ÷ 融資金額餘額（上市+上櫃、含 ETF 市場通用口徑）；警戒線 <span style="color:var(--down)">≥170 🟢</span> / 160–170 🟡 / <span style="color:var(--up)">&lt;160 🔴</span><br>
       數字直接取自官方公開資料，未經第三方加工 · 台股慣例 <span style="color:var(--up)">紅漲</span> / <span style="color:var(--down)">綠跌</span>
     </footer>
   </section>
@@ -508,7 +532,7 @@ function panel(cfg){
       <div class="ptitle">${cfg.title}${cfg.tunit?`<span class="u">${cfg.tunit||cfg.unit}</span>`:""}</div>
       <div class="metric">
         <div class="value">${cfg.valueTxt}<span class="un">${cfg.unit}${cfg.who?`（${cfg.who}）`:""}</span></div>
-        <div class="delta ${dcls}">${arrow} ${fmtInt(Math.abs(cfg.delta))} vs 前一筆</div>
+        <div class="delta ${dcls}">${arrow} ${cfg.dfmt?cfg.dfmt(Math.abs(cfg.delta)):fmtInt(Math.abs(cfg.delta))} vs 前一筆</div>
       </div>
     </div>
     ${legend}
@@ -690,12 +714,19 @@ function renderStreaks(){
   const sF=signStreak(iF), sT=signStreak(iT), sD=signStreak(iD);
   const lastNet=iF.length?iF[iF.length-1]:null;
   const netSub=lastNet!=null?`最新 ${fmtSign1(lastNet)} 億`:"";
+  // 融資餘額 連增/連減（用上市融資餘額逐日變化）
+  const mgn=(DATA.margin||[]).slice().sort((a,b)=>a[0]<b[0]?-1:1);
+  const mV=mgn.map(x=>x[1]??null);
+  const sM=signStreak(deltaSeries(mV));
+  const lastM=mV.length?mV[mV.length-1]:null;
+  const mSub=lastM!=null?`最新 ${fmtInt(lastM)} 億`:"";
   box.innerHTML=
     scard("外資期貨・部位",  pos.sign, pos.count, "淨多",  "淨空",  posSub)
    +scard("外資期貨・加減碼",add.sign, add.count, "加多單","加空單","未平倉逐日增減")
    +scard("外資・現貨",      sF.sign,  sF.count,  "買超",  "賣超",  netSub)
    +scard("投信・現貨",      sT.sign,  sT.count,  "買超",  "賣超",  "")
-   +scard("自營・現貨",      sD.sign,  sD.count,  "買超",  "賣超",  "");
+   +scard("自營・現貨",      sD.sign,  sD.count,  "買超",  "賣超",  "")
+   +scard("融資餘額・增減",  sM.sign,  sM.count,  "連續增","連續減",mSub);
 }
 
 // ---- 組資料 ----
@@ -760,6 +791,21 @@ function build(){
       valueTxt:fmtInt(last),delta:last-prev,fill:true,labels:k,
       yfmt:v=>fmtInt(v),
       lines:[{name:"融資餘額",color:cssv("--fill"),data:V}]}));
+  }
+  // ⑥ 大盤融資維持率（上市+上櫃，市場通用含 ETF 口徑；<160🔴 160–170🟡 ≥170🟢）
+  if(Array.isArray(DATA.maintain) && DATA.maintain.length){
+    const R=DATA.maintain.filter(x=>inRange(x[0]));
+    const k=R.map(x=>x[0]);
+    const TOT=R.map(x=>x[1]??null), TW=R.map(x=>x[2]??null), TP=R.map(x=>x[3]??null);
+    const last=TOT[TOT.length-1], prev=TOT[TOT.length-2];
+    const dot=last==null?"":last<160?"🔴":last<170?"🟡":"🟢";
+    panels.push(panel({key:"maint",title:"大盤融資維持率",unit:"%",tunit:"%（上市+上櫃）",
+      valueTxt:(last!=null?dot+" "+last.toFixed(2):"—"),
+      delta:(last!=null&&prev!=null?last-prev:0),dfmt:v=>v.toFixed(2),labels:k,
+      yfmt:v=>Math.round(v)+"%",
+      lines:[{name:"整體",color:cssv("--fill"),data:TOT},
+             {name:"上市",color:cssv("--foreign"),data:TW},
+             {name:"上櫃",color:cssv("--trust"),data:TP}]}));
   }
 
   panels.forEach(p=>{grid.appendChild(p._el); drawChart(p);});
