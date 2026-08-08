@@ -35,8 +35,6 @@ NAV_STYLE = """
   box-shadow:var(--shadow,0 1px 2px rgba(20,30,50,.05));transition:color .12s,background .12s}
 .topnav a:hover{color:var(--ink,#1a2230)}
 .topnav a.on{background:var(--fill,#3d7bf0);color:#fff;border-color:var(--fill,#3d7bf0)}
-.topnav a.upd{margin-left:auto;color:#0a7a3f;border-color:#a7e0c0;background:#eafaf0}
-.topnav a.upd:hover{color:#fff;background:#0a7a3f;border-color:#0a7a3f}
 </style>
 """
 
@@ -50,18 +48,11 @@ TABS = [("index.html", "chips", "📊 籌碼總覽"),
         ("institutions.html", "inst", "🏦 法人買賣超")]
 
 
-# 手動更新：連到 GitHub Actions 的 daily workflow 頁，登入後按「Run workflow」即重抓。
-# 公開靜態站不能嵌金鑰，故走 GitHub 內建 UI 觸發（零 token、最安全）。
-UPDATE_URL = "https://github.com/timchang1977o-maker/chip-dashboard/actions/workflows/daily.yml"
-
-
 def nav_html(current):
     links = ""
     for href, key, label in TABS:
         cls = ' class="on"' if key == current else ""
         links += f'<a href="{href}"{cls}>{label}</a>'
-    links += (f'<a class="upd" href="{UPDATE_URL}" target="_blank" rel="noopener" '
-              f'title="開 GitHub Actions，按 Run workflow 立即重抓最新資料">🔄 手動更新</a>')
     return f'<nav class="topnav">{links}</nav>'
 
 
