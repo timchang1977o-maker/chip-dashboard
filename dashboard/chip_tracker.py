@@ -609,7 +609,7 @@ function drawChart(cfg){
   cfg.lines.forEach(l=>{
     let d="";
     l.data.forEach((v,i)=>{ if(v==null){return;} d+=(d?"L":"M")+X(i)+" "+Y(v);});
-    svg.appendChild(mk("path",{d,fill:"none",stroke:l.color,"stroke-width":cfg.lines.length===1?1.7:1.4,
+    svg.appendChild(mk("path",{d,fill:"none",stroke:l.color,"stroke-width":l.width||(cfg.lines.length===1?1.7:1.4),
       "stroke-linejoin":"round","stroke-linecap":"round"}));
     // endpoint dot
     for(let i=l.data.length-1;i>=0;i--){ if(l.data[i]!=null){
@@ -803,9 +803,9 @@ function build(){
       valueTxt:(last!=null?dot+" "+last.toFixed(2):"—"),
       delta:(last!=null&&prev!=null?last-prev:0),dfmt:v=>v.toFixed(2),labels:k,
       yfmt:v=>Math.round(v)+"%",
-      lines:[{name:"整體",color:cssv("--fill"),data:TOT},
-             {name:"上市",color:cssv("--foreign"),data:TW},
-             {name:"上櫃",color:cssv("--trust"),data:TP}]}));
+      lines:[{name:"整體",color:cssv("--fill"),data:TOT,width:2.4},
+             {name:"上市",color:cssv("--dealer"),data:TW,width:1.2},
+             {name:"上櫃",color:cssv("--trust"),data:TP,width:1.2}]}));
   }
 
   panels.forEach(p=>{grid.appendChild(p._el); drawChart(p);});
