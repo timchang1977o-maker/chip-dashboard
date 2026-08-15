@@ -4,6 +4,7 @@
 <title>美股財報區 · Cover List</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#eef1f5">
+<meta name="color-scheme" content="light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="美股財報">
@@ -11,504 +12,524 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" href="favicon.ico">
 <style>
+/* 強制淺色（Evan Mac 深色模式，交付物一律淺色） */
 :root{
-  --bg:#eef1f5; --panel:#fff; --ink:#1a2230; --muted:#6b7686; --hair:#e4e8ee;
-  --fill:#3d7bf0; --beat:#1f9d57; --miss:#d0342c; --gd:#8a6d1f;
+  color-scheme:light;
+  --bg:#eef1f5; --panel:#fff; --panel2:#f7f9fc; --ink:#1a2230; --muted:#6b7686; --hair:#e4e8ee;
+  --fill:#3d7bf0; --beat:#1f9d57; --miss:#d0342c; --gd:#8a6d1f; --henry:#7a52d8;
   --shadow:0 1px 2px rgba(20,30,50,.05),0 6px 20px rgba(20,30,50,.06);
   --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC",sans-serif;
 }
-@media (prefers-color-scheme:dark){:root{
-  --bg:#0e1218; --panel:#161c26; --ink:#e8edf4; --muted:#8b97a8; --hair:#242c38;
-  --fill:#4d89ff; --beat:#25c274; --miss:#ff5a4d; --gd:#d9b45a;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
-}}
-:root[data-theme="light"]{--bg:#eef1f5;--panel:#fff;--ink:#1a2230;--muted:#6b7686;--hair:#e4e8ee;--fill:#3d7bf0;--beat:#1f9d57;--miss:#d0342c;--gd:#8a6d1f;}
-:root[data-theme="dark"]{--bg:#0e1218;--panel:#161c26;--ink:#e8edf4;--muted:#8b97a8;--hair:#242c38;--fill:#4d89ff;--beat:#25c274;--miss:#ff5a4d;--gd:#d9b45a;}
 *{box-sizing:border-box}
+html{color-scheme:light}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
-  -webkit-font-smoothing:antialiased;padding:16px 14px 40px}
+  -webkit-font-smoothing:antialiased;padding:16px 14px 44px}
 .wrap{max-width:1180px;margin:0 auto}
 .topnav{display:flex;gap:6px;margin:0 2px 14px;flex-wrap:wrap}
 .topnav a{font:600 13px var(--font);color:var(--muted);text-decoration:none;padding:7px 14px;
-  border-radius:10px;border:1px solid var(--hair);background:var(--panel);letter-spacing:.2px;
-  box-shadow:var(--shadow)}
+  border-radius:10px;border:1px solid var(--hair);background:var(--panel);letter-spacing:.2px;box-shadow:var(--shadow)}
 .topnav a.on{background:var(--fill);color:#fff;border-color:var(--fill)}
 h1{font-size:19px;margin:2px 2px 3px;letter-spacing:.3px}
-.sub{color:var(--muted);font-size:12.5px;margin:0 2px 14px}
+.sub{color:var(--muted);font-size:12.5px;margin:0 2px 14px;line-height:1.6}
 .sub b{color:var(--ink)}
 .kpis{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 14px}
-.kpi{background:var(--panel);border:1px solid var(--hair);border-radius:12px;padding:9px 14px;
-  box-shadow:var(--shadow)}
-.kpi .v{font-size:19px;font-weight:750}
-.kpi .l{font-size:11px;color:var(--muted)}
-.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 2px 10px}
-.bar input,.bar select{font:600 12.5px var(--font);color:var(--ink);background:var(--panel);
-  border:1px solid var(--hair);border-radius:9px;padding:7px 11px;box-shadow:var(--shadow)}
+.kpi{background:var(--panel);border:1px solid var(--hair);border-radius:12px;padding:9px 14px;box-shadow:var(--shadow)}
+.kpi .v{font-size:19px;font-weight:750} .kpi .l{font-size:11px;color:var(--muted)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 2px 16px}
+.bar input{font:600 12.5px var(--font);color:var(--ink);background:var(--panel);
+  border:1px solid var(--hair);border-radius:9px;padding:8px 12px;box-shadow:var(--shadow);min-width:200px}
 .bar .chip{cursor:pointer;color:var(--muted);border:1px solid var(--hair);background:var(--panel);
-  border-radius:20px;padding:5px 12px;font:600 12px var(--font);box-shadow:var(--shadow)}
+  border-radius:20px;padding:6px 13px;font:600 12px var(--font);box-shadow:var(--shadow)}
 .bar .chip.on{background:var(--fill);color:#fff;border-color:var(--fill)}
-.card{background:var(--panel);border:1px solid var(--hair);border-radius:14px;
-  box-shadow:var(--shadow);overflow:hidden}
-.scroll{overflow-x:auto}
-table{border-collapse:collapse;width:100%;min-width:1050px;font-size:13px}
-thead th{position:sticky;top:0;background:var(--panel);z-index:2;text-align:right;
-  padding:9px 8px;border-bottom:2px solid var(--hair);color:var(--muted);font-size:11px;
-  font-weight:700;white-space:nowrap;cursor:pointer;user-select:none}
-thead th.l{text-align:left} thead th.grp{color:var(--fill)}
-thead th:hover{color:var(--ink)}
-tbody td{padding:9px 8px;border-bottom:1px solid var(--hair);text-align:right;white-space:nowrap}
-tbody tr:hover{background:rgba(61,123,240,.05)}
-.tk{text-align:left!important}
-.sym{font-weight:750;font-size:13.5px} .nm{color:var(--muted);font-size:11px;margin-left:7px}
-.n{font-variant-numeric:tabular-nums} .mut{color:var(--muted)}
-.q{color:var(--muted);font-size:12px;text-align:center!important}
-.u{font-size:9.5px;color:var(--muted);margin-left:2px;font-weight:600}
-.beat{color:var(--beat);font-weight:700} .miss{color:var(--miss);font-weight:700}
-.gd{color:var(--gd);font-size:11.5px}
-.pe{font-weight:700}
-.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.secthead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:22px 2px 12px;
+  padding-bottom:9px;border-bottom:2px solid var(--hair)}
+.secthead h2{font-size:16px;margin:0;letter-spacing:.3px}
+.secsub{color:var(--muted);font-size:12px} .secsub b{color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);border-radius:14px;padding:13px 15px 12px;
+  box-shadow:var(--shadow);display:flex;flex-direction:column;gap:5px}
+.chead{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.sym{font-weight:800;font-size:15px;letter-spacing:.3px}
+.nm{color:var(--muted);font-size:11.5px;margin-right:auto}
+.badge{padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:700;white-space:nowrap}
 .s-bull{background:rgba(31,157,87,.14);color:var(--beat)}
 .s-bullmid{background:rgba(61,123,240,.14);color:var(--fill)}
 .s-neu{background:rgba(120,130,145,.16);color:var(--muted)}
 .s-bear{background:rgba(208,52,44,.14);color:var(--miss)}
 .s-watch{background:rgba(180,140,20,.16);color:var(--gd)}
-.grpr th{background:var(--bg)!important;border-bottom:1px solid var(--hair);padding:5px 8px;
-  font-size:10px;color:var(--muted);text-align:center;position:static;top:auto;cursor:default}
-footer{color:var(--muted);font-size:11.5px;text-align:center;margin-top:18px;line-height:1.7}
+.s-henry{background:rgba(122,82,216,.14);color:var(--henry)}
+.qtag{font-size:11px;color:var(--muted);margin:-2px 0 4px}
+.mrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px}
+.mrow .k{color:var(--muted);font-size:11.5px;white-space:nowrap}
+.mrow .val{font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.mrow .val.sm{font-weight:600;font-size:12px} .mrow .val.mut{color:var(--muted);font-weight:600}
+.val i{font-style:normal;font-size:9.5px;color:var(--muted);margin-left:1px;font-weight:600}
+.sub2{text-align:right;margin:-3px 0 1px} .vs{color:var(--muted);font-size:10.5px;font-weight:600}
+.beat{color:var(--beat);font-weight:800;font-size:11.5px;margin-left:3px}
+.miss{color:var(--miss);font-weight:800;font-size:11.5px;margin-left:3px}
+.gd{color:var(--gd)!important}
+.cfoot{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:7px;padding-top:8px;
+  border-top:1px solid var(--hair);font-size:11px;color:var(--muted)}
+.cfoot b{color:var(--ink);font-weight:700}
+.cview{margin-top:6px;padding-top:7px;border-top:1px solid var(--hair);
+  font-size:11.5px;color:var(--ink);line-height:1.55}
+.empty{color:var(--muted);font-size:12.5px;padding:14px 2px}
+footer{color:var(--muted);font-size:11.5px;text-align:center;margin-top:24px;line-height:1.7}
 </style></head><body><div class="wrap">
 <nav class="topnav"><a href="index.html">📊 籌碼總覽</a><a href="institutions.html">🏦 法人買賣超</a><a href="us_earnings.html" class="on">📈 美股財報</a></nav>
 <h1>📈 美股財報區</h1>
-<p class="sub">資料來源＝投資 <b>cover list</b> 試算表（韭菜王 Allen 每季財報模型：Allen 預估／Bloomberg 共識／實際結果／公司指引）。
-最新已公布季的實際值 vs 共識判 <span class="beat">Beat</span>／<span class="miss">Miss</span>；營收單位＝億（各檔原幣別）。更新於 <b>2026-08-15 13:15</b>。</p>
+<p class="sub">兩位分析師的美股財報數字，各自獨立。<b>韭菜王 Allen</b>＝投資 cover list 模型（Allen 預估／Bloomberg 共識／實際／公司指引）；<b>Henry</b>＝Pentimetrics「The Trace」券商彙整與市場（Bloomberg）共識。營收單位＝億（各檔原幣別）。更新 <b>2026-08-15 13:54</b>。</p>
 <div class="kpis">
- <div class="kpi"><div class="v">20</div><div class="l">覆蓋檔數</div></div>
+ <div class="kpi"><div class="v">20</div><div class="l">Allen 覆蓋</div></div>
  <div class="kpi"><div class="v" style="color:var(--beat)">13</div><div class="l">Allen 看多</div></div>
  <div class="kpi"><div class="v" style="color:var(--miss)">1</div><div class="l">Allen 偏空</div></div>
- <div class="kpi"><div class="v">18<span style="font-size:12px;color:var(--muted)">/20</span></div><div class="l">最新季營收 Beat 共識</div></div>
+ <div class="kpi"><div class="v" style="color:var(--henry)">38</div><div class="l">Henry 覆蓋</div></div>
 </div>
 <div class="bar">
  <input id="q" placeholder="🔍 搜尋代號／名稱…" oninput="flt()">
- <span class="chip on" data-s="all" onclick="pick(this)">全部</span>
+ <span class="chip on" data-s="all" onclick="pick(this)">全部立場</span>
  <span class="chip" data-s="看多" onclick="pick(this)">看多</span>
  <span class="chip" data-s="中性偏多" onclick="pick(this)">中性偏多</span>
  <span class="chip" data-s="中性" onclick="pick(this)">中性</span>
  <span class="chip" data-s="偏空" onclick="pick(this)">偏空</span>
 </div>
-<div class="card"><div class="scroll"><table id="tb">
-<thead>
-<tr class="grpr">
-  <th colspan="2"></th><th colspan="6" class="l">最新已公布季（實際 vs 共識）</th>
-  <th colspan="4" class="l">下一季預估</th><th colspan="2" class="l">年度 non-GAAP EPS</th><th colspan="2" class="l">估值</th>
-</tr>
-<tr>
- <th class="l" onclick="sortby('t')">標的</th>
- <th class="l">立場</th>
- <th>季別</th>
- <th onclick="sortby('beat')">實際營收</th>
- <th>共識營收</th>
- <th onclick="sortby('beat')">營收<br>Beat/Miss</th>
- <th>實際 EPS</th>
- <th>EPS<br>Beat/Miss</th>
- <th>季別</th>
- <th>Allen 營收</th>
- <th>Allen EPS</th>
- <th>公司指引<br>(營收)</th>
- <th>FY26</th>
- <th>FY27</th>
- <th>股價</th>
- <th onclick="sortby('pe')">PE<br>(本益比)</th>
-</tr>
-</thead>
-<tbody>
-<tr data-t="GOOG" data-stance="看多" data-pe="18.7624249" data-beat="2.9945062030899416">
- <td class="tk"><span class="sym">GOOG</span><span class="nm">Alphabet</span></td>
- <td><span class="badge s-bull">看多</span></td>
- <td class="q">2Q26</td>
- <td class="n">1,198.0<span class="u">億USD</span></td>
- <td class="n mut">1,163.1</td>
- <td class="n beat">▲3.0%</td>
- <td class="n">9.11</td>
- <td class="n beat">▲218.5%</td>
- <td class="q">3Q26</td>
- <td class="n">1,296.1</td>
- <td class="n">3.10</td>
- <td class="n gd">1,522.5</td>
- <td class="n">20.94</td>
- <td class="n">18.31</td>
- <td class="n">343.54</td>
- <td class="n pe">18.8</td>
-</tr>
-<tr data-t="AMZN" data-stance="看多" data-pe="-1" data-beat="1.9925058595636758">
- <td class="tk"><span class="sym">AMZN</span><span class="nm">亞馬遜</span></td>
- <td><span class="badge s-bull">看多</span></td>
- <td class="q">2Q26</td>
- <td class="n">2,006.1<span class="u">億USD</span></td>
- <td class="n mut">1,966.9</td>
- <td class="n beat">▲2.0%</td>
- <td class="n">—</td>
- <td class="n ">—</td>
- <td class="q">3Q26</td>
- <td class="n">2,075.6</td>
- <td class="n">—</td>
- <td class="n gd">197000~202000</td>
- <td class="n">—</td>
- <td class="n">—</td>
- <td class="n">262.65</td>
- <td class="n pe">—</td>
-</tr>
-<tr data-t="MSFT" data-stance="中性偏多" data-pe="24.86947791" data-beat="2.6247078273758717">
- <td class="tk"><span class="sym">MSFT</span><span class="nm">微軟</span></td>
- <td><span class="badge s-bullmid">中性偏多</span></td>
- <td class="q">FY4Q26</td>
- <td class="n">900.1<span class="u">億USD</span></td>
- <td class="n mut">877.0</td>
- <td class="n beat">▲2.6%</td>
- <td class="n">4.74</td>
- <td class="n beat">▲11.3%</td>
- <td class="q">FY1Q27</td>
- <td class="n">928.7</td>
- <td class="n">4.84</td>
- <td class="n gd">89850~90950</td>
- <td class="n">16.65</td>
- <td class="n">19.92</td>
- <td class="n">495.40</td>
- <td class="n pe">24.9</td>
-</tr>
-<tr data-t="META" data-stance="偏空" data-pe="18.7671015" data-beat="0.7356230428947841">
- <td class="tk"><span class="sym">META</span><span class="nm">Meta</span></td>
- <td><span class="badge s-bear">偏空</span></td>
- <td class="q">2Q26</td>
- <td class="n">608.0<span class="u">億USD</span></td>
- <td class="n mut">603.6</td>
- <td class="n beat">▲0.7%</td>
- <td class="n">6.18</td>
- <td class="n miss">▼14.0%</td>
- <td class="q">3Q26</td>
- <td class="n">639.0</td>
- <td class="n">6.90</td>
- <td class="n gd">61000~64000</td>
- <td class="n">32.10</td>
- <td class="n">31.43</td>
- <td class="n">589.85</td>
- <td class="n pe">18.8</td>
-</tr>
-<tr data-t="TSM" data-stance="中性" data-pe="19.72929199" data-beat="2.2327899702464293">
- <td class="tk"><span class="sym">TSM</span><span class="nm">台積電 ADR</span></td>
- <td><span class="badge s-neu">中性</span></td>
- <td class="q">2Q26</td>
- <td class="n">402.0<span class="u">億USD</span></td>
- <td class="n mut">393.2</td>
- <td class="n beat">▲2.2%</td>
- <td class="n">4.31</td>
- <td class="n beat">▲14.9%</td>
- <td class="q">3Q26</td>
- <td class="n">458.8</td>
- <td class="n">4.40</td>
- <td class="n gd">44,600~45,800</td>
- <td class="n">17.00</td>
- <td class="n">21.61</td>
- <td class="n">426.35</td>
- <td class="n pe">19.7</td>
-</tr>
-<tr data-t="MTK" data-stance="看多" data-pe="29.45910013" data-beat="3.748167842656036">
- <td class="tk"><span class="sym">MTK</span><span class="nm">聯發科</span></td>
- <td><span class="badge s-bull">看多</span></td>
- <td class="q">2Q26</td>
- <td class="n">1,521.8<span class="u">億TWD</span></td>
- <td class="n mut">1,466.8</td>
- <td class="n beat">▲3.7%</td>
- <td class="n">15.28</td>
- <td class="n beat">▲8.3%</td>
- <td class="q">3Q26</td>
- <td class="n">1,588.6</td>
- <td class="n">14.56</td>
- <td class="n gd">152200~159800</td>
- <td class="n">69.93</td>
- <td class="n">142.91</td>
- <td class="n">4,210.00</td>
- <td class="n pe">29.5</td>
-</tr>
-<tr data-t="ASML" data-stance="看多" data-pe="31.05034518" data-beat="5.652469415496153">
- <td class="tk"><span class="sym">ASML</span><span class="nm">艾司摩爾</span></td>
- <td><span class="badge s-bull">看多</span></td>
- <td class="q">2Q26</td>
- <td class="n">93.3<span class="u">億EUR</span></td>
- <td class="n mut">88.3</td>
- <td class="n beat">▲5.7%</td>
- <td class="n">7.58</td>
- <td class="n beat">▲11.0%</td>
- <td class="q">3Q26</td>
- <td class="n">116.3</td>
- <td class="n">9.71</td>
- <td class="n gd">115.0</td>
- <td class="n">36.81</td>
- <td class="n">—</td>
- <td class="n">1,844.08</td>
- <td class="n pe">31.1</td>
-</tr>
-<tr data-t="AMD" data-stance="看多" data-pe="32.41272842" data-beat="1.6835610401057632">
- <td class="tk"><span class="sym">AMD</span><span class="nm">超微 AMD</span></td>
- <td><span class="badge s-bull">看多</span></td>
- <td class="q">2Q26</td>
- <td class="n">115.4<span class="u">億USD</span></td>
- <td class="n mut">113.5</td>
- <td class="n beat">▲1.7%</td>
- <td class="n">1.66</td>
- <td class="n beat">▲3.1%</td>
- <td class="q">3Q26</td>
- <td class="n">134.1</td>
- <td class="n">2.04</td>
- <td class="n gd">12700~13300</td>
- <td class="n">8.47</td>
- <td class="n">15.87</td>
- <td class="n">514.39</td>
- <td class="n pe">32.4</td>
-</tr>
-<tr data-t="TER" data-stance="看多" data-pe="29.82834758" data-beat="9.382716049382722">
- <td class="tk"><span class="sym">TER</span><span class="nm">Teradyne</span></td>
- <td><span class="badge s-bull">看多</span></td>
- <td class="q">2Q26</td>
- <td class="n">13.3<span class="u">億USD</span></td>
- <td class="n mut">12.2</td>
- <td class="n beat">▲9.4%</td>
- <td class="n">2.47</td>
- <td class="n beat">▲20.5%</td>
- <td class="q">3Q26</td>
- <td class="n">12.9</td>
- <td class="n">2.07</td>
- <td class="n gd">1200~1300</td>
- <td class="n">9.26</td>
- <td class="n">14.04</td>
- <td class="n">418.79</td>
- <td class="n pe">29.8</td>
-</tr>
-<tr data-t="VRT" data-stance="中性偏多" data-pe="30.51298027" data-beat="-3.1074282332050895">
- <td class="tk"><span class="sym">VRT</span><span class="nm">Vertiv</span></td>
- <td><span class="badge s-bullmid">中性偏多</span></td>
- <td class="q">2Q26</td>
- <td class="n">32.7<span class="u">億USD</span></td>
- <td class="n mut">33.8</td>
- <td class="n miss">▼3.1%</td>
- <td class="n">1.52</td>
- <td class="n beat">▲8.6%</td>
- <td class="q">3Q26</td>
- <td class="n">38.6</td>
- <td class="n">1.85</td>
- <td class="n gd">3650~3850</td>
- <td class="n">6.83</td>
- <td class="n">—</td>
- <td class="n">293.84</td>
- <td class="n pe">30.5</td>
-</tr>
-<tr data-t="ONTO" data-stance="看多" data-pe="39.4423305588585" data-beat="4.892966360856277">
- <td class="tk"><span class="sym">ONTO</span><span class="nm">Onto</span></td>
- <td><span class="badge s-bull">看多</span></td>
- <td class="q">2Q26</td>
- <td class="n">3.4<span class="u">億USD</span></td>
- <td class="n mut">3.3</td>
- <td class="n beat">▲4.9%</td>
- <td class="n">1.93</td>
- <td class="n beat">▲12.9%</td>
- <td class="q">3Q26</td>
- <td class="n">4.0</td>
- <td class="n">2.41</td>
- <td class="n gd">380~400</td>
- <td class="n">8.41</td>
- <td class="n">13.44</td>
- <td class="n">331.71</td>
- <td class="n pe">39.4</td>
-</tr>
-<tr data-t="LITE" data-stance="看多" data-pe="22.04045693" data-beat="1.8218623481781382">
- <td class="tk"><span class="sym">LITE</span><span class="nm">Lumentum</span></td>
- <td><span class="badge s-bull">看多</span></td>
- <td class="q">FY4Q26</td>
- <td class="n">10.1<span class="u">億USD</span></td>
- <td class="n mut">9.9</td>
- <td class="n beat">▲1.8%</td>
- <td class="n">3.23</td>
- <td class="n beat">▲9.1%</td>
- <td class="q">FY1Q27</td>
- <td class="n">12.9</td>
- <td class="n">5.19</td>
- <td class="n gd">1225~1275</td>
- <td class="n">25.88</td>
- <td class="n">42.02</td>
- <td class="n">926.14</td>
- <td class="n pe">22.0</td>
-</tr>
-<tr data-t="CLS" data-stance="看多" data-pe="13.57576985" data-beat="7.014347529036669">
- <td class="tk"><span class="sym">CLS</span><span class="nm">Celestica</span></td>
- <td><span class="badge s-bull">看多</span></td>
- <td class="q">2Q26</td>
- <td class="n">47.0<span class="u">億USD</span></td>
- <td class="n mut">43.9</td>
- <td class="n beat">▲7.0%</td>
- <td class="n">2.54</td>
- <td class="n beat">▲10.0%</td>
- <td class="q">3Q26</td>
- <td class="n">55.1</td>
- <td class="n">3.05</td>
- <td class="n gd">5250~5550</td>
- <td class="n">11.15</td>
- <td class="n">11.30</td>
- <td class="n">335.05</td>
- <td class="n pe">13.6</td>
-</tr>
-<tr data-t="GLW" data-stance="中性" data-pe="35.16737288" data-beat="2.3547202419529123">
- <td class="tk"><span class="sym">GLW</span><span class="nm">康寧 Corning</span></td>
- <td><span class="badge s-neu">中性</span></td>
- <td class="q">2Q26</td>
- <td class="n">47.4<span class="u">億USD</span></td>
- <td class="n mut">46.3</td>
- <td class="n beat">▲2.4%</td>
- <td class="n">0.78</td>
- <td class="n beat">▲2.6%</td>
- <td class="q">3Q26</td>
- <td class="n">52.7</td>
- <td class="n">0.96</td>
- <td class="n gd">4900~5000</td>
- <td class="n">3.34</td>
- <td class="n">—</td>
- <td class="n">165.99</td>
- <td class="n pe">35.2</td>
-</tr>
-<tr data-t="NOK" data-stance="看多" data-pe="19.21428571" data-beat="-0.1451679800912431">
- <td class="tk"><span class="sym">NOK</span><span class="nm">Nokia</span></td>
- <td><span class="badge s-bull">看多</span></td>
- <td class="q">2Q26</td>
- <td class="n">48.1<span class="u">億EUR</span></td>
- <td class="n mut">48.2</td>
- <td class="n miss">▼0.1%</td>
- <td class="n">0.07</td>
- <td class="n beat">▲40.0%</td>
- <td class="q">3Q26</td>
- <td class="n">51.6</td>
- <td class="n">0.10</td>
- <td class="n gd">66.5</td>
- <td class="n">0.38</td>
- <td class="n">0.48</td>
- <td class="n">10.76</td>
- <td class="n pe">19.2</td>
-</tr>
-<tr data-t="COHR" data-stance="看多" data-pe="30.11367837" data-beat="1.5168539325842723">
- <td class="tk"><span class="sym">COHR</span><span class="nm">Coherent</span></td>
- <td><span class="badge s-bull">看多</span></td>
- <td class="q">FY3Q26</td>
- <td class="n">18.1<span class="u">億USD</span></td>
- <td class="n mut">17.8</td>
- <td class="n beat">▲1.5%</td>
- <td class="n">1.41</td>
- <td class="n beat">▲0.7%</td>
- <td class="q">FY4Q26</td>
- <td class="n">20.2</td>
- <td class="n">1.77</td>
- <td class="n gd">1910~2050</td>
- <td class="n">5.63</td>
- <td class="n">10.82</td>
- <td class="n">325.83</td>
- <td class="n pe">30.1</td>
-</tr>
-<tr data-t="AMAT" data-stance="看多" data-pe="30.37005988" data-beat="3.075319259838416">
- <td class="tk"><span class="sym">AMAT</span><span class="nm">應用材料</span></td>
- <td><span class="badge s-bull">看多</span></td>
- <td class="q">FY2Q26</td>
- <td class="n">79.1<span class="u">億USD</span></td>
- <td class="n mut">76.7</td>
- <td class="n beat">▲3.1%</td>
- <td class="n">2.86</td>
- <td class="n beat">▲7.1%</td>
- <td class="q">FY3Q26</td>
- <td class="n">92.0</td>
- <td class="n">3.58</td>
- <td class="n gd">8450~9450</td>
- <td class="n">12.58</td>
- <td class="n">16.70</td>
- <td class="n">507.18</td>
- <td class="n pe">30.4</td>
-</tr>
-<tr data-t="AVGO" data-stance="中性" data-pe="18.64278937" data-beat="0.5529118513482922">
- <td class="tk"><span class="sym">AVGO</span><span class="nm">博通 Broadcom</span></td>
- <td><span class="badge s-neu">中性</span></td>
- <td class="q">FY2Q26</td>
- <td class="n">221.9<span class="u">億USD</span></td>
- <td class="n mut">220.7</td>
- <td class="n beat">▲0.6%</td>
- <td class="n">2.44</td>
- <td class="n beat">▲2.1%</td>
- <td class="q">FY3Q26</td>
- <td class="n">297.5</td>
- <td class="n">3.35</td>
- <td class="n gd">294.0</td>
- <td class="n">11.98</td>
- <td class="n">21.08</td>
- <td class="n">392.99</td>
- <td class="n pe">18.6</td>
-</tr>
-<tr data-t="NVDA" data-stance="看多" data-pe="16.37527273" data-beat="3.513222144714323">
- <td class="tk"><span class="sym">NVDA</span><span class="nm">輝達 NVIDIA</span></td>
- <td><span class="badge s-bull">看多</span></td>
- <td class="q">FY1Q27</td>
- <td class="n">816.1<span class="u">億USD</span></td>
- <td class="n mut">788.5</td>
- <td class="n beat">▲3.5%</td>
- <td class="n">1.87</td>
- <td class="n beat">▲6.2%</td>
- <td class="q">FY2Q27</td>
- <td class="n">935.1</td>
- <td class="n">2.12</td>
- <td class="n gd">891.8</td>
- <td class="n">8.96</td>
- <td class="n">13.75</td>
- <td class="n">225.16</td>
- <td class="n pe">16.4</td>
-</tr>
-<tr data-t="CIEN" data-stance="追蹤" data-pe="41.42705314" data-beat="4.246848042468487">
- <td class="tk"><span class="sym">CIEN</span><span class="nm">Ciena</span></td>
- <td><span class="badge s-watch">追蹤</span></td>
- <td class="q">FY2Q26</td>
- <td class="n">15.7<span class="u">億USD</span></td>
- <td class="n mut">15.1</td>
- <td class="n beat">▲4.2%</td>
- <td class="n">1.64</td>
- <td class="n beat">▲12.3%</td>
- <td class="q">FY3Q26</td>
- <td class="n">16.6</td>
- <td class="n">1.76</td>
- <td class="n gd">16.2</td>
- <td class="n">6.61</td>
- <td class="n">—</td>
- <td class="n">428.77</td>
- <td class="n pe">41.4</td>
-</tr>
-</tbody></table></div></div>
-<footer>數字一字不差取自 cover list（韭菜王 Allen 模型）。營收＝百萬換算億、各檔原幣別（ASML／NOK 歐元、聯發科 台幣，其餘美元）。<br>
-AMZN 因模型用營業利益、PANW 用 FCF，此處 EPS 欄留「—」。「待公布」＝該季尚未發財報。PE＝股價 ÷ cover list 底部估值列 EPS（各檔依該分頁設定，多為 FY26）。<br>
-本頁為 cover list 快照，每次重跑 build_us_earnings.py 更新。© Evan 投資工作區</footer>
+
+<div class="secthead" id="allen"><h2>🅐 韭菜王 Allen · Cover List</h2>
+<span class="secsub">每季財報模型・數字取自 cover list（股價/PE 隨 GOOGLEFINANCE 日更）。</span></div>
+<div class="grid" id="allenGrid">
+<div class="card" data-t="GOOG" data-stance="看多" data-s="goog alphabet">
+ <div class="chead"><span class="sym">GOOG</span><span class="nm">Alphabet</span>
+   <span class="badge s-bull">看多</span></div>
+ <div class="qtag">2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">1,198.0<i>億USD</i> <span class="beat">▲3.0%</span></span></div><div class=sub2><span class="vs">vs 共識 1,163.1</span></div><div class="mrow"><span class="k">EPS</span><span class="val">9.11 <span class="beat">▲218.5%</span></span></div><div class=sub2><span class="vs">vs 2.86</span></div><div class="mrow"><span class="k">下季 3Q26</span><span class="val sm">營收 1,296.1 · EPS 3.10</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">1,522.5</span></div>
+ <div class="cfoot"><span>FY26 <b>20.94</b></span><span>FY27 <b>18.31</b></span><span>股價 <b>343.54</b></span><span>PE <b>18.8</b></span></div>
+</div>
+<div class="card" data-t="AMZN" data-stance="看多" data-s="amzn 亞馬遜">
+ <div class="chead"><span class="sym">AMZN</span><span class="nm">亞馬遜</span>
+   <span class="badge s-bull">看多</span></div>
+ <div class="qtag">2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">2,006.1<i>億USD</i> <span class="beat">▲2.0%</span></span></div><div class=sub2><span class="vs">vs 共識 1,966.9</span></div><div class="mrow"><span class="k">下季 3Q26</span><span class="val sm">營收 2,075.6</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">197000~202000</span></div>
+ <div class="cfoot"><span>FY26 <b>—</b></span><span>FY27 <b>—</b></span><span>股價 <b>262.65</b></span><span>PE <b>—</b></span></div>
+</div>
+<div class="card" data-t="MSFT" data-stance="中性偏多" data-s="msft 微軟">
+ <div class="chead"><span class="sym">MSFT</span><span class="nm">微軟</span>
+   <span class="badge s-bullmid">中性偏多</span></div>
+ <div class="qtag">FY4Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">900.1<i>億USD</i> <span class="beat">▲2.6%</span></span></div><div class=sub2><span class="vs">vs 共識 877.0</span></div><div class="mrow"><span class="k">EPS</span><span class="val">4.74 <span class="beat">▲11.3%</span></span></div><div class=sub2><span class="vs">vs 4.26</span></div><div class="mrow"><span class="k">下季 FY1Q27</span><span class="val sm">營收 928.7 · EPS 4.84</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">89850~90950</span></div>
+ <div class="cfoot"><span>FY26 <b>16.65</b></span><span>FY27 <b>19.92</b></span><span>股價 <b>495.40</b></span><span>PE <b>24.9</b></span></div>
+</div>
+<div class="card" data-t="META" data-stance="偏空" data-s="meta meta">
+ <div class="chead"><span class="sym">META</span><span class="nm">Meta</span>
+   <span class="badge s-bear">偏空</span></div>
+ <div class="qtag">2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">608.0<i>億USD</i> <span class="beat">▲0.7%</span></span></div><div class=sub2><span class="vs">vs 共識 603.6</span></div><div class="mrow"><span class="k">EPS</span><span class="val">6.18 <span class="miss">▼14.0%</span></span></div><div class=sub2><span class="vs">vs 7.19</span></div><div class="mrow"><span class="k">下季 3Q26</span><span class="val sm">營收 639.0 · EPS 6.90</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">61000~64000</span></div>
+ <div class="cfoot"><span>FY26 <b>32.10</b></span><span>FY27 <b>31.43</b></span><span>股價 <b>589.85</b></span><span>PE <b>18.8</b></span></div>
+</div>
+<div class="card" data-t="TSM" data-stance="中性" data-s="tsm 台積電 adr">
+ <div class="chead"><span class="sym">TSM</span><span class="nm">台積電 ADR</span>
+   <span class="badge s-neu">中性</span></div>
+ <div class="qtag">2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">402.0<i>億USD</i> <span class="beat">▲2.2%</span></span></div><div class=sub2><span class="vs">vs 共識 393.2</span></div><div class="mrow"><span class="k">EPS</span><span class="val">4.31 <span class="beat">▲14.9%</span></span></div><div class=sub2><span class="vs">vs 3.75</span></div><div class="mrow"><span class="k">下季 3Q26</span><span class="val sm">營收 458.8 · EPS 4.40</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">44,600~45,800</span></div>
+ <div class="cfoot"><span>FY26 <b>17.00</b></span><span>FY27 <b>21.61</b></span><span>股價 <b>426.35</b></span><span>PE <b>19.7</b></span></div>
+</div>
+<div class="card" data-t="MTK" data-stance="看多" data-s="mtk 聯發科">
+ <div class="chead"><span class="sym">MTK</span><span class="nm">聯發科</span>
+   <span class="badge s-bull">看多</span></div>
+ <div class="qtag">2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">1,521.8<i>億TWD</i> <span class="beat">▲3.7%</span></span></div><div class=sub2><span class="vs">vs 共識 1,466.8</span></div><div class="mrow"><span class="k">EPS</span><span class="val">15.28 <span class="beat">▲8.3%</span></span></div><div class=sub2><span class="vs">vs 14.11</span></div><div class="mrow"><span class="k">下季 3Q26</span><span class="val sm">營收 1,588.6 · EPS 14.56</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">152200~159800</span></div>
+ <div class="cfoot"><span>FY26 <b>69.93</b></span><span>FY27 <b>142.91</b></span><span>股價 <b>4,210.00</b></span><span>PE <b>29.5</b></span></div>
+</div>
+<div class="card" data-t="ASML" data-stance="看多" data-s="asml 艾司摩爾">
+ <div class="chead"><span class="sym">ASML</span><span class="nm">艾司摩爾</span>
+   <span class="badge s-bull">看多</span></div>
+ <div class="qtag">2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">93.3<i>億EUR</i> <span class="beat">▲5.7%</span></span></div><div class=sub2><span class="vs">vs 共識 88.3</span></div><div class="mrow"><span class="k">EPS</span><span class="val">7.58 <span class="beat">▲11.0%</span></span></div><div class=sub2><span class="vs">vs 6.83</span></div><div class="mrow"><span class="k">下季 3Q26</span><span class="val sm">營收 116.3 · EPS 9.71</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">115.0</span></div>
+ <div class="cfoot"><span>FY26 <b>36.81</b></span><span>FY27 <b>—</b></span><span>股價 <b>1,844.08</b></span><span>PE <b>31.1</b></span></div>
+</div>
+<div class="card" data-t="AMD" data-stance="看多" data-s="amd 超微 amd">
+ <div class="chead"><span class="sym">AMD</span><span class="nm">超微 AMD</span>
+   <span class="badge s-bull">看多</span></div>
+ <div class="qtag">2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">115.4<i>億USD</i> <span class="beat">▲1.7%</span></span></div><div class=sub2><span class="vs">vs 共識 113.5</span></div><div class="mrow"><span class="k">EPS</span><span class="val">1.66 <span class="beat">▲3.1%</span></span></div><div class=sub2><span class="vs">vs 1.61</span></div><div class="mrow"><span class="k">下季 3Q26</span><span class="val sm">營收 134.1 · EPS 2.04</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">12700~13300</span></div>
+ <div class="cfoot"><span>FY26 <b>8.47</b></span><span>FY27 <b>15.87</b></span><span>股價 <b>514.39</b></span><span>PE <b>32.4</b></span></div>
+</div>
+<div class="card" data-t="TER" data-stance="看多" data-s="ter teradyne">
+ <div class="chead"><span class="sym">TER</span><span class="nm">Teradyne</span>
+   <span class="badge s-bull">看多</span></div>
+ <div class="qtag">2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">13.3<i>億USD</i> <span class="beat">▲9.4%</span></span></div><div class=sub2><span class="vs">vs 共識 12.2</span></div><div class="mrow"><span class="k">EPS</span><span class="val">2.47 <span class="beat">▲20.5%</span></span></div><div class=sub2><span class="vs">vs 2.05</span></div><div class="mrow"><span class="k">下季 3Q26</span><span class="val sm">營收 12.9 · EPS 2.07</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">1200~1300</span></div>
+ <div class="cfoot"><span>FY26 <b>9.26</b></span><span>FY27 <b>14.04</b></span><span>股價 <b>418.79</b></span><span>PE <b>29.8</b></span></div>
+</div>
+<div class="card" data-t="VRT" data-stance="中性偏多" data-s="vrt vertiv">
+ <div class="chead"><span class="sym">VRT</span><span class="nm">Vertiv</span>
+   <span class="badge s-bullmid">中性偏多</span></div>
+ <div class="qtag">2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">32.7<i>億USD</i> <span class="miss">▼3.1%</span></span></div><div class=sub2><span class="vs">vs 共識 33.8</span></div><div class="mrow"><span class="k">EPS</span><span class="val">1.52 <span class="beat">▲8.6%</span></span></div><div class=sub2><span class="vs">vs 1.40</span></div><div class="mrow"><span class="k">下季 3Q26</span><span class="val sm">營收 38.6 · EPS 1.85</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">3650~3850</span></div>
+ <div class="cfoot"><span>FY26 <b>6.83</b></span><span>FY27 <b>—</b></span><span>股價 <b>293.84</b></span><span>PE <b>30.5</b></span></div>
+</div>
+<div class="card" data-t="ONTO" data-stance="看多" data-s="onto onto">
+ <div class="chead"><span class="sym">ONTO</span><span class="nm">Onto</span>
+   <span class="badge s-bull">看多</span></div>
+ <div class="qtag">2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">3.4<i>億USD</i> <span class="beat">▲4.9%</span></span></div><div class=sub2><span class="vs">vs 共識 3.3</span></div><div class="mrow"><span class="k">EPS</span><span class="val">1.93 <span class="beat">▲12.9%</span></span></div><div class=sub2><span class="vs">vs 1.71</span></div><div class="mrow"><span class="k">下季 3Q26</span><span class="val sm">營收 4.0 · EPS 2.41</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">380~400</span></div>
+ <div class="cfoot"><span>FY26 <b>8.41</b></span><span>FY27 <b>13.44</b></span><span>股價 <b>331.71</b></span><span>PE <b>39.4</b></span></div>
+</div>
+<div class="card" data-t="LITE" data-stance="看多" data-s="lite lumentum">
+ <div class="chead"><span class="sym">LITE</span><span class="nm">Lumentum</span>
+   <span class="badge s-bull">看多</span></div>
+ <div class="qtag">FY4Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">10.1<i>億USD</i> <span class="beat">▲1.8%</span></span></div><div class=sub2><span class="vs">vs 共識 9.9</span></div><div class="mrow"><span class="k">EPS</span><span class="val">3.23 <span class="beat">▲9.1%</span></span></div><div class=sub2><span class="vs">vs 2.96</span></div><div class="mrow"><span class="k">下季 FY1Q27</span><span class="val sm">營收 12.9 · EPS 5.19</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">1225~1275</span></div>
+ <div class="cfoot"><span>FY26 <b>25.88</b></span><span>FY27 <b>42.02</b></span><span>股價 <b>926.14</b></span><span>PE <b>22.0</b></span></div>
+</div>
+<div class="card" data-t="CLS" data-stance="看多" data-s="cls celestica">
+ <div class="chead"><span class="sym">CLS</span><span class="nm">Celestica</span>
+   <span class="badge s-bull">看多</span></div>
+ <div class="qtag">2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">47.0<i>億USD</i> <span class="beat">▲7.0%</span></span></div><div class=sub2><span class="vs">vs 共識 43.9</span></div><div class="mrow"><span class="k">EPS</span><span class="val">2.54 <span class="beat">▲10.0%</span></span></div><div class=sub2><span class="vs">vs 2.31</span></div><div class="mrow"><span class="k">下季 3Q26</span><span class="val sm">營收 55.1 · EPS 3.05</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">5250~5550</span></div>
+ <div class="cfoot"><span>FY26 <b>11.15</b></span><span>FY27 <b>11.30</b></span><span>股價 <b>335.05</b></span><span>PE <b>13.6</b></span></div>
+</div>
+<div class="card" data-t="GLW" data-stance="中性" data-s="glw 康寧 corning">
+ <div class="chead"><span class="sym">GLW</span><span class="nm">康寧 Corning</span>
+   <span class="badge s-neu">中性</span></div>
+ <div class="qtag">2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">47.4<i>億USD</i> <span class="beat">▲2.4%</span></span></div><div class=sub2><span class="vs">vs 共識 46.3</span></div><div class="mrow"><span class="k">EPS</span><span class="val">0.78 <span class="beat">▲2.6%</span></span></div><div class=sub2><span class="vs">vs 0.76</span></div><div class="mrow"><span class="k">下季 3Q26</span><span class="val sm">營收 52.7 · EPS 0.96</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">4900~5000</span></div>
+ <div class="cfoot"><span>FY26 <b>3.34</b></span><span>FY27 <b>—</b></span><span>股價 <b>165.99</b></span><span>PE <b>35.2</b></span></div>
+</div>
+<div class="card" data-t="NOK" data-stance="看多" data-s="nok nokia">
+ <div class="chead"><span class="sym">NOK</span><span class="nm">Nokia</span>
+   <span class="badge s-bull">看多</span></div>
+ <div class="qtag">2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">48.1<i>億EUR</i> <span class="miss">▼0.1%</span></span></div><div class=sub2><span class="vs">vs 共識 48.2</span></div><div class="mrow"><span class="k">EPS</span><span class="val">0.07 <span class="beat">▲40.0%</span></span></div><div class=sub2><span class="vs">vs 0.05</span></div><div class="mrow"><span class="k">下季 3Q26</span><span class="val sm">營收 51.6 · EPS 0.10</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">66.5</span></div>
+ <div class="cfoot"><span>FY26 <b>0.38</b></span><span>FY27 <b>0.48</b></span><span>股價 <b>10.76</b></span><span>PE <b>19.2</b></span></div>
+</div>
+<div class="card" data-t="COHR" data-stance="看多" data-s="cohr coherent">
+ <div class="chead"><span class="sym">COHR</span><span class="nm">Coherent</span>
+   <span class="badge s-bull">看多</span></div>
+ <div class="qtag">FY3Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">18.1<i>億USD</i> <span class="beat">▲1.5%</span></span></div><div class=sub2><span class="vs">vs 共識 17.8</span></div><div class="mrow"><span class="k">EPS</span><span class="val">1.41 <span class="beat">▲0.7%</span></span></div><div class=sub2><span class="vs">vs 1.40</span></div><div class="mrow"><span class="k">下季 FY4Q26</span><span class="val sm">營收 20.2 · EPS 1.77</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">1910~2050</span></div>
+ <div class="cfoot"><span>FY26 <b>5.63</b></span><span>FY27 <b>10.82</b></span><span>股價 <b>325.83</b></span><span>PE <b>30.1</b></span></div>
+</div>
+<div class="card" data-t="AMAT" data-stance="看多" data-s="amat 應用材料">
+ <div class="chead"><span class="sym">AMAT</span><span class="nm">應用材料</span>
+   <span class="badge s-bull">看多</span></div>
+ <div class="qtag">FY2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">79.1<i>億USD</i> <span class="beat">▲3.1%</span></span></div><div class=sub2><span class="vs">vs 共識 76.7</span></div><div class="mrow"><span class="k">EPS</span><span class="val">2.86 <span class="beat">▲7.1%</span></span></div><div class=sub2><span class="vs">vs 2.67</span></div><div class="mrow"><span class="k">下季 FY3Q26</span><span class="val sm">營收 92.0 · EPS 3.58</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">8450~9450</span></div>
+ <div class="cfoot"><span>FY26 <b>12.58</b></span><span>FY27 <b>16.70</b></span><span>股價 <b>507.18</b></span><span>PE <b>30.4</b></span></div>
+</div>
+<div class="card" data-t="AVGO" data-stance="中性" data-s="avgo 博通 broadcom">
+ <div class="chead"><span class="sym">AVGO</span><span class="nm">博通 Broadcom</span>
+   <span class="badge s-neu">中性</span></div>
+ <div class="qtag">FY2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">221.9<i>億USD</i> <span class="beat">▲0.6%</span></span></div><div class=sub2><span class="vs">vs 共識 220.7</span></div><div class="mrow"><span class="k">EPS</span><span class="val">2.44 <span class="beat">▲2.1%</span></span></div><div class=sub2><span class="vs">vs 2.39</span></div><div class="mrow"><span class="k">下季 FY3Q26</span><span class="val sm">營收 297.5 · EPS 3.35</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">294.0</span></div>
+ <div class="cfoot"><span>FY26 <b>11.98</b></span><span>FY27 <b>21.08</b></span><span>股價 <b>392.99</b></span><span>PE <b>18.6</b></span></div>
+</div>
+<div class="card" data-t="NVDA" data-stance="看多" data-s="nvda 輝達 nvidia">
+ <div class="chead"><span class="sym">NVDA</span><span class="nm">輝達 NVIDIA</span>
+   <span class="badge s-bull">看多</span></div>
+ <div class="qtag">FY1Q27 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">816.1<i>億USD</i> <span class="beat">▲3.5%</span></span></div><div class=sub2><span class="vs">vs 共識 788.5</span></div><div class="mrow"><span class="k">EPS</span><span class="val">1.87 <span class="beat">▲6.2%</span></span></div><div class=sub2><span class="vs">vs 1.76</span></div><div class="mrow"><span class="k">下季 FY2Q27</span><span class="val sm">營收 935.1 · EPS 2.12</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">891.8</span></div>
+ <div class="cfoot"><span>FY26 <b>8.96</b></span><span>FY27 <b>13.75</b></span><span>股價 <b>225.16</b></span><span>PE <b>16.4</b></span></div>
+</div>
+<div class="card" data-t="CIEN" data-stance="追蹤" data-s="cien ciena">
+ <div class="chead"><span class="sym">CIEN</span><span class="nm">Ciena</span>
+   <span class="badge s-watch">追蹤</span></div>
+ <div class="qtag">FY2Q26 已公布</div>
+ <div class="mrow"><span class="k">實際營收</span><span class="val">15.7<i>億USD</i> <span class="beat">▲4.2%</span></span></div><div class=sub2><span class="vs">vs 共識 15.1</span></div><div class="mrow"><span class="k">EPS</span><span class="val">1.64 <span class="beat">▲12.3%</span></span></div><div class=sub2><span class="vs">vs 1.46</span></div><div class="mrow"><span class="k">下季 FY3Q26</span><span class="val sm">營收 16.6 · EPS 1.76</span></div><div class="mrow"><span class="k">公司指引</span><span class="val sm gd">16.2</span></div>
+ <div class="cfoot"><span>FY26 <b>6.61</b></span><span>FY27 <b>—</b></span><span>股價 <b>428.77</b></span><span>PE <b>41.4</b></span></div>
+</div>
+</div>
+
+<div class="secthead" id="henry"><h2>🅗 Henry · Pentimetrics</h2>
+<span class="secsub">The Trace 券商彙整／市場（Bloomberg）共識・buy side。38 檔，其中 <b>25</b> 檔為 cover list 未收。</span></div>
+<div class="grid">
+<div class="card" data-t="AMAT" data-s="amat 應用材料">
+ <div class="chead"><span class="sym">AMAT</span><span class="nm">應用材料</span>
+   <span class="badge s-henry">FY3Q26</span></div>
+ <div class="qtag">Trace 91 · 2026-08-14</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">91.2億美元</span></div><div class="sub2"><span class="vs">vs 共識 89.9億美元 · buyside 約95億美元</span></div><div class="mrow"><span class="k">EPS</span><span class="val">3.50 <span class=vs>vs 3.40</span></span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">第4財季營收102.5億±5億美元 vs 市場預期95.4億(buy side約105億);EPS 4.02±0.20 vs 市場預期3.71;毛利率50.4%</span></div>
+ <div class="cview">「又是一次優於預期並上修,但漲多後102.5億營收展望恐難推升buy side預估;管理層稱客戶可見度提升、2027仍為強勁成長年,沒有改變投資邏輯的負面因素」</div>
+</div>
+<div class="card" data-t="COHR" data-s="cohr coherent">
+ <div class="chead"><span class="sym">COHR</span><span class="nm">Coherent</span>
+   <span class="badge s-henry">F4Q26</span></div>
+ <div class="qtag">Trace 90 · 2026-08-13</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">20.46億美元</span></div><div class="sub2"><span class="vs">vs 共識 19.85億美元(華爾街)</span></div><div class="mrow"><span class="k">EPS</span><span class="val">1.74 <span class=vs>vs 1.62</span></span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">F1Q27營收22-24億(中值23.0億,+45%) vs 市場預期21.35億;EPS中值1.95 vs 1.77;毛利率中值40.5% vs 40.0%(2Q毛利率40.2%/營業利益率21.8% vs 40.0%/21.5%)</span></div>
+ <div class="cview">「全面優於預期;需求能見度為最強訊號(6月接單創新高、FY27產能已大致預訂完、訂單延伸至CY28),但毛利率仍是多空爭論核心」</div>
+</div>
+<div class="card" data-t="CSCO" data-s="csco cisco">
+ <div class="chead"><span class="sym">CSCO</span><span class="nm">Cisco</span>
+   <span class="badge s-henry">FY4Q26</span></div>
+ <div class="qtag">Trace 90 · 2026-08-13</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">173億美元</span></div><div class="sub2"><span class="vs">vs 共識 168.5億美元</span></div><div class="mrow"><span class="k">EPS</span><span class="val">1.22(Non-GAAP) <span class=vs>vs 1.17</span></span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">FY27Q1營收180-182億, Non-GAAP EPS 1.32-1.34, 毛利率65-66% vs 市場預期66.1%;FY27營收722-734億, EPS 5.05-5.11</span></div>
+ <div class="cview">「又一份beat and raise,評為中性偏上;爭論點:產品訂單年增35%略低於buy side約40%期望值、毛利率壓力主要來自記憶體成本轉嫁」</div>
+</div>
+<div class="card" data-t="CBRS" data-s="cbrs cbrs(henry 原文用字,另處作 crbs)">
+ <div class="chead"><span class="sym">CBRS</span><span class="nm">CBRS(Henry 原文用字,另處作 CRBS)</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 90 · 2026-08-13</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">2.099億美元(核心營收)</span></div><div class="sub2"><span class="vs">vs 共識 1.91億美元(華爾街)</span></div><div class="mrow"><span class="k">EPS</span><span class="val">-0.05(Non-GAAP) <span class=vs>vs -0.17</span></span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">核心毛利率40.6% vs 華爾街37.3%;預期第三季毛利率中值39%為低點;已上線或簽約逾600MW容量(2027年底前交付,後續可能增至700-800MW)</span></div>
+ <div class="cview">「核心營收/毛利率/營業利益率均明顯優於預期,需求本身仍強(OpenAI部署擴張及其他雲端客戶使用量增加);但客戶集中度(OpenAI)仍是主要爭議,且財報前buy side原預期上調至1B落空」</div>
+</div>
+<div class="card" data-t="LITE" data-s="lite lumentum">
+ <div class="chead"><span class="sym">LITE</span><span class="nm">Lumentum</span>
+   <span class="badge s-henry">F4Q26</span></div>
+ <div class="qtag">Trace 89 · 2026-08-12</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">10.06億美元</span></div><div class="sub2"><span class="vs">vs buyside 略符buy side預期低標</span></div><div class="mrow"><span class="k">EPS</span><span class="val">調整後EPS符合buy side預期</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">F1Q27營收12.25-12.75億(中值12.50億,略高於buy side);調整後營業利益率39.5-40.5%(符合buy side);調整後EPS 4.05-4.35(中值4.20,略高於buy side);調整後毛利率50.4% vs buy side 50-50.5%+</span></div>
+ <div class="cview">「財報表現扎實,營業利益顯示營運槓桿顯現速度比模型更快;LITE表示將比原計畫提前逾一季達成目標模型,市場相對平淡的反應更像是預期博弈的問題」</div>
+</div>
+<div class="card" data-t="MNDY" data-s="mndy monday.com">
+ <div class="chead"><span class="sym">MNDY</span><span class="nm">Monday.com</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace Weekly 23 · 2026-08-10</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">3.646億美元</span></div><div class="sub2"><span class="vs">vs 共識 約3.555億美元(市場共識)</span></div>
+ <div class="cview">「表面上看是一次優於預期的表現(AI產品ARR較Q1翻倍、佔淨新增ARR 17%);但市場顯然不只是要表現尚可的數據」</div>
+</div>
+<div class="card" data-t="ATI" data-s="ati ati inc">
+ <div class="chead"><span class="sym">ATI</span><span class="nm">ATI Inc</span>
+   <span class="badge s-henry">Henry</span></div>
+ <div class="qtag">Trace Weekly 23 · 2026-08-09</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">12.61億美元</span></div><div class="sub2"><span class="vs">vs 共識 超越市場共識3.5%</span></div><div class="mrow"><span class="k">EPS</span><span class="val">1.23(調整後) <span class=vs>vs 超越市場共識18%</span></span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">2026財年指引在中點分別上調至EPS 5.04美元與EBITDA 11.6億美元</span></div>
+ <div class="cview">「EBITDA 2.84億創2007年以來最強單季紀錄;AA&amp;S部門利潤率躍升至23.7%(年增930bps),稀缺的鎳/鈦/鉿鋯產能已轉化為定價權;積壓訂單44億(70%將在12個月內轉化)」</div>
+</div>
+<div class="card" data-t="TEAM" data-s="team atlassian">
+ <div class="chead"><span class="sym">TEAM</span><span class="nm">Atlassian</span>
+   <span class="badge s-henry">Henry</span></div>
+ <div class="qtag">Trace 86 + 1 · 2026-08-07</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">雲端業務成長31%</span></div><div class="sub2"><span class="vs">vs buyside buy side約29-30%(雲端成長)</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">雲端業務成長指引28.5%,大幅超越buy side約22-23%的預期</span></div>
+ <div class="cview">「31%的雲端業務成長超越buy side約29-30%的預期;創辦人亦宣布高達2.5億美元的庫藏股回購計畫」</div>
+</div>
+<div class="card" data-t="APP" data-s="app applovin">
+ <div class="chead"><span class="sym">APP</span><span class="nm">AppLovin</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 86 · 2026-08-06</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">$1.924B</span></div><div class="sub2"><span class="vs">vs 共識 $1.942B · buyside 約$2B</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">3Q26營收$2.055-2.085B(中值$2.070B,+47.3%) vs 市場預期$2.083B;調整後EBITDA中值$1.725B(利益率83.3%) vs 市場預期$1.754B</span></div>
+ <div class="cview">「3Q22以來首次營收低於市場預期,打破過去約12-14季持續達到或超越指引上限的交付模式;即使仍逾50%成長,相對APP過往標準仍明顯偏弱(管理層歸因模型更新時點);2Q調整後EBITDA $1.614B(83.9%)亦低於市場預期$1.639B」</div>
+</div>
+<div class="card" data-t="SNDK" data-s="sndk sandisk">
+ <div class="chead"><span class="sym">SNDK</span><span class="nm">SanDisk</span>
+   <span class="badge s-henry">F4Q26</span></div>
+ <div class="qtag">Trace 86 · 2026-08-06</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">89.7億美元</span></div><div class="sub2"><span class="vs">vs 共識 86.0億美元(Street) · buyside 約95.0億美元</span></div><div class="mrow"><span class="k">EPS</span><span class="val">39.25 <span class=vs>vs 34.80(Street);買方42.00</span></span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">F1Q27營收103-108億(中值105.5億) vs Street 107.4億;毛利率83-85%(中值84.0%);EPS 44-46(中值45.00);F4Q26毛利率84.6%(QoQ+620bps) vs Street 80.0%/買方84.0%;最低合約營收939億、備考RPO 911億</span></div>
+ <div class="cview">「整體仍優於華爾街,但相較買方高預期並非全面超標;最大爭議仍在毛利率(F1Q27中值反小幅回落約60bps);NBM新增5份協議累計8家客戶10份協議為本季最具結構性正面訊息」</div>
+</div>
+<div class="card" data-t="WDC" data-s="wdc western digital">
+ <div class="chead"><span class="sym">WDC</span><span class="nm">Western Digital</span>
+   <span class="badge s-henry">Q2</span></div>
+ <div class="qtag">Trace 86 · 2026-08-06</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">37.5億美元</span></div><div class="sub2"><span class="vs">vs buyside 38.5億美元</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">Q3營收指引41.0億美元 vs buy side 43.5億(毛利率指引表現不差)</span></div>
+ <div class="cview">「相較buy side預期不足,主因STX的優秀財報讓WDC這份財報比起來略顯不足(非需求端疲軟)」</div>
+</div>
+<div class="card" data-t="U" data-s="u unity">
+ <div class="chead"><span class="sym">U</span><span class="nm">Unity</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 86 · 2026-08-06</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">總營收5.46億美元(策略營收4.86億)</span></div><div class="sub2"><span class="vs">vs 共識 總營收5.15億美元(策略4.64億)</span></div><div class="mrow"><span class="k">EPS</span><span class="val">-0.05 <span class=vs>vs -0.09</span></span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">第三季策略營收指引5.4-5.5億;總營收指引5.6-5.7億;調整後EBITDA 1.85-1.95億(比市場預期高約20%)</span></div>
+ <div class="cview">「策略營收超預期5%、總營收超預期6%、調整後EBITDA 1.6億(利潤率29%)超預期18%;Vector業務成長加速至20%以上(占Grow收入81%)。原文標註『還在消化中』」</div>
+</div>
+<div class="card" data-t="DDOG" data-s="ddog datadog">
+ <div class="chead"><span class="sym">DDOG</span><span class="nm">Datadog</span>
+   <span class="badge s-henry">F2Q26</span></div>
+ <div class="qtag">Trace 86 · 2026-08-06</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">11.21億美元</span></div><div class="sub2"><span class="vs">vs 共識 10.8億美元(賣方) · buyside 買方35-36%</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">F3Q營收指引11.35-11.45億(中值年增+29%) vs 市場預期11.06億(買方~31%);FY26營收指引44.5-44.7億(+30%) vs 市場預期~43.5億</span></div>
+ <div class="cview">「很顯然市場希望看到的是Q3年增30%以上的營收指引(中值僅+29%);2Q營收(+36%)、營業利潤率22.9%、預訂額11.77億、自由現金流2.79億全面超預期。原文標註『還在消化中』」</div>
+</div>
+<div class="card" data-t="AMD" data-s="amd 超微/amd">
+ <div class="chead"><span class="sym">AMD</span><span class="nm">超微/AMD</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 85 · 2026-08-05</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">$11.536B</span></div><div class="sub2"><span class="vs">vs 共識 $11.309B(華爾街) · buyside 接近$12B</span></div><div class="mrow"><span class="k">EPS</span><span class="val">1.66(Non-GAAP) <span class=vs>vs 1.62</span></span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">3Q26營收$12.7-13.3B(中值$13B,+40.6%) vs 市場預期$12.502B(買方目標約$13.2B);隱含EPS約$1.93 vs $1.87;3Q AI GPU約$3.4B僅與市場預期$3.36B大致相當;資料中心$6.718B vs $6.554B;AI GPU 2Q約$2.8B vs $2.65B</span></div>
+ <div class="cview">「擁擠持倉+高位buy side預期下,2Q營收未達買方接近$12B、3Q AI GPU指引僅與市場相當,故盤後受市場懲罰;多頭論述不會改變,但正因這種預期市場容易跑太前面」</div>
+</div>
+<div class="card" data-t="ALAB" data-s="alab astera labs">
+ <div class="chead"><span class="sym">ALAB</span><span class="nm">Astera Labs</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 85 · 2026-08-05</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">$392.4M</span></div><div class="sub2"><span class="vs">vs 共識 $360.9M</span></div><div class="mrow"><span class="k">EPS</span><span class="val">0.80(Non-GAAP) <span class=vs>vs 0.69</span></span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">3Q26營收$540-560M(中值$550M,+138.5%) vs 市場預期$417M(高約32%);EPS中值約$1.19 vs $0.81;毛利率約72.0% vs 71.7%、營業利益率約43% vs 38%;2Q毛利率73.7%/營業利益率39.1% vs 72.8%/36.8%</span></div>
+ <div class="cview">「再次beat and raise,3Q營收指引遠高於buy side(主因Scorpio X進入大批量生產),整體並未有過多疑慮,但市場並未進一步獎勵價格」</div>
+</div>
+<div class="card" data-t="ANET" data-s="anet arista networks">
+ <div class="chead"><span class="sym">ANET</span><span class="nm">Arista Networks</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 85 · 2026-08-05</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">$3.036B</span></div><div class="sub2"><span class="vs">vs 共識 $2.830B(華爾街)</span></div><div class="mrow"><span class="k">EPS</span><span class="val">1.02 <span class=vs>vs 0.89</span></span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">3Q26營收約$3.3B(+43.0%) vs 市場預期$2.951B;EPS $1.06-1.08 vs $0.92;FY26營收約$12.6B(+40%) vs 市場預期$11.617B(買方預期約35%);2Q毛利率63.4%/營業利益率49.9% vs 62.2%/46.5%</span></div>
+ <div class="cview">「財報季唯一亮點;Q2營收年增38.5%顯著高於市場、Q3隱含年增43%大幅超越sell/buy side,Q2營業利潤率將近50%;目前半導體要非常顯著超預期才會被市場進一步買單」</div>
+</div>
+<div class="card" data-t="PLTR" data-s="pltr palantir">
+ <div class="chead"><span class="sym">PLTR</span><span class="nm">Palantir</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 84 · 2026-08-04</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">$1.936B</span></div><div class="sub2"><span class="vs">vs 共識 $1.811B</span></div><div class="mrow"><span class="k">EPS</span><span class="val">0.41(調整後,排除SpaceX評價利益後約$0.39) <span class=vs>vs 0.34</span></span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">3Q26營收$2.160-2.164B(+83%) vs 市場預期約$2.000B;FY26營收上調至$8.150-8.158B(+82%) vs 市場預期約$7.722B(本次上調約$498M);非GAAP營業利益率61.7% vs 59.6%</span></div>
+ <div class="cview">「指引上調幅度明顯高於本季超預期金額;美國商業營收$764M(+149%)、美國政府$809M(+90%)均優於預期;Karp力拚美國商業與政府合計逾100%成長」</div>
+</div>
+<div class="card" data-t="ON" data-s="on 安森美/onsemi">
+ <div class="chead"><span class="sym">ON</span><span class="nm">安森美/onsemi</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 84 · 2026-08-04</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">$1.604B</span></div><div class="sub2"><span class="vs">vs 共識 $1.587B</span></div><div class="mrow"><span class="k">EPS</span><span class="val">0.74 <span class=vs>vs 0.71</span></span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">3Q26營收$1.65-1.75B(中值$1.70B) vs 市場預期$1.669B;毛利率中值41.0% vs 40.3%;EPS中值$0.87 vs $0.84</span></div>
+ <div class="cview">「整體超預期幅度不大,且主要來自AI資料中心;汽車($781M)與工業($423M)營收均低於市場預期,主要爭點仍是安森美是否進入廣泛景氣復甦,或只是AI快速成長暫時掩蓋汽車與傳統工業需求偏弱」</div>
+</div>
+<div class="card" data-t="AAPL" data-s="aapl 蘋果/apple">
+ <div class="chead"><span class="sym">AAPL</span><span class="nm">蘋果/Apple</span>
+   <span class="badge s-henry">F3Q26</span></div>
+ <div class="qtag">Trace 83 · 2026-07-31</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">1,094億美元</span></div><div class="sub2"><span class="vs">vs 共識 約1,090億美元(Street)</span></div><div class="mrow"><span class="k">EPS</span><span class="val">2.02(剔除每股0.11關稅退稅後約1.91) <span class=vs>vs 1.89(Street)</span></span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">F4Q26營收指引年增9-11%(中位數約1,127億) vs Street 1,147億;服務隱含成長約9.5-10% vs Street 13.2%;毛利率指引47-48%</span></div>
+ <div class="cview">「報導毛利率50.1%高於Street(含約200bps關稅退稅,乾淨毛利率約48.1%);服務營收307億(+12.1%)低於Street 314億;大中華區188億低於預期196億;F4Q營收與服務指引均低於Street」</div>
+</div>
+<div class="card" data-t="AMZN" data-s="amzn 亞馬遜/amazon">
+ <div class="chead"><span class="sym">AMZN</span><span class="nm">亞馬遜/Amazon</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 83 · 2026-07-31</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">2,006億美元</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">3Q26營收指引1,970-2,020億;營業利益225-265億;2026年現金CapEx約2,200億(先前約2,000億)</span></div>
+ <div class="cview">「優異財報;AWS營收422億(+36.7%,連續第五季加速、18季最快),AWS營業利益166億/利益率39.4%明顯高於Street 137億/33.8%;北美營收1,162億高於Street 1,139億;整體營業利益275億高於原指引高標240億」</div>
+</div>
+<div class="card" data-t="RDDT" data-s="rddt reddit">
+ <div class="chead"><span class="sym">RDDT</span><span class="nm">Reddit</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 83 · 2026-07-31</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">8.05億美元</span></div><div class="sub2"><span class="vs">vs 共識 7.30億美元(Street) · buyside 7.80億美元(買方bogey)</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">3Q26營收指引8.60-8.70億 vs Street 8.30億(買方bogey 8.55億);調整後EBITDA 3.85-3.95億(中位數利潤率約45%)</span></div>
+ <div class="cview">「營收優於預期,但美國DAUq僅5,320萬(+6%、季減30萬)低於Street 5,400-5,410萬,且美國已登入與未登入DAUq均季減;總ARPU 6.18(+36%)高於Street 5.60-5.63」</div>
+</div>
+<div class="card" data-t="MSFT" data-s="msft 微軟/microsoft">
+ <div class="chead"><span class="sym">MSFT</span><span class="nm">微軟/Microsoft</span>
+   <span class="badge s-henry">F4Q26</span></div>
+ <div class="qtag">Trace 82 · 2026-07-30</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">900億美元</span></div><div class="sub2"><span class="vs">vs 共識 約880億美元(sell side)</span></div><div class="mrow"><span class="k">EPS</span><span class="val">4.74</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">Azure下季度指引+45%,buy side預期僅41-42%;27 FCF保持正值;26 capex不變</span></div>
+ <div class="cview">「營收900億超越sell side約880億、Azure成長+43%超越buy side約+42%、Copilot席位達3,000萬超越buy side約2,500萬;未來租賃承諾金額從1,970億大增至3,290億」</div>
+</div>
+<div class="card" data-t="META" data-s="meta meta">
+ <div class="chead"><span class="sym">META</span><span class="nm">Meta</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 82 · 2026-07-30</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">608億美元</span></div><div class="sub2"><span class="vs">vs buyside 約610億美元</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">FY26 Capex從1,250-1,450億微幅上調至1,300-1,450億;Q3營收指引610-640億(中位數625億) vs buy side約630億(隱含廣告固定匯率成長約+24%)</span></div>
+ <div class="cview">「似乎有點令人失望;Q2營收608億未達buy side約610億、廣告營收成長+27%未達buy side約+29%,且營業費用小幅增加;扣除一次性罰款與遣散費(共36億)實際小幅超預期,並重申2026財年營業利益指引」</div>
+</div>
+<div class="card" data-t="LRCX" data-s="lrcx lam research/科林研發">
+ <div class="chead"><span class="sym">LRCX</span><span class="nm">Lam Research/科林研發</span>
+   <span class="badge s-henry">Q2</span></div>
+ <div class="qtag">Trace 82 · 2026-07-30</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">67.2億美元</span></div><div class="sub2"><span class="vs">vs 共識 66.8億美元</span></div><div class="mrow"><span class="k">EPS</span><span class="val">1.82</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">Q3營收指引81.0億 vs 市場預期僅71億左右;毛利率52% vs 市場預期50.4%;EPS 2.15</span></div>
+ <div class="cview">「這裡最重要的是指引全線超預期(Q3營收81億遠高於市場~71億);毛利率52%持續超越市場預期50.4%;中國營收占比略降至26%」</div>
+</div>
+<div class="card" data-t="FTNT" data-s="ftnt fortinet">
+ <div class="chead"><span class="sym">FTNT</span><span class="nm">Fortinet</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 82 · 2026-07-30</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">Q2 Billings 23.7億美元(+33%)</span></div><div class="sub2"><span class="vs">vs 共識 21.5億美元(billings)</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">Q3營收/Billings指引20.55億/23.0億;FY Billings指引中位數94.5億(全線超預期)</span></div>
+ <div class="cview">「成功beat &amp; raise;產品營收成長率+52%」</div>
+</div>
+<div class="card" data-t="STX" data-s="stx seagate">
+ <div class="chead"><span class="sym">STX</span><span class="nm">Seagate</span>
+   <span class="badge s-henry">Q4(FY26)</span></div>
+ <div class="qtag">Trace 81 · 2026-07-29</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">36.3億美元</span></div><div class="sub2"><span class="vs">vs buyside 36.5億美元</span></div><div class="mrow"><span class="k">EPS</span><span class="val">5.71</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">Q1營收41.0億(約持平於buy side高標);EPS 7.30(隱含毛利率指引約57%,高於buy side高標56%);Q4毛利率52.7% vs buy side 51.5-52%</span></div>
+ <div class="cview">「營收約略符合buy side,毛利率52.7%高於buy side;Q1隱含毛利率指引約57%高於buy side高標56%」</div>
+</div>
+<div class="card" data-t="TER" data-s="ter teradyne">
+ <div class="chead"><span class="sym">TER</span><span class="nm">Teradyne</span>
+   <span class="badge s-henry">Q2</span></div>
+ <div class="qtag">Trace 81 · 2026-07-29</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">13.3億美元</span></div><div class="sub2"><span class="vs">vs buyside 13億美元</span></div><div class="mrow"><span class="k">EPS</span><span class="val">2.47</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">Q3營收12-13億 vs buy side 11億;EPS 1.85-2.15</span></div>
+ <div class="cview">「營收超越buy side預期,Q3營收指引也超越buy side預期」</div>
+</div>
+<div class="card" data-t="KLAC" data-s="klac kla">
+ <div class="chead"><span class="sym">KLAC</span><span class="nm">KLA</span>
+   <span class="badge s-henry">Q4</span></div>
+ <div class="qtag">Trace 81 · 2026-07-29</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">36.6億美元</span></div><div class="sub2"><span class="vs">vs buyside 37.0億美元</span></div><div class="mrow"><span class="k">EPS</span><span class="val">1.05</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">Q1營收40.0億(略低於buy side 40.5億);毛利率62.5%;EPS 1.16;Q4毛利率62.4%</span></div>
+ <div class="cview">「營收略低於buy side預期,Q1營收指引也略低於buy side預期」</div>
+</div>
+<div class="card" data-t="F" data-s="f ford/福特">
+ <div class="chead"><span class="sym">F</span><span class="nm">Ford/福特</span>
+   <span class="badge s-henry">Q2</span></div>
+ <div class="qtag">Trace 81 · 2026-07-29</div>
+ <div class="mrow"><span class="k">EPS</span><span class="val">0.42(調整後) <span class=vs>vs 0.40(sell side)</span></span></div>
+ <div class="cview">「第二季EBIT 25億高於sell side 23億(主由F Credit及F Model e虧損收窄驅動);F Automotive EBIT 19億符合sell side;汽車部門自由現金流21億未達sell side 30億;EBIT強勁主要由更強淨定價與有利產品組合」</div>
+</div>
+<div class="card" data-t="VRT" data-s="vrt vertiv">
+ <div class="chead"><span class="sym">VRT</span><span class="nm">Vertiv</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 81 · 2026-07-29</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">32.7億美元</span></div><div class="sub2"><span class="vs">vs 共識 33.7億美元</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">第三季營收指引36.5-38.5億(中位數高於市場共識37.1億);調整後EPS 1.77-1.83(中位數1.80 vs 市場共識1.78)</span></div>
+ <div class="cview">「營收缺口管理層歸因暫時性供應鏈壅塞及超大規模部署日益增加的複雜度,而非需求疲軟;有機增長18%(長期目標20-22%),調整後營業利潤率上升410bps至22.6%」</div>
+</div>
+<div class="card" data-t="STM" data-s="stm 意法半導體/stmicro">
+ <div class="chead"><span class="sym">STM</span><span class="nm">意法半導體/STMicro</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 78 · 2026-07-23</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">34.87億美元</span></div><div class="sub2"><span class="vs">vs 共識 比市場共識高0.6%</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">Q3營收指引37億(比共識低2.3%,隱含+6.2%QoQ,低於正常季節性7.5%及buy side 10-12%);Q3毛利率37%(比共識高20bps);預計Q4營收超過40億(共識40.3億);2Q EBIT 2.69億(OM 7.7%)比共識高9.6%</span></div>
+ <div class="cview">「市場期望相當高,弱於預期的Q3指引掩蓋了Q4正面評論;buy side 2027 EPS落在3美元以上 vs sell side約2.8美元;本次財報已達某種de-risk作用,但若無催化劑,上行空間短期較缺乏」</div>
+</div>
+<div class="card" data-t="NOK" data-s="nok nokia/諾基亞">
+ <div class="chead"><span class="sym">NOK</span><span class="nm">Nokia/諾基亞</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 78 · 2026-07-23</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">48.2億歐元</span></div><div class="sub2"><span class="vs">vs 共識 大致符合市場共識(-0.1%)</span></div><div class="mrow"><span class="k">EPS</span><span class="val">0.07歐元(超出預期34.6%)</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">AI與雲端新增接單量達28億歐元(YoY翻倍以上),預期約半數將在未來12個月內轉化為營收</span></div>
+ <div class="cview">「營收大致符合但獲利能力顯著超越預期;EBIT 4.34億歐元超越市場共識15.6%、毛利率46.0%(高134bps);強勁AI接單、改善中的利潤率及再次大幅超越預期的EBIT,應能增強市場對NOK持續受益AI網路投資週期的信心」</div>
+</div>
+<div class="card" data-t="GOOGL" data-s="googl alphabet/google">
+ <div class="chead"><span class="sym">GOOGL</span><span class="nm">Alphabet/Google</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 78 · 2026-07-23</div>
+ <div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">2026全年資本支出指引上調至1,950-2,050億美元(先前預估1,800-1,900億);預期2027資本支出將顯著增加</span></div>
+ <div class="cview">「財報棒透了(GCP +82% YoY基本達到buy side預期高標),但市場疑慮落在資本支出;交出負50億自由現金流,並承認部分雲端營收來自TPU機架銷售;buy side對2027 capex 3,000-4,000億的預期大有人在」</div>
+</div>
+<div class="card" data-t="TXN" data-s="txn 德州儀器/texas instruments">
+ <div class="chead"><span class="sym">TXN</span><span class="nm">德州儀器/Texas Instruments</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 78 · 2026-07-23</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">$5.5B</span></div><div class="sub2"><span class="vs">vs buyside $5.4B(buy side bogey)</span></div><div class="mrow"><span class="k">EPS</span><span class="val">2.14(含每股$0.05一次性稅務利益)</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">Q3營收指引$5.65-6.15B, EPS $2.23-2.57(buy side bogey:Q3營收$5.95B/EPS$2.40-2.50/GM 61.5%)</span></div>
+ <div class="cview">「2Q營收$5.5B(+23%)高於公司指引區間及市場預期,毛利61%、毛利率季增340bps;財報與指引雖強,但未構成重大意外,市場可能仍質疑各終端能否支撐1Q至3Q合計約20%成長」</div>
+</div>
+<div class="card" data-t="GEV" data-s="gev ge vernova">
+ <div class="chead"><span class="sym">GEV</span><span class="nm">GE Vernova</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 78 · 2026-07-23</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">高於共識3%</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">燃氣新合約20GW(高於10-15GW指引);確定積壓由44GW增至53GW;電氣化訂單63.47億(相當於營收1.7倍)</span></div>
+ <div class="cview">「2Q26營收高於共識3%、調整後EBITDA低3%(差距源於風電及未分攤企業成本);電力與電氣化均優於預期;電氣化營收36.37億(有機+29%)、EBITDA 6.71億(率18.4%);1H26資料中心訂單逾50億(占電氣化總訂單35%以上)」</div>
+</div>
+<div class="card" data-t="ASML" data-s="asml 艾司摩爾/asml">
+ <div class="chead"><span class="sym">ASML</span><span class="nm">艾司摩爾/ASML</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 75 · 2026-07-17</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">93億歐元</span></div><div class="sub2"><span class="vs">vs 共識 較共識高4.85%</span></div><div class="mrow"><span class="k">EPS</span><span class="val">7.58歐元(高10%)</span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">Q3營收指引中值115億歐元(較Street高11%)、毛利率55-57%(高255bps,隱含EPS 10.68歐元、高25%);2026營收指引由360-400億升至430-450億、毛利率由51-53%升至55-57%;2Q毛利率54%(高205bps)</span></div>
+ <div class="cview">「全面優於預期並上調全年指引;EUV、非EUV及記憶體營收預期分別增長45%、25%及75%,中國約占2026營收20%」</div>
+</div>
+<div class="card" data-t="TSM" data-s="tsm 台積電/tsmc">
+ <div class="chead"><span class="sym">TSM</span><span class="nm">台積電/TSMC</span>
+   <span class="badge s-henry">2Q26</span></div>
+ <div class="qtag">Trace 74 · 2026-07-16</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">新台幣1.27兆元</span></div><div class="sub2"><span class="vs">vs 共識 1.267兆元</span></div><div class="mrow"><span class="k">EPS</span><span class="val">27.25元 <span class=vs>vs 24.1元</span></span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">(本段未給下季展望數字);毛利率67.7%(較上季+1.5pp) vs 彭博預期67.4%,未達買方約69%高標</span></div>
+ <div class="cview">「營收略高於市場預期、EPS亦優於預期;毛利率67.7%高於彭博67.4%但未達買方約69%高標(改善來自成本下降及產能利用率提高,部分被海外廠稀釋);HPC營收QoQ+20%、占比升至66%,N2首次貢獻3%,7nm及以下先進製程占77%」</div>
+</div>
+<div class="card" data-t="NXPI" data-s="nxpi 恩智浦/nxp">
+ <div class="chead"><span class="sym">NXPI</span><span class="nm">恩智浦/NXP</span>
+   <span class="badge s-henry">1Q26</span></div>
+ <div class="qtag">Trace 35 · 2026-04-29</div>
+ <div class="mrow"><span class="k">營收</span><span class="val">$3.181B</span></div><div class="sub2"><span class="vs">vs 共識 $3.153B(Street)</span></div><div class="mrow"><span class="k">EPS</span><span class="val">3.05 <span class=vs>vs 2.99(Street)</span></span></div><div class="mrow"><span class="k">展望/指引</span><span class="val sm gd">Q2營收指引$3.450B(+17.9%) vs Street $3.269B;EPS $3.50 vs $3.21;毛利率58.0% vs 57.6%</span></div>
+ <div class="cview">「營收與EPS均高於Street;direct order book轉強、distributor backlog改善,重申2027 target model(隱含CY26與CY27均需雙位數營收成長)。注:此為DB內最新一筆NXPI已報財報(Q1),Q2以後實際財報未在庫,較新僅有券商預覽」</div>
+</div>
+</div>
+
+<footer>Allen 數字取自 cover list（AMZN 用營業利益、PANW 用 FCF 故 EPS 留「—」；ASML/NOK 歐元、聯發科台幣，其餘美元；GOOG 2Q26 EPS 含未實現利得故 Beat% 偏高）。<br>
+Henry 數字為 Pentimetrics「The Trace」原文摘錄、標出處期號／日期；「市場預期」＝Bloomberg 共識，另附 buy side。數字一字不差、未明列者留空。<br>
+Allen 區每日重跑更新；Henry 區為精選快照。© Evan 投資工作區</footer>
 </div>
 <script>
-var sortState={};
 function pick(el){document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');flt();}
 function flt(){
   var q=document.getElementById('q').value.trim().toLowerCase();
   var s=document.querySelector('.chip.on').dataset.s;
-  document.querySelectorAll('#tb tbody tr').forEach(function(tr){
-    var okS=(s==='all'||tr.dataset.stance===s);
-    var txt=(tr.dataset.t+' '+tr.querySelector('.nm').textContent).toLowerCase();
-    var okQ=(!q||txt.indexOf(q)>=0);
-    tr.style.display=(okS&&okQ)?'':'none';
+  document.querySelectorAll('.card').forEach(function(c){
+    var okQ=(!q||c.dataset.s.indexOf(q)>=0);
+    // 立場篩選只作用於 Allen 卡（有 data-stance）；Henry 卡不受立場影響、只受搜尋
+    var okS=(s==='all'||!c.dataset.stance||c.dataset.stance===s);
+    c.style.display=(okQ&&okS)?'':'none';
   });
-}
-function sortby(key){
-  var tb=document.querySelector('#tb tbody');
-  var rows=[].slice.call(tb.querySelectorAll('tr'));
-  var dir=sortState[key]=(sortState[key]===1?-1:1);
-  rows.sort(function(a,b){
-    var va,vb;
-    if(key==='t'){va=a.dataset.t;vb=b.dataset.t;return dir*va.localeCompare(vb);}
-    va=parseFloat(a.dataset[key]);vb=parseFloat(b.dataset[key]);
-    return dir*((va||-1e9)-(vb||-1e9));
+  // 區塊全空時整段淡化
+  document.querySelectorAll('.grid').forEach(function(g){
+    var any=[].some.call(g.querySelectorAll('.card'),x=>x.style.display!=='none');
+    g.style.opacity=any?'1':'.4';
   });
-  rows.forEach(function(r){tb.appendChild(r);});
 }
 </script>
 </body></html>
