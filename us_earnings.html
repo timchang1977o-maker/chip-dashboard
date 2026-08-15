@@ -1,0 +1,514 @@
+<!doctype html><html lang="zh-Hant"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>美股財報區 · Cover List</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#eef1f5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="美股財報">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" href="favicon.ico">
+<style>
+:root{
+  --bg:#eef1f5; --panel:#fff; --ink:#1a2230; --muted:#6b7686; --hair:#e4e8ee;
+  --fill:#3d7bf0; --beat:#1f9d57; --miss:#d0342c; --gd:#8a6d1f;
+  --shadow:0 1px 2px rgba(20,30,50,.05),0 6px 20px rgba(20,30,50,.06);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0e1218; --panel:#161c26; --ink:#e8edf4; --muted:#8b97a8; --hair:#242c38;
+  --fill:#4d89ff; --beat:#25c274; --miss:#ff5a4d; --gd:#d9b45a;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+}}
+:root[data-theme="light"]{--bg:#eef1f5;--panel:#fff;--ink:#1a2230;--muted:#6b7686;--hair:#e4e8ee;--fill:#3d7bf0;--beat:#1f9d57;--miss:#d0342c;--gd:#8a6d1f;}
+:root[data-theme="dark"]{--bg:#0e1218;--panel:#161c26;--ink:#e8edf4;--muted:#8b97a8;--hair:#242c38;--fill:#4d89ff;--beat:#25c274;--miss:#ff5a4d;--gd:#d9b45a;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
+  -webkit-font-smoothing:antialiased;padding:16px 14px 40px}
+.wrap{max-width:1180px;margin:0 auto}
+.topnav{display:flex;gap:6px;margin:0 2px 14px;flex-wrap:wrap}
+.topnav a{font:600 13px var(--font);color:var(--muted);text-decoration:none;padding:7px 14px;
+  border-radius:10px;border:1px solid var(--hair);background:var(--panel);letter-spacing:.2px;
+  box-shadow:var(--shadow)}
+.topnav a.on{background:var(--fill);color:#fff;border-color:var(--fill)}
+h1{font-size:19px;margin:2px 2px 3px;letter-spacing:.3px}
+.sub{color:var(--muted);font-size:12.5px;margin:0 2px 14px}
+.sub b{color:var(--ink)}
+.kpis{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 14px}
+.kpi{background:var(--panel);border:1px solid var(--hair);border-radius:12px;padding:9px 14px;
+  box-shadow:var(--shadow)}
+.kpi .v{font-size:19px;font-weight:750}
+.kpi .l{font-size:11px;color:var(--muted)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 2px 10px}
+.bar input,.bar select{font:600 12.5px var(--font);color:var(--ink);background:var(--panel);
+  border:1px solid var(--hair);border-radius:9px;padding:7px 11px;box-shadow:var(--shadow)}
+.bar .chip{cursor:pointer;color:var(--muted);border:1px solid var(--hair);background:var(--panel);
+  border-radius:20px;padding:5px 12px;font:600 12px var(--font);box-shadow:var(--shadow)}
+.bar .chip.on{background:var(--fill);color:#fff;border-color:var(--fill)}
+.card{background:var(--panel);border:1px solid var(--hair);border-radius:14px;
+  box-shadow:var(--shadow);overflow:hidden}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:1050px;font-size:13px}
+thead th{position:sticky;top:0;background:var(--panel);z-index:2;text-align:right;
+  padding:9px 8px;border-bottom:2px solid var(--hair);color:var(--muted);font-size:11px;
+  font-weight:700;white-space:nowrap;cursor:pointer;user-select:none}
+thead th.l{text-align:left} thead th.grp{color:var(--fill)}
+thead th:hover{color:var(--ink)}
+tbody td{padding:9px 8px;border-bottom:1px solid var(--hair);text-align:right;white-space:nowrap}
+tbody tr:hover{background:rgba(61,123,240,.05)}
+.tk{text-align:left!important}
+.sym{font-weight:750;font-size:13.5px} .nm{color:var(--muted);font-size:11px;margin-left:7px}
+.n{font-variant-numeric:tabular-nums} .mut{color:var(--muted)}
+.q{color:var(--muted);font-size:12px;text-align:center!important}
+.u{font-size:9.5px;color:var(--muted);margin-left:2px;font-weight:600}
+.beat{color:var(--beat);font-weight:700} .miss{color:var(--miss);font-weight:700}
+.gd{color:var(--gd);font-size:11.5px}
+.pe{font-weight:700}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.s-bull{background:rgba(31,157,87,.14);color:var(--beat)}
+.s-bullmid{background:rgba(61,123,240,.14);color:var(--fill)}
+.s-neu{background:rgba(120,130,145,.16);color:var(--muted)}
+.s-bear{background:rgba(208,52,44,.14);color:var(--miss)}
+.s-watch{background:rgba(180,140,20,.16);color:var(--gd)}
+.grpr th{background:var(--bg)!important;border-bottom:1px solid var(--hair);padding:5px 8px;
+  font-size:10px;color:var(--muted);text-align:center;position:static;top:auto;cursor:default}
+footer{color:var(--muted);font-size:11.5px;text-align:center;margin-top:18px;line-height:1.7}
+</style></head><body><div class="wrap">
+<nav class="topnav"><a href="index.html">📊 籌碼總覽</a><a href="institutions.html">🏦 法人買賣超</a><a href="us_earnings.html" class="on">📈 美股財報</a></nav>
+<h1>📈 美股財報區</h1>
+<p class="sub">資料來源＝投資 <b>cover list</b> 試算表（韭菜王 Allen 每季財報模型：Allen 預估／Bloomberg 共識／實際結果／公司指引）。
+最新已公布季的實際值 vs 共識判 <span class="beat">Beat</span>／<span class="miss">Miss</span>；營收單位＝億（各檔原幣別）。更新於 <b>2026-08-15 13:15</b>。</p>
+<div class="kpis">
+ <div class="kpi"><div class="v">20</div><div class="l">覆蓋檔數</div></div>
+ <div class="kpi"><div class="v" style="color:var(--beat)">13</div><div class="l">Allen 看多</div></div>
+ <div class="kpi"><div class="v" style="color:var(--miss)">1</div><div class="l">Allen 偏空</div></div>
+ <div class="kpi"><div class="v">18<span style="font-size:12px;color:var(--muted)">/20</span></div><div class="l">最新季營收 Beat 共識</div></div>
+</div>
+<div class="bar">
+ <input id="q" placeholder="🔍 搜尋代號／名稱…" oninput="flt()">
+ <span class="chip on" data-s="all" onclick="pick(this)">全部</span>
+ <span class="chip" data-s="看多" onclick="pick(this)">看多</span>
+ <span class="chip" data-s="中性偏多" onclick="pick(this)">中性偏多</span>
+ <span class="chip" data-s="中性" onclick="pick(this)">中性</span>
+ <span class="chip" data-s="偏空" onclick="pick(this)">偏空</span>
+</div>
+<div class="card"><div class="scroll"><table id="tb">
+<thead>
+<tr class="grpr">
+  <th colspan="2"></th><th colspan="6" class="l">最新已公布季（實際 vs 共識）</th>
+  <th colspan="4" class="l">下一季預估</th><th colspan="2" class="l">年度 non-GAAP EPS</th><th colspan="2" class="l">估值</th>
+</tr>
+<tr>
+ <th class="l" onclick="sortby('t')">標的</th>
+ <th class="l">立場</th>
+ <th>季別</th>
+ <th onclick="sortby('beat')">實際營收</th>
+ <th>共識營收</th>
+ <th onclick="sortby('beat')">營收<br>Beat/Miss</th>
+ <th>實際 EPS</th>
+ <th>EPS<br>Beat/Miss</th>
+ <th>季別</th>
+ <th>Allen 營收</th>
+ <th>Allen EPS</th>
+ <th>公司指引<br>(營收)</th>
+ <th>FY26</th>
+ <th>FY27</th>
+ <th>股價</th>
+ <th onclick="sortby('pe')">PE<br>(本益比)</th>
+</tr>
+</thead>
+<tbody>
+<tr data-t="GOOG" data-stance="看多" data-pe="18.7624249" data-beat="2.9945062030899416">
+ <td class="tk"><span class="sym">GOOG</span><span class="nm">Alphabet</span></td>
+ <td><span class="badge s-bull">看多</span></td>
+ <td class="q">2Q26</td>
+ <td class="n">1,198.0<span class="u">億USD</span></td>
+ <td class="n mut">1,163.1</td>
+ <td class="n beat">▲3.0%</td>
+ <td class="n">9.11</td>
+ <td class="n beat">▲218.5%</td>
+ <td class="q">3Q26</td>
+ <td class="n">1,296.1</td>
+ <td class="n">3.10</td>
+ <td class="n gd">1,522.5</td>
+ <td class="n">20.94</td>
+ <td class="n">18.31</td>
+ <td class="n">343.54</td>
+ <td class="n pe">18.8</td>
+</tr>
+<tr data-t="AMZN" data-stance="看多" data-pe="-1" data-beat="1.9925058595636758">
+ <td class="tk"><span class="sym">AMZN</span><span class="nm">亞馬遜</span></td>
+ <td><span class="badge s-bull">看多</span></td>
+ <td class="q">2Q26</td>
+ <td class="n">2,006.1<span class="u">億USD</span></td>
+ <td class="n mut">1,966.9</td>
+ <td class="n beat">▲2.0%</td>
+ <td class="n">—</td>
+ <td class="n ">—</td>
+ <td class="q">3Q26</td>
+ <td class="n">2,075.6</td>
+ <td class="n">—</td>
+ <td class="n gd">197000~202000</td>
+ <td class="n">—</td>
+ <td class="n">—</td>
+ <td class="n">262.65</td>
+ <td class="n pe">—</td>
+</tr>
+<tr data-t="MSFT" data-stance="中性偏多" data-pe="24.86947791" data-beat="2.6247078273758717">
+ <td class="tk"><span class="sym">MSFT</span><span class="nm">微軟</span></td>
+ <td><span class="badge s-bullmid">中性偏多</span></td>
+ <td class="q">FY4Q26</td>
+ <td class="n">900.1<span class="u">億USD</span></td>
+ <td class="n mut">877.0</td>
+ <td class="n beat">▲2.6%</td>
+ <td class="n">4.74</td>
+ <td class="n beat">▲11.3%</td>
+ <td class="q">FY1Q27</td>
+ <td class="n">928.7</td>
+ <td class="n">4.84</td>
+ <td class="n gd">89850~90950</td>
+ <td class="n">16.65</td>
+ <td class="n">19.92</td>
+ <td class="n">495.40</td>
+ <td class="n pe">24.9</td>
+</tr>
+<tr data-t="META" data-stance="偏空" data-pe="18.7671015" data-beat="0.7356230428947841">
+ <td class="tk"><span class="sym">META</span><span class="nm">Meta</span></td>
+ <td><span class="badge s-bear">偏空</span></td>
+ <td class="q">2Q26</td>
+ <td class="n">608.0<span class="u">億USD</span></td>
+ <td class="n mut">603.6</td>
+ <td class="n beat">▲0.7%</td>
+ <td class="n">6.18</td>
+ <td class="n miss">▼14.0%</td>
+ <td class="q">3Q26</td>
+ <td class="n">639.0</td>
+ <td class="n">6.90</td>
+ <td class="n gd">61000~64000</td>
+ <td class="n">32.10</td>
+ <td class="n">31.43</td>
+ <td class="n">589.85</td>
+ <td class="n pe">18.8</td>
+</tr>
+<tr data-t="TSM" data-stance="中性" data-pe="19.72929199" data-beat="2.2327899702464293">
+ <td class="tk"><span class="sym">TSM</span><span class="nm">台積電 ADR</span></td>
+ <td><span class="badge s-neu">中性</span></td>
+ <td class="q">2Q26</td>
+ <td class="n">402.0<span class="u">億USD</span></td>
+ <td class="n mut">393.2</td>
+ <td class="n beat">▲2.2%</td>
+ <td class="n">4.31</td>
+ <td class="n beat">▲14.9%</td>
+ <td class="q">3Q26</td>
+ <td class="n">458.8</td>
+ <td class="n">4.40</td>
+ <td class="n gd">44,600~45,800</td>
+ <td class="n">17.00</td>
+ <td class="n">21.61</td>
+ <td class="n">426.35</td>
+ <td class="n pe">19.7</td>
+</tr>
+<tr data-t="MTK" data-stance="看多" data-pe="29.45910013" data-beat="3.748167842656036">
+ <td class="tk"><span class="sym">MTK</span><span class="nm">聯發科</span></td>
+ <td><span class="badge s-bull">看多</span></td>
+ <td class="q">2Q26</td>
+ <td class="n">1,521.8<span class="u">億TWD</span></td>
+ <td class="n mut">1,466.8</td>
+ <td class="n beat">▲3.7%</td>
+ <td class="n">15.28</td>
+ <td class="n beat">▲8.3%</td>
+ <td class="q">3Q26</td>
+ <td class="n">1,588.6</td>
+ <td class="n">14.56</td>
+ <td class="n gd">152200~159800</td>
+ <td class="n">69.93</td>
+ <td class="n">142.91</td>
+ <td class="n">4,210.00</td>
+ <td class="n pe">29.5</td>
+</tr>
+<tr data-t="ASML" data-stance="看多" data-pe="31.05034518" data-beat="5.652469415496153">
+ <td class="tk"><span class="sym">ASML</span><span class="nm">艾司摩爾</span></td>
+ <td><span class="badge s-bull">看多</span></td>
+ <td class="q">2Q26</td>
+ <td class="n">93.3<span class="u">億EUR</span></td>
+ <td class="n mut">88.3</td>
+ <td class="n beat">▲5.7%</td>
+ <td class="n">7.58</td>
+ <td class="n beat">▲11.0%</td>
+ <td class="q">3Q26</td>
+ <td class="n">116.3</td>
+ <td class="n">9.71</td>
+ <td class="n gd">115.0</td>
+ <td class="n">36.81</td>
+ <td class="n">—</td>
+ <td class="n">1,844.08</td>
+ <td class="n pe">31.1</td>
+</tr>
+<tr data-t="AMD" data-stance="看多" data-pe="32.41272842" data-beat="1.6835610401057632">
+ <td class="tk"><span class="sym">AMD</span><span class="nm">超微 AMD</span></td>
+ <td><span class="badge s-bull">看多</span></td>
+ <td class="q">2Q26</td>
+ <td class="n">115.4<span class="u">億USD</span></td>
+ <td class="n mut">113.5</td>
+ <td class="n beat">▲1.7%</td>
+ <td class="n">1.66</td>
+ <td class="n beat">▲3.1%</td>
+ <td class="q">3Q26</td>
+ <td class="n">134.1</td>
+ <td class="n">2.04</td>
+ <td class="n gd">12700~13300</td>
+ <td class="n">8.47</td>
+ <td class="n">15.87</td>
+ <td class="n">514.39</td>
+ <td class="n pe">32.4</td>
+</tr>
+<tr data-t="TER" data-stance="看多" data-pe="29.82834758" data-beat="9.382716049382722">
+ <td class="tk"><span class="sym">TER</span><span class="nm">Teradyne</span></td>
+ <td><span class="badge s-bull">看多</span></td>
+ <td class="q">2Q26</td>
+ <td class="n">13.3<span class="u">億USD</span></td>
+ <td class="n mut">12.2</td>
+ <td class="n beat">▲9.4%</td>
+ <td class="n">2.47</td>
+ <td class="n beat">▲20.5%</td>
+ <td class="q">3Q26</td>
+ <td class="n">12.9</td>
+ <td class="n">2.07</td>
+ <td class="n gd">1200~1300</td>
+ <td class="n">9.26</td>
+ <td class="n">14.04</td>
+ <td class="n">418.79</td>
+ <td class="n pe">29.8</td>
+</tr>
+<tr data-t="VRT" data-stance="中性偏多" data-pe="30.51298027" data-beat="-3.1074282332050895">
+ <td class="tk"><span class="sym">VRT</span><span class="nm">Vertiv</span></td>
+ <td><span class="badge s-bullmid">中性偏多</span></td>
+ <td class="q">2Q26</td>
+ <td class="n">32.7<span class="u">億USD</span></td>
+ <td class="n mut">33.8</td>
+ <td class="n miss">▼3.1%</td>
+ <td class="n">1.52</td>
+ <td class="n beat">▲8.6%</td>
+ <td class="q">3Q26</td>
+ <td class="n">38.6</td>
+ <td class="n">1.85</td>
+ <td class="n gd">3650~3850</td>
+ <td class="n">6.83</td>
+ <td class="n">—</td>
+ <td class="n">293.84</td>
+ <td class="n pe">30.5</td>
+</tr>
+<tr data-t="ONTO" data-stance="看多" data-pe="39.4423305588585" data-beat="4.892966360856277">
+ <td class="tk"><span class="sym">ONTO</span><span class="nm">Onto</span></td>
+ <td><span class="badge s-bull">看多</span></td>
+ <td class="q">2Q26</td>
+ <td class="n">3.4<span class="u">億USD</span></td>
+ <td class="n mut">3.3</td>
+ <td class="n beat">▲4.9%</td>
+ <td class="n">1.93</td>
+ <td class="n beat">▲12.9%</td>
+ <td class="q">3Q26</td>
+ <td class="n">4.0</td>
+ <td class="n">2.41</td>
+ <td class="n gd">380~400</td>
+ <td class="n">8.41</td>
+ <td class="n">13.44</td>
+ <td class="n">331.71</td>
+ <td class="n pe">39.4</td>
+</tr>
+<tr data-t="LITE" data-stance="看多" data-pe="22.04045693" data-beat="1.8218623481781382">
+ <td class="tk"><span class="sym">LITE</span><span class="nm">Lumentum</span></td>
+ <td><span class="badge s-bull">看多</span></td>
+ <td class="q">FY4Q26</td>
+ <td class="n">10.1<span class="u">億USD</span></td>
+ <td class="n mut">9.9</td>
+ <td class="n beat">▲1.8%</td>
+ <td class="n">3.23</td>
+ <td class="n beat">▲9.1%</td>
+ <td class="q">FY1Q27</td>
+ <td class="n">12.9</td>
+ <td class="n">5.19</td>
+ <td class="n gd">1225~1275</td>
+ <td class="n">25.88</td>
+ <td class="n">42.02</td>
+ <td class="n">926.14</td>
+ <td class="n pe">22.0</td>
+</tr>
+<tr data-t="CLS" data-stance="看多" data-pe="13.57576985" data-beat="7.014347529036669">
+ <td class="tk"><span class="sym">CLS</span><span class="nm">Celestica</span></td>
+ <td><span class="badge s-bull">看多</span></td>
+ <td class="q">2Q26</td>
+ <td class="n">47.0<span class="u">億USD</span></td>
+ <td class="n mut">43.9</td>
+ <td class="n beat">▲7.0%</td>
+ <td class="n">2.54</td>
+ <td class="n beat">▲10.0%</td>
+ <td class="q">3Q26</td>
+ <td class="n">55.1</td>
+ <td class="n">3.05</td>
+ <td class="n gd">5250~5550</td>
+ <td class="n">11.15</td>
+ <td class="n">11.30</td>
+ <td class="n">335.05</td>
+ <td class="n pe">13.6</td>
+</tr>
+<tr data-t="GLW" data-stance="中性" data-pe="35.16737288" data-beat="2.3547202419529123">
+ <td class="tk"><span class="sym">GLW</span><span class="nm">康寧 Corning</span></td>
+ <td><span class="badge s-neu">中性</span></td>
+ <td class="q">2Q26</td>
+ <td class="n">47.4<span class="u">億USD</span></td>
+ <td class="n mut">46.3</td>
+ <td class="n beat">▲2.4%</td>
+ <td class="n">0.78</td>
+ <td class="n beat">▲2.6%</td>
+ <td class="q">3Q26</td>
+ <td class="n">52.7</td>
+ <td class="n">0.96</td>
+ <td class="n gd">4900~5000</td>
+ <td class="n">3.34</td>
+ <td class="n">—</td>
+ <td class="n">165.99</td>
+ <td class="n pe">35.2</td>
+</tr>
+<tr data-t="NOK" data-stance="看多" data-pe="19.21428571" data-beat="-0.1451679800912431">
+ <td class="tk"><span class="sym">NOK</span><span class="nm">Nokia</span></td>
+ <td><span class="badge s-bull">看多</span></td>
+ <td class="q">2Q26</td>
+ <td class="n">48.1<span class="u">億EUR</span></td>
+ <td class="n mut">48.2</td>
+ <td class="n miss">▼0.1%</td>
+ <td class="n">0.07</td>
+ <td class="n beat">▲40.0%</td>
+ <td class="q">3Q26</td>
+ <td class="n">51.6</td>
+ <td class="n">0.10</td>
+ <td class="n gd">66.5</td>
+ <td class="n">0.38</td>
+ <td class="n">0.48</td>
+ <td class="n">10.76</td>
+ <td class="n pe">19.2</td>
+</tr>
+<tr data-t="COHR" data-stance="看多" data-pe="30.11367837" data-beat="1.5168539325842723">
+ <td class="tk"><span class="sym">COHR</span><span class="nm">Coherent</span></td>
+ <td><span class="badge s-bull">看多</span></td>
+ <td class="q">FY3Q26</td>
+ <td class="n">18.1<span class="u">億USD</span></td>
+ <td class="n mut">17.8</td>
+ <td class="n beat">▲1.5%</td>
+ <td class="n">1.41</td>
+ <td class="n beat">▲0.7%</td>
+ <td class="q">FY4Q26</td>
+ <td class="n">20.2</td>
+ <td class="n">1.77</td>
+ <td class="n gd">1910~2050</td>
+ <td class="n">5.63</td>
+ <td class="n">10.82</td>
+ <td class="n">325.83</td>
+ <td class="n pe">30.1</td>
+</tr>
+<tr data-t="AMAT" data-stance="看多" data-pe="30.37005988" data-beat="3.075319259838416">
+ <td class="tk"><span class="sym">AMAT</span><span class="nm">應用材料</span></td>
+ <td><span class="badge s-bull">看多</span></td>
+ <td class="q">FY2Q26</td>
+ <td class="n">79.1<span class="u">億USD</span></td>
+ <td class="n mut">76.7</td>
+ <td class="n beat">▲3.1%</td>
+ <td class="n">2.86</td>
+ <td class="n beat">▲7.1%</td>
+ <td class="q">FY3Q26</td>
+ <td class="n">92.0</td>
+ <td class="n">3.58</td>
+ <td class="n gd">8450~9450</td>
+ <td class="n">12.58</td>
+ <td class="n">16.70</td>
+ <td class="n">507.18</td>
+ <td class="n pe">30.4</td>
+</tr>
+<tr data-t="AVGO" data-stance="中性" data-pe="18.64278937" data-beat="0.5529118513482922">
+ <td class="tk"><span class="sym">AVGO</span><span class="nm">博通 Broadcom</span></td>
+ <td><span class="badge s-neu">中性</span></td>
+ <td class="q">FY2Q26</td>
+ <td class="n">221.9<span class="u">億USD</span></td>
+ <td class="n mut">220.7</td>
+ <td class="n beat">▲0.6%</td>
+ <td class="n">2.44</td>
+ <td class="n beat">▲2.1%</td>
+ <td class="q">FY3Q26</td>
+ <td class="n">297.5</td>
+ <td class="n">3.35</td>
+ <td class="n gd">294.0</td>
+ <td class="n">11.98</td>
+ <td class="n">21.08</td>
+ <td class="n">392.99</td>
+ <td class="n pe">18.6</td>
+</tr>
+<tr data-t="NVDA" data-stance="看多" data-pe="16.37527273" data-beat="3.513222144714323">
+ <td class="tk"><span class="sym">NVDA</span><span class="nm">輝達 NVIDIA</span></td>
+ <td><span class="badge s-bull">看多</span></td>
+ <td class="q">FY1Q27</td>
+ <td class="n">816.1<span class="u">億USD</span></td>
+ <td class="n mut">788.5</td>
+ <td class="n beat">▲3.5%</td>
+ <td class="n">1.87</td>
+ <td class="n beat">▲6.2%</td>
+ <td class="q">FY2Q27</td>
+ <td class="n">935.1</td>
+ <td class="n">2.12</td>
+ <td class="n gd">891.8</td>
+ <td class="n">8.96</td>
+ <td class="n">13.75</td>
+ <td class="n">225.16</td>
+ <td class="n pe">16.4</td>
+</tr>
+<tr data-t="CIEN" data-stance="追蹤" data-pe="41.42705314" data-beat="4.246848042468487">
+ <td class="tk"><span class="sym">CIEN</span><span class="nm">Ciena</span></td>
+ <td><span class="badge s-watch">追蹤</span></td>
+ <td class="q">FY2Q26</td>
+ <td class="n">15.7<span class="u">億USD</span></td>
+ <td class="n mut">15.1</td>
+ <td class="n beat">▲4.2%</td>
+ <td class="n">1.64</td>
+ <td class="n beat">▲12.3%</td>
+ <td class="q">FY3Q26</td>
+ <td class="n">16.6</td>
+ <td class="n">1.76</td>
+ <td class="n gd">16.2</td>
+ <td class="n">6.61</td>
+ <td class="n">—</td>
+ <td class="n">428.77</td>
+ <td class="n pe">41.4</td>
+</tr>
+</tbody></table></div></div>
+<footer>數字一字不差取自 cover list（韭菜王 Allen 模型）。營收＝百萬換算億、各檔原幣別（ASML／NOK 歐元、聯發科 台幣，其餘美元）。<br>
+AMZN 因模型用營業利益、PANW 用 FCF，此處 EPS 欄留「—」。「待公布」＝該季尚未發財報。PE＝股價 ÷ cover list 底部估值列 EPS（各檔依該分頁設定，多為 FY26）。<br>
+本頁為 cover list 快照，每次重跑 build_us_earnings.py 更新。© Evan 投資工作區</footer>
+</div>
+<script>
+var sortState={};
+function pick(el){document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');flt();}
+function flt(){
+  var q=document.getElementById('q').value.trim().toLowerCase();
+  var s=document.querySelector('.chip.on').dataset.s;
+  document.querySelectorAll('#tb tbody tr').forEach(function(tr){
+    var okS=(s==='all'||tr.dataset.stance===s);
+    var txt=(tr.dataset.t+' '+tr.querySelector('.nm').textContent).toLowerCase();
+    var okQ=(!q||txt.indexOf(q)>=0);
+    tr.style.display=(okS&&okQ)?'':'none';
+  });
+}
+function sortby(key){
+  var tb=document.querySelector('#tb tbody');
+  var rows=[].slice.call(tb.querySelectorAll('tr'));
+  var dir=sortState[key]=(sortState[key]===1?-1:1);
+  rows.sort(function(a,b){
+    var va,vb;
+    if(key==='t'){va=a.dataset.t;vb=b.dataset.t;return dir*va.localeCompare(vb);}
+    va=parseFloat(a.dataset[key]);vb=parseFloat(b.dataset[key]);
+    return dir*((va||-1e9)-(vb||-1e9));
+  });
+  rows.forEach(function(r){tb.appendChild(r);});
+}
+</script>
+</body></html>

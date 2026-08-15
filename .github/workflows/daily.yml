@@ -44,11 +44,20 @@ jobs:
           python dashboard/institution_tracker.py
           python build_page.py
 
+      # 美股財報區：從投資 cover list（link-可讀）抓每檔財報預測數字重畫 us_earnings.html。
+      # 容錯：sheet 匿名端點偶爾 404／網路失敗時不擋主 pipeline，保留前一版。
+      - name: Rebuild US earnings page from cover list
+        env:
+          TZ: Asia/Taipei
+        run: |
+          pip install --quiet openpyxl
+          python build_us_earnings.py || echo "::warning::us_earnings build skipped (cover list fetch failed)"
+
       - name: Commit + push（觸發 Pages 重新部署）
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html institutions.html \
+          git add index.html institutions.html us_earnings.html \
                   "chip_reports/籌碼儀表板.html" \
                   "chip_reports/籌碼儀表板_artifact.html" \
                   "chip_reports/法人買賣超.html" \

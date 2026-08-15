@@ -45,7 +45,8 @@ PAGES = [
 ]
 
 TABS = [("index.html", "chips", "📊 籌碼總覽"),
-        ("institutions.html", "inst", "🏦 法人買賣超")]
+        ("institutions.html", "inst", "🏦 法人買賣超"),
+        ("us_earnings.html", "us", "📈 美股財報")]
 
 
 def nav_html(current):
