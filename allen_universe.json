@@ -1,353 +1,353 @@
 [
-  {
-    "ticker": "AAPL",
-    "name": "蘋果",
-    "category": "M7",
-    "stance": "中性",
-    "view": "FY3Q26 毛利率 50.1% 亮眼但 F4Q26 因記憶體成本上升毛利率降至 47.5~48.5%、iPhone 增速砍至 +14~16%，財報當日 -7%",
-    "src_date": "2026/08/11",
-    "note": "分類 sheet M7 欄"
-  },
-  {
-    "ticker": "MSFT",
-    "name": "微軟",
-    "category": "M7",
-    "stance": "中性偏多",
-    "view": "由中性轉正：Azure YoY +43% 受惠 GB300，Copilot 單季淨增 1000 萬席次證明 AI ROI，RPO 6780 億扣 OpenAI 仍 +25%",
-    "src_date": "2026/07/31",
-    "note": "分類 sheet M7 欄"
-  },
-  {
-    "ticker": "TSLA",
-    "name": "特斯拉",
-    "category": "M7",
-    "stance": "觀察",
-    "view": "交車 48.1 萬創近兩年最佳但利潤率崩壞：OPM 僅 1.4%、EPS 0.33 低於共識、FCF 轉負貫穿 2027；重申對比 S&P500 暫不具 Alpha",
-    "src_date": "2026/07/25",
-    "note": "分類 sheet M7 欄"
-  },
-  {
-    "ticker": "NVDA",
-    "name": "輝達",
-    "category": "M7",
-    "stance": "中性",
-    "view": "Vera CPU 200 億獨立營收指引或成第 2 條營收 S 曲線、Networking YoY 近 +300%，但 GPU 本業被 TPU/Trainium 侵蝕，Forward PE 25~28x",
-    "src_date": "2026/05/22",
-    "note": "分類 sheet M7 欄"
-  },
-  {
-    "ticker": "AMZN",
-    "name": "亞馬遜",
-    "category": "M7",
-    "stance": "看多",
-    "view": "AWS YoY +37% 大超共識、積壓訂單 QoQ +36% 至 4960 億、AI ARR>250 億；全年 CAPEX 上修至 2200 億；3Q26 指引小低於共識非需求轉弱",
-    "src_date": "2026/08/03",
-    "note": "分類 sheet M7 欄"
-  },
-  {
-    "ticker": "META",
-    "name": "Meta",
-    "category": "M7",
-    "stance": "偏空",
-    "view": "財報日跌約 8%：3Q26 營收指引中值 625 億低於共識、OPM 降至 31%，提高 OPEX/CAPEX 卻未談 AI ROI；2027 資本密集度上看約 60%",
-    "src_date": "2026/08/02",
-    "note": "分類 sheet M7 欄"
-  },
-  {
-    "ticker": "GOOG",
-    "name": "Google",
-    "category": "M7",
-    "stance": "看多",
-    "view": "GCP YoY +82% 觸 buyside 高端、積壓訂單 5140 億 YoY +385%；CAPEX 年內二度上修至 1950~2050 億但 FCF 轉負；首釋 MRVL 完整模型",
-    "src_date": "2026/07/23",
-    "note": "分類 sheet M7 欄"
-  },
-  {
-    "ticker": "TSM",
-    "name": "台積電",
-    "category": "Semi",
-    "stance": "看多→中性",
-    "view": "2Q26 Beat & Raise＋CAPEX 上修至 600~640 億，但毛利率低於 Buyside、3Q26 指引僅 65~67%；Allen 態度首度轉中性、只願給 20~21 倍",
-    "src_date": "2026/07/17",
-    "note": "分類 sheet Semi 欄"
-  },
-  {
-    "ticker": "AVGO",
-    "name": "博通",
-    "category": "Semi",
-    "stance": "看空",
-    "view": "管理層首承 Google 多元採購：TPUv9 Pumafish 取消、2027 AVGO 650 萬顆 vs MTK 400 萬顆；營收 EPS 走高但毛利率下滑不可逆，估值上限約 22x",
-    "src_date": "2026/06/05",
-    "note": "分類 sheet Semi 欄"
-  },
-  {
-    "ticker": "CLS",
-    "name": "Celestica",
-    "category": "Semi",
-    "stance": "看多",
-    "view": "2Q26 Beat＋雙重上修並意外提早給 2027 指引（營收 YoY>65%）；三引擎 TPUv7＋800G/1.6T Switch＋OpenAI ASIC",
-    "src_date": "2026/07/29",
-    "note": "分類 sheet Semi 欄"
-  },
-  {
-    "ticker": "MU",
-    "name": "美光",
-    "category": "Semi",
-    "stance": "看多",
-    "view": "FY3Q26 無懈可擊：營收 414.56 億、毛利率 84.9%、EPS 25.11 全面超共識；RPO 1000 億打開能見度、估值由 PB 轉 PE（給 8~10x）",
-    "src_date": "2026/06/26",
-    "note": "分類 sheet Semi 欄"
-  },
-  {
-    "ticker": "MTK",
-    "name": "聯發科",
-    "category": "Semi",
-    "stance": "看多",
-    "view": "營收 1521.83 億、EPS 15.28 超預期；連 2 季上修 2026 ASIC 營收>20 億美元、2027 市占 15~20%＝120~160 億美元、4 個 TPU 專案",
-    "src_date": "2026/08/02",
-    "note": "sheet 2454-TW＝聯發科，合為 MTK（對齊 cover list）；分類 sheet Semi 欄"
-  },
-  {
-    "ticker": "AMD",
-    "name": "超微",
-    "category": "Semi",
-    "stance": "看多（短線警示）",
-    "view": "營收 EPS beat；上修 TAM（AI GPU 2030 年 1.4 兆）、MI455/Helios 3Q26 出貨；惟 3Q26 毛利率指引 56% 低於 Buyside 57%、當日 -7%",
-    "src_date": "2026/08/06",
-    "note": "分類 sheet Semi 欄"
-  },
-  {
-    "ticker": "CRDO",
-    "name": "Credo",
-    "category": "Semi",
-    "stance": null,
-    "view": null,
-    "src_date": null,
-    "note": "sheet-only：分類 sheet Semi 欄，kb 無此檔"
-  },
-  {
-    "ticker": "MRVL",
-    "name": "Marvell",
-    "category": "Semi",
-    "stance": "正面（未給模型）",
-    "view": "Channel check 確定拿下 Google TPU v9.5/v10 第三供應商（產線代號 TIA）＋手握 Google 四個專案；搶 AVGO 大頭毛利、非 MTK",
-    "src_date": "2026/07/02",
-    "note": "分類 sheet Semi 欄"
-  },
-  {
-    "ticker": "STM",
-    "name": "意法半導體",
-    "category": "Semi",
-    "stance": "看好題材、尚未建模（未納正式覆蓋）",
-    "view": "喜歡題材、看好矽光/CPO(Pluggable 製造端)＋車用工業復甦＋LEO 衛星三主線，但尚未建模、未納正式財報覆蓋；二選一偏好英飛凌/IFNNY/WOLF",
-    "src_date": "2026/06/16",
-    "note": "kb-only；category=Semi（車用 IDM cluster ON/STM/NXPI＋矽光製造端）。kb 有 STM.md 但未列入 INDEX 個股表，stance/view/date 取自 STM.md（整理日 2026/06/16）非 INDEX"
-  },
-  {
-    "ticker": "ASML",
-    "name": "艾司摩爾",
-    "category": "WFE",
-    "stance": "看多",
-    "view": "2Q26 Beat & Raise、2026 全年營收指引大砍上修至 430~450 億歐元、毛利率 54~55%；官方上修 27/28 Low-NA EUV 產能各 +30%",
-    "src_date": "2026/07/15",
-    "note": "分類 sheet WFE 欄"
-  },
-  {
-    "ticker": "AMAT",
-    "name": "應用材料",
-    "category": "WFE",
-    "stance": "看多",
-    "view": "5 大客戶 CAPEX 2026 年 2010 億（YoY+57%）、2027 年 3050 億（YoY+52%），無塵室不足只是遞延非取消，FY3Q26 指引大超共識",
-    "src_date": "2026/05/18",
-    "note": "分類 sheet WFE 欄"
-  },
-  {
-    "ticker": "ONTO",
-    "name": "Onto Innovation",
-    "category": "WFE",
-    "stance": "看多",
-    "view": "2Q26 Beat & Raise：營收/EPS/毛利率超共識、積壓訂單創高 11 億；G5 上修 2026 出貨 40~50→50~70 台、先進封裝全年成長 50%→80%",
-    "src_date": "2026/08/13",
-    "note": "分類 sheet WFE 欄"
-  },
-  {
-    "ticker": "TER",
-    "name": "Teradyne",
-    "category": "WFE",
-    "stance": "看多",
-    "view": "Beat & Raise：營收 EPS 毛利率超共識；2026 記憶體測試 TAM 由 +10~15% 大幅上修至 >40%；第二家 ASIC 客戶（研判 Google TPU）近量產",
-    "src_date": "2026/08/04",
-    "note": "分類 sheet WFE 欄"
-  },
-  {
-    "ticker": "CIEN",
-    "name": "Ciena",
-    "category": "Optical",
-    "stance": "看多",
-    "view": "FY2Q26 Beat & Raise：營收 15.71 億 YoY+40%、EPS 1.64 大超共識；上修 TAM 至 2029 翻倍 500 億；財報後重挫 14% 是預期重置",
-    "src_date": "2026/06/08",
-    "note": "分類 sheet Optical 欄"
-  },
-  {
-    "ticker": "COHR",
-    "name": "Coherent",
-    "category": "Optical",
-    "stance": "看多",
-    "view": "Backlog 創高、LTA 簽至 CY2030 需求極強，但 InP 基板供給限制壓營收；6 吋 InP 規模化推 EPS 是長期敘事（效益可能 2028 年後）",
-    "src_date": "2026/05/10",
-    "note": "分類 sheet Optical 欄"
-  },
-  {
-    "ticker": "FN",
-    "name": "Fabrinet",
-    "category": "Optical",
-    "stance": "中性",
-    "view": "EML 缺料壓制 Datacom（YoY 僅 +4%）、模型未上修且 FY2027 與共識已無預期差；中期看好 OCS/DCI/HPC/CPO，催化為擴產超預期",
-    "src_date": "2026/05/11",
-    "note": "分類 sheet Optical 欄"
-  },
-  {
-    "ticker": "LITE",
-    "name": "Lumentum",
-    "category": "Optical",
-    "stance": "看多",
-    "view": "FY4Q26 營收合預期、non-GAAP EPS 3.23 優於共識；FY1Q27 營收中值約 12.5 億 QoQ +25%；NPO 成 CPO 前過渡方案、能見度延伸至 CY2028",
-    "src_date": "2026/08/14",
-    "note": "分類 sheet Optical 欄"
-  },
-  {
-    "ticker": "KEYS",
-    "name": "Keysight",
-    "category": "Optical",
-    "stance": "看多",
-    "view": "高階光取樣示波器龍頭（市佔 55~60%）吃 800G/1.6T 測試升級潮，已打入 TSM COUPE 平台；最大風險為 OE 測試需求不足",
-    "src_date": "2026/05/24",
-    "note": "分類 sheet Optical 欄"
-  },
-  {
-    "ticker": "NOK",
-    "name": "諾基亞",
-    "category": "Optical",
-    "stance": "看多",
-    "view": "2Q26 新接訂單單季 28 億歐元 QoQ +180% 創高、B/B 升至 2.0，但未上修全年財測致股價跌 5%；分得 48.6 億美元 DCI 訂單、6 吋 InP 報價 YoY +70%",
-    "src_date": "2026/07/27",
-    "note": "分類 sheet Optical 欄"
-  },
-  {
-    "ticker": "GLW",
-    "name": "康寧",
-    "category": "Optical",
-    "stance": "中性偏多",
-    "view": "2Q26 雙超預期但 3Q26 指引低於共識、當日重挫 12%；Allen 判弱指引係供給限制非需求；漲價主題最實、循環延續至 2027",
-    "src_date": "2026/07/30",
-    "note": "分類 sheet Optical 欄"
-  },
-  {
-    "ticker": "NET",
-    "name": "Cloudflare",
-    "category": "Security",
-    "stance": "中性偏多",
-    "view": "2Q26 營收 6.96 億 YoY +36% 超共識、non-GAAP 毛利率 73% 持平趨穩為最大驚喜，Workers 單季暴增 200 萬活躍帳戶；唯 2028 EV/Sales 約 23 倍偏高",
-    "src_date": "2026/08/10",
-    "note": "分類 sheet Security 欄"
-  },
-  {
-    "ticker": "PANW",
-    "name": "Palo Alto Networks",
-    "category": "Security",
-    "stance": "看多",
-    "view": "Beat & Raise 且有機 ARR/RPO 潛在加速，平台化＋CyberArk/Chronosphere 整合站位佳，AI Coding 新競爭者數年內難撼動",
-    "src_date": "2026/06/03",
-    "note": "分類 sheet Security 欄"
-  },
-  {
-    "ticker": "CRWD",
-    "name": "CrowdStrike",
-    "category": "Security",
-    "stance": null,
-    "view": null,
-    "src_date": null,
-    "note": "sheet-only：分類 sheet Security 欄，kb 無此檔"
-  },
-  {
-    "ticker": "APP",
-    "name": "AppLovin",
-    "category": "ADs",
-    "stance": "偏空",
-    "view": "2Q26 AXON 模型迭代連續數季低於預期、營收低於共識與財測中值，遊戲廣告 QoQ 僅 +2% vs Unity +18%、ROAS 被 Unity 反超；本季後停止覆蓋 APP",
-    "src_date": "2026/08/12",
-    "note": "分類 sheet ADs 欄"
-  },
-  {
-    "ticker": "PLTR",
-    "name": "Palantir",
-    "category": "Tech",
-    "stance": "看多",
-    "view": "由中性偏空轉向：美國商業營收 YoY +150% 創史上最高、引入 ACN/EPAM 補交付弱點；全年指引上修至 81.58 億；惟仍交易 2027 EV/Sales 約 30 倍",
-    "src_date": "2026/08/07",
-    "note": "分類 sheet Tech 欄"
-  },
-  {
-    "ticker": "ORCL",
-    "name": "甲骨文",
-    "category": "Tech",
-    "stance": "中性偏多",
-    "view": "FY4Q26：RPO 6380 億 YoY+363% 創高但 FY27 營收指引維持 900 億未上修；股價重挫 10% 主因再籌 400 億債＋股稀釋；Allen 給 17~18x Forward PE",
-    "src_date": "2026/06/12",
-    "note": "分類 sheet Tech 欄"
-  },
-  {
-    "ticker": "BE",
-    "name": "Bloom Energy",
-    "category": "AIDC",
-    "stance": "中性偏多",
-    "view": "再度 Beat & Raise：營收 EBITDA 大超共識、全年指引上修營收 39~42 億、OPM 中值升至 21%；唯 2030 EV/調整後 EBITDA 約 20 倍短期偏高",
-    "src_date": "2026/08/05",
-    "note": "分類 sheet AIDC(electricity) 欄"
-  },
-  {
-    "ticker": "VRT",
-    "name": "Vertiv",
-    "category": "AIDC",
-    "stance": "中性偏多",
-    "view": "2Q26 執行力少見失誤致營收 miss、當日 -17%，但 non-GAAP EPS 1.52 beat、上修全年指引；META 400V HVDC 訂單約 8 億；Allen 判短期現象已 de-risk",
-    "src_date": "2026/08/09",
-    "note": "分類 sheet AIDC(electricity) 欄"
-  },
-  {
-    "ticker": "F",
-    "name": "福特",
-    "category": "其他",
-    "stance": "看多",
-    "view": "福特能源 BESS 毛利率 25% 遠高於造車 9%，2028 年增量淨利約 10%，毛利率改善預期先行可能帶來提前 re-rate",
-    "src_date": "2026/05/31",
-    "note": "kb-only；不在分類 sheet。歸類其他(車廠/儲能 BESS)，非現有主題可涵蓋"
-  },
-  {
-    "ticker": "KTOS",
-    "name": "Kratos",
-    "category": "其他",
-    "stance": "看多",
-    "view": "Book-to-bill 升至 1.6、Beat & Raise 驗證政府訂單確定性，靶彈/無人機/太空三成長曲線契合美國國防支出擴張",
-    "src_date": "2026/05/26",
-    "note": "kb-only；不在分類 sheet。歸類其他(國防)，非現有主題可涵蓋"
-  },
-  {
-    "ticker": "MRAAY",
-    "name": "村田",
-    "category": "其他",
-    "stance": "看多",
-    "view": "村田/MLCC：AI 伺服器排擠傳統產能驅動 MLCC 全面漲價（村田漲價函均幅 34%），趨勢或延續至 2027 可能超越 Sellside；買法偏好日股 6981",
-    "src_date": "2026/06/16",
-    "note": "kb-only；不在分類 sheet。歸類其他(被動元件/MLCC)，非現有主題可涵蓋"
-  },
-  {
-    "ticker": "BB",
-    "name": "BlackBerry",
-    "category": "其他",
-    "stance": "看多(早期)",
-    "view": "Physical AI 作業系統押注：QNX 為全球第一大硬實時 OS，關鍵題材是與 NVIDIA IGX Thor OS 級整合（每賣一 Thor 付權利金）；很早期、2028 才更多量產驗證",
-    "src_date": "2026/07/02",
-    "note": "kb-only；不在分類 sheet。Allen 論點是 Physical AI OS(QNX/車用)而非資安，故歸其他而非 Security"
-  }
+ {
+  "ticker": "AAPL",
+  "name": "蘋果",
+  "category": "M7",
+  "stance": "中性",
+  "view": "FY3Q26 毛利率 50.1% 亮眼但 F4Q26 因記憶體成本上升毛利率降至 47.5~48.5%、iPhone 增速砍至 +14~16%，財報當日 -7%",
+  "src_date": "2026/08/11",
+  "note": "分類 sheet M7 欄"
+ },
+ {
+  "ticker": "MSFT",
+  "name": "微軟",
+  "category": "M7",
+  "stance": "中性偏多",
+  "view": "由中性轉正：Azure YoY +43% 受惠 GB300，Copilot 單季淨增 1000 萬席次證明 AI ROI，RPO 6780 億扣 OpenAI 仍 +25%",
+  "src_date": "2026/07/31",
+  "note": "分類 sheet M7 欄"
+ },
+ {
+  "ticker": "TSLA",
+  "name": "特斯拉",
+  "category": "M7",
+  "stance": "觀察",
+  "view": "交車 48.1 萬創近兩年最佳但利潤率崩壞：OPM 僅 1.4%、EPS 0.33 低於共識、FCF 轉負貫穿 2027；重申對比 S&P500 暫不具 Alpha",
+  "src_date": "2026/07/25",
+  "note": "分類 sheet M7 欄"
+ },
+ {
+  "ticker": "NVDA",
+  "name": "輝達",
+  "category": "M7",
+  "stance": "中性",
+  "view": "Vera CPU 200 億獨立營收指引或成第 2 條營收 S 曲線、Networking YoY 近 +300%，但 GPU 本業被 TPU/Trainium 侵蝕，Forward PE 25~28x",
+  "src_date": "2026/05/22",
+  "note": "分類 sheet M7 欄"
+ },
+ {
+  "ticker": "AMZN",
+  "name": "亞馬遜",
+  "category": "M7",
+  "stance": "看多",
+  "view": "AWS YoY +37% 大超共識、積壓訂單 QoQ +36% 至 4960 億、AI ARR>250 億；全年 CAPEX 上修至 2200 億；3Q26 指引小低於共識非需求轉弱",
+  "src_date": "2026/08/03",
+  "note": "分類 sheet M7 欄"
+ },
+ {
+  "ticker": "META",
+  "name": "Meta",
+  "category": "M7",
+  "stance": "偏空",
+  "view": "財報日跌約 8%：3Q26 營收指引中值 625 億低於共識、OPM 降至 31%，提高 OPEX/CAPEX 卻未談 AI ROI；2027 資本密集度上看約 60%",
+  "src_date": "2026/08/02",
+  "note": "分類 sheet M7 欄"
+ },
+ {
+  "ticker": "GOOG",
+  "name": "Google",
+  "category": "M7",
+  "stance": "看多",
+  "view": "GCP YoY +82% 觸 buyside 高端、積壓訂單 5140 億 YoY +385%；CAPEX 年內二度上修至 1950~2050 億但 FCF 轉負；首釋 MRVL 完整模型",
+  "src_date": "2026/07/23",
+  "note": "分類 sheet M7 欄"
+ },
+ {
+  "ticker": "TSM",
+  "name": "台積電",
+  "category": "Semi",
+  "stance": "看多→中性",
+  "view": "2Q26 Beat & Raise＋CAPEX 上修至 600~640 億，但毛利率低於 Buyside、3Q26 指引僅 65~67%；Allen 態度首度轉中性、只願給 20~21 倍",
+  "src_date": "2026/07/17",
+  "note": "分類 sheet Semi 欄"
+ },
+ {
+  "ticker": "AVGO",
+  "name": "博通",
+  "category": "Semi",
+  "stance": "看空",
+  "view": "管理層首承 Google 多元採購：TPUv9 Pumafish 取消、2027 AVGO 650 萬顆 vs MTK 400 萬顆；營收 EPS 走高但毛利率下滑不可逆，估值上限約 22x",
+  "src_date": "2026/06/05",
+  "note": "分類 sheet Semi 欄"
+ },
+ {
+  "ticker": "CLS",
+  "name": "Celestica",
+  "category": "Semi",
+  "stance": "看多",
+  "view": "2Q26 Beat＋雙重上修並意外提早給 2027 指引（營收 YoY>65%）；三引擎 TPUv7＋800G/1.6T Switch＋OpenAI ASIC",
+  "src_date": "2026/07/29",
+  "note": "分類 sheet Semi 欄"
+ },
+ {
+  "ticker": "MU",
+  "name": "美光",
+  "category": "Semi",
+  "stance": "看多",
+  "view": "FY3Q26 無懈可擊：營收 414.56 億、毛利率 84.9%、EPS 25.11 全面超共識；RPO 1000 億打開能見度、估值由 PB 轉 PE（給 8~10x）",
+  "src_date": "2026/06/26",
+  "note": "分類 sheet Semi 欄"
+ },
+ {
+  "ticker": "MTK",
+  "name": "聯發科",
+  "category": "Semi",
+  "stance": "看多",
+  "view": "營收 1521.83 億、EPS 15.28 超預期；連 2 季上修 2026 ASIC 營收>20 億美元、2027 市占 15~20%＝120~160 億美元、4 個 TPU 專案",
+  "src_date": "2026/08/02",
+  "note": "sheet 2454-TW＝聯發科，合為 MTK（對齊 cover list）；分類 sheet Semi 欄"
+ },
+ {
+  "ticker": "AMD",
+  "name": "超微",
+  "category": "Semi",
+  "stance": "看多（短線警示）",
+  "view": "營收 EPS beat；上修 TAM（AI GPU 2030 年 1.4 兆）、MI455/Helios 3Q26 出貨；惟 3Q26 毛利率指引 56% 低於 Buyside 57%、當日 -7%",
+  "src_date": "2026/08/06",
+  "note": "分類 sheet Semi 欄"
+ },
+ {
+  "ticker": "CRDO",
+  "name": "Credo",
+  "category": "Semi",
+  "stance": null,
+  "view": null,
+  "src_date": null,
+  "note": "sheet-only：分類 sheet Semi 欄，kb 無此檔"
+ },
+ {
+  "ticker": "MRVL",
+  "name": "Marvell",
+  "category": "Semi",
+  "stance": "正面（未給模型）",
+  "view": "Channel check 確定拿下 Google TPU v9.5/v10 第三供應商（產線代號 TIA）＋手握 Google 四個專案；搶 AVGO 大頭毛利、非 MTK",
+  "src_date": "2026/07/02",
+  "note": "分類 sheet Semi 欄"
+ },
+ {
+  "ticker": "STM",
+  "name": "意法半導體",
+  "category": "Semi",
+  "stance": "看好題材、尚未建模（未納正式覆蓋）",
+  "view": "喜歡題材、看好矽光/CPO(Pluggable 製造端)＋車用工業復甦＋LEO 衛星三主線，但尚未建模、未納正式財報覆蓋；二選一偏好英飛凌/IFNNY/WOLF",
+  "src_date": "2026/06/16",
+  "note": "kb-only；category=Semi（車用 IDM cluster ON/STM/NXPI＋矽光製造端）。kb 有 STM.md 但未列入 INDEX 個股表，stance/view/date 取自 STM.md（整理日 2026/06/16）非 INDEX"
+ },
+ {
+  "ticker": "ASML",
+  "name": "艾司摩爾",
+  "category": "WFE",
+  "stance": "看多",
+  "view": "2Q26 Beat & Raise、2026 全年營收指引大砍上修至 430~450 億歐元、毛利率 54~55%；官方上修 27/28 Low-NA EUV 產能各 +30%",
+  "src_date": "2026/07/15",
+  "note": "分類 sheet WFE 欄"
+ },
+ {
+  "ticker": "AMAT",
+  "name": "應用材料",
+  "category": "WFE",
+  "stance": "看多",
+  "view": "5 大客戶 CAPEX 2026 年 2010 億（YoY+57%）、2027 年 3050 億（YoY+52%），無塵室不足只是遞延非取消，FY3Q26 指引大超共識",
+  "src_date": "2026/05/18",
+  "note": "分類 sheet WFE 欄"
+ },
+ {
+  "ticker": "ONTO",
+  "name": "Onto Innovation",
+  "category": "WFE",
+  "stance": "看多",
+  "view": "2Q26 Beat & Raise：營收/EPS/毛利率超共識、積壓訂單創高 11 億；G5 上修 2026 出貨 40~50→50~70 台、先進封裝全年成長 50%→80%",
+  "src_date": "2026/08/13",
+  "note": "分類 sheet WFE 欄"
+ },
+ {
+  "ticker": "TER",
+  "name": "Teradyne",
+  "category": "WFE",
+  "stance": "看多",
+  "view": "Beat & Raise：營收 EPS 毛利率超共識；2026 記憶體測試 TAM 由 +10~15% 大幅上修至 >40%；第二家 ASIC 客戶（研判 Google TPU）近量產",
+  "src_date": "2026/08/04",
+  "note": "分類 sheet WFE 欄"
+ },
+ {
+  "ticker": "CIEN",
+  "name": "Ciena",
+  "category": "Optical",
+  "stance": "看多",
+  "view": "FY2Q26 Beat & Raise：營收 15.71 億 YoY+40%、EPS 1.64 大超共識；上修 TAM 至 2029 翻倍 500 億；財報後重挫 14% 是預期重置",
+  "src_date": "2026/06/08",
+  "note": "分類 sheet Optical 欄"
+ },
+ {
+  "ticker": "COHR",
+  "name": "Coherent",
+  "category": "Optical",
+  "stance": "看多",
+  "view": "FY4Q26 Beat：營收 20.46 億(vs 共識 20.1)、EPS 1.74；毛利率連 6 季升至 40.2% 創高；FY1Q27 指引營收 YoY +45%/GM 40.5%；1.6T 放量、CPO 沒延遲且需求上調、6 吋 InP CY27 底再翻倍推毛利，能見度延至 CY2028",
+  "src_date": "2026/08/16",
+  "note": "分類 sheet Optical 欄"
+ },
+ {
+  "ticker": "FN",
+  "name": "Fabrinet",
+  "category": "Optical",
+  "stance": "中性",
+  "view": "EML 缺料壓制 Datacom（YoY 僅 +4%）、模型未上修且 FY2027 與共識已無預期差；中期看好 OCS/DCI/HPC/CPO，催化為擴產超預期",
+  "src_date": "2026/05/11",
+  "note": "分類 sheet Optical 欄"
+ },
+ {
+  "ticker": "LITE",
+  "name": "Lumentum",
+  "category": "Optical",
+  "stance": "看多",
+  "view": "FY4Q26 營收合預期、non-GAAP EPS 3.23 優於共識；FY1Q27 營收中值約 12.5 億 QoQ +25%；NPO 成 CPO 前過渡方案、能見度延伸至 CY2028",
+  "src_date": "2026/08/14",
+  "note": "分類 sheet Optical 欄"
+ },
+ {
+  "ticker": "KEYS",
+  "name": "Keysight",
+  "category": "Optical",
+  "stance": "看多",
+  "view": "高階光取樣示波器龍頭（市佔 55~60%）吃 800G/1.6T 測試升級潮，已打入 TSM COUPE 平台；最大風險為 OE 測試需求不足",
+  "src_date": "2026/05/24",
+  "note": "分類 sheet Optical 欄"
+ },
+ {
+  "ticker": "NOK",
+  "name": "諾基亞",
+  "category": "Optical",
+  "stance": "看多",
+  "view": "2Q26 新接訂單單季 28 億歐元 QoQ +180% 創高、B/B 升至 2.0，但未上修全年財測致股價跌 5%；分得 48.6 億美元 DCI 訂單、6 吋 InP 報價 YoY +70%",
+  "src_date": "2026/07/27",
+  "note": "分類 sheet Optical 欄"
+ },
+ {
+  "ticker": "GLW",
+  "name": "康寧",
+  "category": "Optical",
+  "stance": "中性偏多",
+  "view": "2Q26 雙超預期但 3Q26 指引低於共識、當日重挫 12%；Allen 判弱指引係供給限制非需求；漲價主題最實、循環延續至 2027",
+  "src_date": "2026/07/30",
+  "note": "分類 sheet Optical 欄"
+ },
+ {
+  "ticker": "NET",
+  "name": "Cloudflare",
+  "category": "Security",
+  "stance": "中性偏多",
+  "view": "2Q26 營收 6.96 億 YoY +36% 超共識、non-GAAP 毛利率 73% 持平趨穩為最大驚喜，Workers 單季暴增 200 萬活躍帳戶；唯 2028 EV/Sales 約 23 倍偏高",
+  "src_date": "2026/08/10",
+  "note": "分類 sheet Security 欄"
+ },
+ {
+  "ticker": "PANW",
+  "name": "Palo Alto Networks",
+  "category": "Security",
+  "stance": "看多",
+  "view": "Beat & Raise 且有機 ARR/RPO 潛在加速，平台化＋CyberArk/Chronosphere 整合站位佳，AI Coding 新競爭者數年內難撼動",
+  "src_date": "2026/06/03",
+  "note": "分類 sheet Security 欄"
+ },
+ {
+  "ticker": "CRWD",
+  "name": "CrowdStrike",
+  "category": "Security",
+  "stance": null,
+  "view": null,
+  "src_date": null,
+  "note": "sheet-only：分類 sheet Security 欄，kb 無此檔"
+ },
+ {
+  "ticker": "APP",
+  "name": "AppLovin",
+  "category": "ADs",
+  "stance": "偏空",
+  "view": "2Q26 AXON 模型迭代連續數季低於預期、營收低於共識與財測中值，遊戲廣告 QoQ 僅 +2% vs Unity +18%、ROAS 被 Unity 反超；本季後停止覆蓋 APP",
+  "src_date": "2026/08/12",
+  "note": "分類 sheet ADs 欄"
+ },
+ {
+  "ticker": "PLTR",
+  "name": "Palantir",
+  "category": "Tech",
+  "stance": "看多",
+  "view": "由中性偏空轉向：美國商業營收 YoY +150% 創史上最高、引入 ACN/EPAM 補交付弱點；全年指引上修至 81.58 億；惟仍交易 2027 EV/Sales 約 30 倍",
+  "src_date": "2026/08/07",
+  "note": "分類 sheet Tech 欄"
+ },
+ {
+  "ticker": "ORCL",
+  "name": "甲骨文",
+  "category": "Tech",
+  "stance": "中性偏多",
+  "view": "FY4Q26：RPO 6380 億 YoY+363% 創高但 FY27 營收指引維持 900 億未上修；股價重挫 10% 主因再籌 400 億債＋股稀釋；Allen 給 17~18x Forward PE",
+  "src_date": "2026/06/12",
+  "note": "分類 sheet Tech 欄"
+ },
+ {
+  "ticker": "BE",
+  "name": "Bloom Energy",
+  "category": "AIDC",
+  "stance": "中性偏多",
+  "view": "再度 Beat & Raise：營收 EBITDA 大超共識、全年指引上修營收 39~42 億、OPM 中值升至 21%；唯 2030 EV/調整後 EBITDA 約 20 倍短期偏高",
+  "src_date": "2026/08/05",
+  "note": "分類 sheet AIDC(electricity) 欄"
+ },
+ {
+  "ticker": "VRT",
+  "name": "Vertiv",
+  "category": "AIDC",
+  "stance": "中性偏多",
+  "view": "2Q26 執行力少見失誤致營收 miss、當日 -17%，但 non-GAAP EPS 1.52 beat、上修全年指引；META 400V HVDC 訂單約 8 億；Allen 判短期現象已 de-risk",
+  "src_date": "2026/08/09",
+  "note": "分類 sheet AIDC(electricity) 欄"
+ },
+ {
+  "ticker": "F",
+  "name": "福特",
+  "category": "其他",
+  "stance": "看多",
+  "view": "福特能源 BESS 毛利率 25% 遠高於造車 9%，2028 年增量淨利約 10%，毛利率改善預期先行可能帶來提前 re-rate",
+  "src_date": "2026/05/31",
+  "note": "kb-only；不在分類 sheet。歸類其他(車廠/儲能 BESS)，非現有主題可涵蓋"
+ },
+ {
+  "ticker": "KTOS",
+  "name": "Kratos",
+  "category": "其他",
+  "stance": "看多",
+  "view": "Book-to-bill 升至 1.6、Beat & Raise 驗證政府訂單確定性，靶彈/無人機/太空三成長曲線契合美國國防支出擴張",
+  "src_date": "2026/05/26",
+  "note": "kb-only；不在分類 sheet。歸類其他(國防)，非現有主題可涵蓋"
+ },
+ {
+  "ticker": "MRAAY",
+  "name": "村田",
+  "category": "其他",
+  "stance": "看多",
+  "view": "村田/MLCC：AI 伺服器排擠傳統產能驅動 MLCC 全面漲價（村田漲價函均幅 34%），趨勢或延續至 2027 可能超越 Sellside；買法偏好日股 6981",
+  "src_date": "2026/06/16",
+  "note": "kb-only；不在分類 sheet。歸類其他(被動元件/MLCC)，非現有主題可涵蓋"
+ },
+ {
+  "ticker": "BB",
+  "name": "BlackBerry",
+  "category": "其他",
+  "stance": "看多(早期)",
+  "view": "Physical AI 作業系統押注：QNX 為全球第一大硬實時 OS，關鍵題材是與 NVIDIA IGX Thor OS 級整合（每賣一 Thor 付權利金）；很早期、2028 才更多量產驗證",
+  "src_date": "2026/07/02",
+  "note": "kb-only；不在分類 sheet。Allen 論點是 Physical AI OS(QNX/車用)而非資安，故歸其他而非 Security"
+ }
 ]
