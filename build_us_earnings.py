@@ -280,10 +280,12 @@ def build_html(data, henry, updated):
                  if ALIAS.get(h.get("ticker"), h.get("ticker")) not in ORDER] if henry else []
     henry_sec = ""
     if henry:
+        asof = max((h.get("src_date", "") for h in henry), default="")
+        asof_txt = f'・資料截至 <b>{esc(asof)}</b>' if asof else ""
         henry_sec = f"""
 <section class="src-block henry-block">
 <div class="secthead"><h2><span class="dot">H</span>Henry · Pentimetrics</h2>
-<span class="secsub">The Trace 券商彙整・市場（Bloomberg）共識與 buy side・依 Henry 評語分立場。{len(henry)} 檔，其中 <b>{len(henry_new)}</b> 檔為 cover list 未收。</span></div>
+<span class="secsub">The Trace 券商彙整・市場（Bloomberg）共識與 buy side・依 Henry 評語分立場。{len(henry)} 檔，其中 <b>{len(henry_new)}</b> 檔為 cover list 未收{asof_txt}。</span></div>
 {henry_groups}
 </section>"""
     return f"""<!doctype html><html lang="zh-Hant"><head>
