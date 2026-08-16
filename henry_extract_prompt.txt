@@ -1,0 +1,35 @@
+你是資料萃取工。請「自己動手」用 bash / python3 / sqlite3 完成，不要問我、不要派 subagent，最後把結果寫成一個 JSON 檔。
+
+## 目標
+從 Henry（Pentimetrics「The Trace」）全文資料庫，抽出「他有給 Bloomberg／市場共識數字的每一檔美股」的最新一筆財報數據＋Henry 本人的多空立場，輸出到：
+`/Users/mac/chip-dashboard/henry_data.json`（覆寫，JSON 陣列，依 src_date 由新到舊）。
+
+## 資料源
+SQLite：`/Users/mac/Downloads/Evan.agent/vocus/pentimetrics_db/pentimetrics.db`
+- 表 `articles`(content_id, title, series, number_label, date, url)
+- 表 `paragraphs`(content_id, seq, tag, text)：Henry 正文逐段
+作者 Henry(@LansIndustryInsights)，繁中散文式券商彙整。
+
+## 每檔要抽的欄位（沒明列的填 null，數字一字不差、絕不推算）
+ticker, company, quarter, actual_rev, cons_rev, buyside_rev, actual_eps, cons_eps, guide, view,
+src_date, src_label, stance, stance_evidence
+- 金額保留原文單位幣別（如 "91.2億美元"）。
+- cons_rev = Henry 口中的「市場預期／consensus／共識」= Bloomberg 共識；buyside_rev = buy side 預期。
+- guide = 下季/展望指引原文濃縮。view = Henry 對該檔一句話結論（照原文，不加你的判斷）。
+- src_label 如 "Trace 91"（daily number_label=91）/"Trace Weekly 23"（series=weekly）。
+
+## stance（六選一，只依 Henry 本人評語，不可因數字 beat 就判看多）
+看多 / 中性偏多 / 中性 / 中性偏空 / 偏空 / 追蹤
+- "評為中性偏上"→中性偏多；明確看好/"全村的希望"/"唯一亮點"→看多；平衡或"漲多"→中性；
+  "略顯不足/偏弱"→中性偏空；明確看空→偏空；只有數字沒表態→追蹤。
+- stance_evidence = 依據的原文片語（照抄 ≤40 字）；無方向性則 stance=追蹤、evidence="原文僅列數字、未明確表態"。
+- 定調句常在同日「wrap / 市場總結」文，不在深度 takeaway，兩支 content_id 都要看。
+
+## 範圍
+- 只收美股個股。排除：台股(如聯發科/MTK)、韓股(SK hynix/Samsung)、港股(Tencent)、日圓計價個股、
+  未上市/紀念股(SPCX/SpaceX)。
+- 只有券商預覽、當季尚未公布實際財報的（如未到財報日的 NVDA/MU 等）不收。
+
+## 完成後
+把 JSON 寫到 `/Users/mac/chip-dashboard/henry_data.json`，並在最後印一行：
+`DONE n=<檔數> asof=<最新src_date> stances=<各立場檔數>`
