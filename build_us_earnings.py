@@ -2,19 +2,17 @@
 # -*- coding: utf-8 -*-
 """美股財報區 — 兩個獨立來源合成一頁 us_earnings.html（chip-dashboard / GitHub Pages）。
 
-來源 A｜韭菜王 Allen：投資 cover list（Google Sheet，link-可讀免登入）
-  export?format=xlsx → openpyxl。每分頁固定 B-M 12 欄（見 memory project_cover_list_sheet）：
-  row2 季度標頭 / row5 Revenue / row9 EPS / row11-17 年度 / row19-24 估值
-  欄位對應：B-E 歷史(A)｜F=本季Allen G=共識 H=實際｜I/J=下季｜K=下季指引｜L/M=下下季
-來源 B｜Henry(Pentimetrics)：curated henry_data.json（由 pentimetrics_db 精準抽取）
+來源 A｜韭菜王 Allen：投資 cover list（Google Sheet，link-可讀免登入）→ openpyxl。
+  欄位對應：B-E 歷史(A)｜F=本季Allen G=共識 H=實際｜I=下季Allen J=下季共識 K=指引｜L/M=下下季
+來源 B｜Henry(Pentimetrics)：curated henry_data.json（含 stance；由 pentimetrics_db 精準抽取）
 
-設計：精煉財經編輯風、強制淺色（Evan Mac 深色模式，交付物一律淺色）。每檔一張獨立卡，
-  hero 數字放大＋「vs 共識」發散比較條＋清楚分層留白；Henry 觀點做引言區塊。
+版面：精煉財經編輯風、強制淺色。**依多空立場分組**；每張卡兩欄——
+  左＝最新季（實際 vs 共識的預期差＋比較條），右＝下季展望（Allen vs 共識預期差＋公司指引）。
 
 用法：python3 build_us_earnings.py            （自動下載最新 sheet）
       python3 build_us_earnings.py local.xlsx  （用本機 xlsx，離線）
 """
-import sys, json, io, datetime, html, urllib.request
+import sys, json, io, re, datetime, html, urllib.request
 import openpyxl
 from pathlib import Path
 
@@ -24,31 +22,23 @@ UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 ROOT = Path(__file__).resolve().parent
 
 META = {
-    "GOOG": ("Alphabet",   "看多",   "2026/07/23"),
-    "AMZN": ("亞馬遜",      "看多",   "2026/08/03"),
-    "MSFT": ("微軟",        "中性偏多","2026/07/31"),
-    "META": ("Meta",        "偏空",   "2026/08/02"),
-    "TSM":  ("台積電 ADR",  "中性",   "2026/07/17"),
-    "MTK":  ("聯發科",      "看多",   "2026/08/02"),
-    "ASML": ("艾司摩爾",    "看多",   "2026/07/15"),
-    "AMD":  ("超微 AMD",    "看多",   "2026/08/06"),
-    "TER":  ("Teradyne",    "看多",   "2026/08/04"),
-    "VRT":  ("Vertiv",      "中性偏多","2026/08/09"),
-    "ONTO": ("Onto",        "看多",   "2026/08/13"),
-    "LITE": ("Lumentum",    "看多",   "2026/08/14"),
-    "CLS":  ("Celestica",   "看多",   "2026/07/29"),
-    "GLW":  ("康寧 Corning", "中性",  "2026/07/30"),
-    "NOK":  ("Nokia",       "看多",   "2026/07/27"),
-    "COHR": ("Coherent",    "看多",   "2026/05/10"),
-    "AMAT": ("應用材料",    "看多",   "2026/05/16"),
-    "AVGO": ("博通 Broadcom","中性",  "2026/07/23"),
-    "NVDA": ("輝達 NVIDIA", "看多",   "2026/05/28"),
-    "CIEN": ("Ciena",       "追蹤",   "2026/03/12"),
+    "GOOG": ("Alphabet", "看多", "2026/07/23"), "AMZN": ("亞馬遜", "看多", "2026/08/03"),
+    "MSFT": ("微軟", "中性偏多", "2026/07/31"), "META": ("Meta", "偏空", "2026/08/02"),
+    "TSM": ("台積電 ADR", "中性", "2026/07/17"), "MTK": ("聯發科", "看多", "2026/08/02"),
+    "ASML": ("艾司摩爾", "看多", "2026/07/15"), "AMD": ("超微 AMD", "看多", "2026/08/06"),
+    "TER": ("Teradyne", "看多", "2026/08/04"), "VRT": ("Vertiv", "中性偏多", "2026/08/09"),
+    "ONTO": ("Onto", "看多", "2026/08/13"), "LITE": ("Lumentum", "看多", "2026/08/14"),
+    "CLS": ("Celestica", "看多", "2026/07/29"), "GLW": ("康寧 Corning", "中性", "2026/07/30"),
+    "NOK": ("Nokia", "看多", "2026/07/27"), "COHR": ("Coherent", "看多", "2026/05/10"),
+    "AMAT": ("應用材料", "看多", "2026/05/16"), "AVGO": ("博通 Broadcom", "中性", "2026/07/23"),
+    "NVDA": ("輝達 NVIDIA", "看多", "2026/05/28"), "CIEN": ("Ciena", "追蹤", "2026/03/12"),
 }
 ORDER = list(META.keys())
 COL = {c: i for i, c in enumerate("BCDEFGHIJKLM", start=2)}
+# 立場顯示順序＋樣式
+STANCES = ["看多", "中性偏多", "中性", "中性偏空", "偏空", "追蹤"]
 STANCE_CLS = {"看多": "s-bull", "中性偏多": "s-bullmid", "中性": "s-neu",
-              "偏空": "s-bear", "追蹤": "s-watch"}
+              "中性偏空": "s-bearmid", "偏空": "s-bear", "追蹤": "s-watch"}
 
 
 def load_wb():
@@ -83,6 +73,7 @@ def extract(wbd, wbf):
             "act_eps": num(c("H", 9)), "cons_eps": num(c("G", 9)),
             "n_q": lab("I").replace("(E)", ""),
             "n_est_rev": num(c("I", 5)), "n_est_eps": num(c("I", 9)),
+            "n_cons_rev": num(c("J", 5)), "n_cons_eps": num(c("J", 9)),
             "guid": c("K", 5),
             "eps26": num(c("F", 17)), "eps27": num(c("H", 17)),
         }
@@ -104,9 +95,9 @@ def extract(wbd, wbf):
     return data
 
 
-# ---------- format helpers ----------
+# ---------- helpers ----------
 def is_eps(v):
-    return isinstance(v, (int, float)) and abs(v) < 500  # 濾掉 AMZN 營業利益巨值
+    return isinstance(v, (int, float)) and abs(v) < 500
 
 
 def bil(v):
@@ -127,60 +118,64 @@ def esc(v):
     return html.escape(str(v)) if v is not None else ""
 
 
-def cmp_bar(p):
-    """發散比較條：中線＝共識，右綠=beat 左紅=miss，寬度∝|delta|(±25% 滿格半邊)。回傳 HTML。"""
-    if p is None:
-        return ""
-    w = min(abs(p) / 25.0, 1.0) * 50.0
-    if p >= 0:
-        seg = f'<span class="cf beat" style="left:50%;width:{w:.0f}%"></span>'
-    else:
-        seg = f'<span class="cf miss" style="right:50%;width:{w:.0f}%"></span>'
-    return f'<div class="cbar"><span class="cmid"></span>{seg}</div>'
+def pnum(s):
+    """從 Henry 字串取第一個數字（"91.2億美元"→91.2）。"""
+    if not isinstance(s, str):
+        return None
+    m = re.search(r"-?\d+(?:\.\d+)?", s.replace(",", ""))
+    return float(m.group()) if m else None
 
 
-# ---------- Allen card ----------
-def hero_block(label, big, unit, p, cons_label):
-    """一個 hero 指標：標籤 + 大數字 + beat/miss pill + 比較條 + vs 共識。"""
-    if big is None:
-        return f'<div class="metric"><div class="mlabel">{esc(label)}</div><div class="mbig mut">待公布</div></div>'
-    pill = ""
+def diff_row(p, cons_str):
+    """預期差列：pill(▲/▼ %) + 迷你比較條 + vs 共識文字。"""
+    pill = bar = ""
     if p is not None:
         cls = "beat" if p >= 0 else "miss"
         arr = "▲" if p >= 0 else "▼"
         pill = f'<span class="pill {cls}">{arr}{abs(p):.1f}%</span>'
+        w = min(abs(p) / 25.0, 1.0) * 50.0
+        seg = (f'<span class="cf beat" style="left:50%;width:{w:.0f}%"></span>' if p >= 0
+               else f'<span class="cf miss" style="right:50%;width:{w:.0f}%"></span>')
+        bar = f'<div class="cbar"><span class="cmid"></span>{seg}</div>'
+    cl = f'<div class="cons">{esc(cons_str)}</div>' if cons_str else ""
+    return f'<div class="diff">{pill}{bar}</div>{cl}' if (pill or bar or cl) else ""
+
+
+def metric(label, big, unit, p, cons_str, big_cls=""):
+    if big is None:
+        return (f'<div class="metric"><div class="mlabel">{esc(label)}</div>'
+                f'<div class="mbig mut {big_cls}">待公布</div></div>')
     u = f'<span class="munit">億{unit}</span>' if unit else ""
-    bar = cmp_bar(p)
-    cl = f'<div class="cons">{esc(cons_label)}</div>' if cons_label else ""
     return (f'<div class="metric"><div class="mlabel">{esc(label)}</div>'
-            f'<div class="mbig">{esc(big)}{u} {pill}</div>{bar}{cl}</div>')
+            f'<div class="mbig {big_cls}">{esc(big)}{u}</div>{diff_row(p, cons_str)}</div>')
 
 
+# ---------- Allen card ----------
 def allen_card(t, r):
     scls = STANCE_CLS.get(r["stance"], "s-neu")
     unit = r["unit"] or "USD"
-    rp = pct(r["act_rev"], r["cons_rev"])
-    rev_hero = hero_block("實際營收", bil(r["act_rev"]), unit, rp,
-                          f'vs 共識 {bil(r["cons_rev"])}' if bil(r["cons_rev"]) else "")
-    # EPS 次要 hero（EPS 無單位）
-    ep = pct(r["act_eps"], r["cons_eps"])
-    eps_hero = ""
+    # 左欄：最新季
+    rev_m = metric("實際營收", bil(r["act_rev"]), unit, pct(r["act_rev"], r["cons_rev"]),
+                   f'vs 共識 {bil(r["cons_rev"])}' if bil(r["cons_rev"]) else "")
+    eps_m = ""
     if is_eps(r["act_eps"]):
-        eps_hero = hero_block("EPS", fmt(r["act_eps"]), "", ep,
-                              f'vs 共識 {fmt(r["cons_eps"])}' if is_eps(r["cons_eps"]) else "")
-    # 下季 + 指引
+        eps_m = metric("EPS", fmt(r["act_eps"]), "", pct(r["act_eps"], r["cons_eps"]),
+                       f'vs 共識 {fmt(r["cons_eps"])}' if is_eps(r["cons_eps"]) else "", "sm")
+    left = (f'<div class="col"><div class="col-h">最新季 · {esc(r["cur_q"] or "—")}'
+            f'<span class="reported">已公布</span></div>{rev_m}{eps_m}</div>')
+    # 右欄：下季展望（Allen vs 共識預期差）+ 公司指引
     nq = r["n_q"] or ""
     nrev = bil(r["n_est_rev"]); neps = fmt(r["n_est_eps"]) if is_eps(r["n_est_eps"]) else None
+    nrev_m = metric("Allen 營收", nrev, unit, pct(r["n_est_rev"], r["n_cons_rev"]),
+                    f'vs 共識 {bil(r["n_cons_rev"])}' if bil(r["n_cons_rev"]) else "") if nrev else ""
+    neps_m = metric("Allen EPS", neps, "", pct(r["n_est_eps"], r["n_cons_eps"]),
+                    f'vs 共識 {fmt(r["n_cons_eps"])}' if is_eps(r["n_cons_eps"]) else "", "sm") if neps else ""
     guid = r["guid"] if isinstance(r["guid"], str) else (bil(r["guid"]) if isinstance(r["guid"], (int, float)) else None)
-    fwd = ""
-    if nrev or neps or guid:
-        parts = []
-        if nrev: parts.append(f'<span>營收 <b>{nrev}</b></span>')
-        if neps: parts.append(f'<span>EPS <b>{neps}</b></span>')
-        gline = f'<div class="gd">指引 {esc(guid)}</div>' if guid else ""
-        fwd = (f'<div class="fwd"><div class="fwd-h">下季 {esc(nq)}</div>'
-               f'<div class="fwd-r">{"".join(parts)}</div>{gline}</div>')
-    # 年度 + 估值 stat 列
+    guid_m = f'<div class="guidbox"><span class="gl">公司指引</span><span class="gv">{esc(guid)}</span></div>' if guid else ""
+    right = ""
+    if nrev_m or neps_m or guid_m:
+        right = (f'<div class="col col-fwd"><div class="col-h">下季展望 · {esc(nq)}</div>'
+                 f'{nrev_m}{neps_m}{guid_m}</div>')
     stats = [("FY26", fmt(r["eps26"]) if is_eps(r["eps26"]) else "—"),
              ("FY27", fmt(r["eps27"]) if is_eps(r["eps27"]) else "—"),
              ("股價", fmt(r["price"]) if r["price"] else "—"),
@@ -188,13 +183,9 @@ def allen_card(t, r):
     stat_html = "".join(f'<div class="stat"><div class="sl">{k}</div><div class="sv">{v}</div></div>' for k, v in stats)
     searchtxt = f"{t} {r['name']}".lower()
     return f"""<article class="card {scls}" data-t="{t}" data-stance="{r['stance']}" data-s="{searchtxt}">
- <header class="chead">
-   <div class="ident"><span class="sym">{t}</span><span class="nm">{esc(r['name'])}</span></div>
-   <span class="badge {scls}">{r['stance']}</span>
- </header>
- <div class="qtag">{esc(r['cur_q'] or '—')}<span class="qdot">已公布</span></div>
- <div class="metrics">{rev_hero}{eps_hero}</div>
- {fwd}
+ <header class="chead"><div class="ident"><span class="sym">{t}</span><span class="nm">{esc(r['name'])}</span></div>
+   <span class="badge {scls}">{r['stance']}</span></header>
+ <div class="cols">{left}{right}</div>
  <div class="stats">{stat_html}</div>
 </article>"""
 
@@ -202,34 +193,54 @@ def allen_card(t, r):
 # ---------- Henry card ----------
 def henry_card(h):
     t = h.get("ticker", "?")
-    unit = ""  # Henry 金額自帶單位
-    body = []
-    if h.get("actual_rev") or h.get("cons_rev"):
-        vs = []
-        if h.get("cons_rev"): vs.append(f'共識 {h["cons_rev"]}')
-        if h.get("buyside_rev"): vs.append(f'buyside {h["buyside_rev"]}')
-        cons_label = "vs " + " · ".join(esc(x) for x in vs) if vs else ""
-        body.append(f'<div class="metric"><div class="mlabel">營收</div>'
-                    f'<div class="mbig">{esc(h.get("actual_rev") or "—")}</div>'
-                    f'{("<div class=cons>"+cons_label+"</div>") if cons_label else ""}</div>')
-    if h.get("actual_eps") or h.get("cons_eps"):
-        cons = f'<span class="cons-inline">vs {esc(h["cons_eps"])}</span>' if h.get("cons_eps") else ""
-        body.append(f'<div class="metric"><div class="mlabel">EPS</div>'
-                    f'<div class="mbig sm">{esc(h.get("actual_eps") or "—")} {cons}</div></div>')
-    guide = f'<div class="fwd"><div class="fwd-h">展望／指引</div><div class="gd">{esc(h.get("guide"))}</div></div>' if h.get("guide") else ""
+    stance = h.get("stance") or "追蹤"
+    scls = STANCE_CLS.get(stance, "s-watch")
+    # 左欄：最新季（字串金額，解析出預期差）
+    rev = h.get("actual_rev"); cr = h.get("cons_rev")
+    prev = None
+    if isinstance(rev, str) and isinstance(cr, str) and "億" in rev and "億" in cr and "兆" not in rev:
+        prev = pct(pnum(rev), pnum(cr))
+    vs = []
+    if cr: vs.append(f"共識 {cr}")
+    if h.get("buyside_rev"): vs.append(f'buyside {h["buyside_rev"]}')
+    rev_m = (f'<div class="metric"><div class="mlabel">營收</div>'
+             f'<div class="mbig">{esc(rev or "—")}</div>'
+             f'{diff_row(prev, "vs " + " · ".join(esc(x) for x in vs) if vs else "")}</div>') if (rev or cr) else ""
+    eps = h.get("actual_eps"); ce = h.get("cons_eps")
+    peps = pct(pnum(eps), pnum(ce)) if (eps and ce) else None
+    eps_m = (f'<div class="metric"><div class="mlabel">EPS</div>'
+             f'<div class="mbig sm">{esc(eps or "—")}</div>'
+             f'{diff_row(peps, "vs 共識 " + esc(ce) if ce else "")}</div>') if (eps or ce) else ""
+    left = f'<div class="col"><div class="col-h">已公布 · {esc(h.get("quarter","") or "—")}</div>{rev_m}{eps_m}</div>'
+    # 右欄：展望／指引
+    guide = h.get("guide")
+    right = (f'<div class="col col-fwd"><div class="col-h">展望／指引</div>'
+             f'<div class="gd">{esc(guide)}</div></div>') if guide else ""
     view = f'<blockquote class="cview">{esc(h.get("view"))}</blockquote>' if h.get("view") else ""
-    src = f'{esc(h.get("src_label",""))} · {esc(h.get("src_date",""))}'
+    src = " · ".join(x for x in [esc(h.get("src_label", "")), esc(h.get("src_date", ""))] if x)
     searchtxt = f'{t} {h.get("company","")}'.lower()
-    return f"""<article class="card s-henry" data-t="{t}" data-s="{searchtxt}">
- <header class="chead">
-   <div class="ident"><span class="sym">{t}</span><span class="nm">{esc(h.get('company',''))}</span></div>
-   <span class="badge s-henry">{esc(h.get('quarter','')) or 'Henry'}</span>
- </header>
+    return f"""<article class="card {scls}" data-t="{t}" data-stance="{esc(stance)}" data-s="{searchtxt}">
+ <header class="chead"><div class="ident"><span class="sym">{t}</span><span class="nm">{esc(h.get('company',''))}</span></div>
+   <span class="badge {scls}">{esc(stance)}</span></header>
  <div class="qtag src">{src}</div>
- <div class="metrics">{"".join(body)}</div>
- {guide}
+ <div class="cols">{left}{right}</div>
  {view}
 </article>"""
+
+
+def stance_groups(cards_by_stance):
+    """把 {stance: [card_html,...]} 依 STANCES 順序渲染成分組帶。"""
+    out = []
+    for st in STANCES:
+        cards = cards_by_stance.get(st)
+        if not cards:
+            continue
+        scls = STANCE_CLS.get(st, "s-neu")
+        out.append(
+            f'<div class="stance-group" data-stance="{st}">'
+            f'<div class="sband {scls}"><span class="sdot"></span>{st}<em>{len(cards)}</em></div>'
+            f'<div class="grid">{"".join(cards)}</div></div>')
+    return "\n".join(out)
 
 
 NAV = ('<nav class="topnav"><a href="index.html">📊 籌碼總覽</a>'
@@ -238,8 +249,18 @@ NAV = ('<nav class="topnav"><a href="index.html">📊 籌碼總覽</a>'
 
 
 def build_html(data, henry, updated):
-    allen_cards = "\n".join(allen_card(t, data[t]) for t in ORDER if t in data)
-    henry_cards = "\n".join(henry_card(h) for h in henry) if henry else ""
+    # Allen 依立場分組
+    a_by = {}
+    for t in ORDER:
+        if t in data:
+            a_by.setdefault(data[t]["stance"], []).append(allen_card(t, data[t]))
+    allen_groups = stance_groups(a_by)
+    # Henry 依立場分組
+    h_by = {}
+    for h in henry:
+        h_by.setdefault(h.get("stance") or "追蹤", []).append(henry_card(h))
+    henry_groups = stance_groups(h_by)
+
     n = len(data)
     bull = sum(1 for r in data.values() if r["stance"] == "看多")
     bear = sum(1 for r in data.values() if r["stance"] == "偏空")
@@ -251,10 +272,9 @@ def build_html(data, henry, updated):
         henry_sec = f"""
 <section class="src-block henry-block">
 <div class="secthead"><h2><span class="dot">H</span>Henry · Pentimetrics</h2>
-<span class="secsub">The Trace 券商彙整・市場（Bloomberg）共識與 buy side。{len(henry)} 檔，其中 <b>{len(henry_new)}</b> 檔為 cover list 未收。</span></div>
-<div class="grid">
-{henry_cards}
-</div></section>"""
+<span class="secsub">The Trace 券商彙整・市場（Bloomberg）共識與 buy side・依 Henry 評語分立場。{len(henry)} 檔，其中 <b>{len(henry_new)}</b> 檔為 cover list 未收。</span></div>
+{henry_groups}
+</section>"""
     return f"""<!doctype html><html lang="zh-Hant"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -276,7 +296,7 @@ def build_html(data, henry, updated):
   --accent:#1a5e4a; --accent2:#c2410c;
   --beat:#1f7a4d; --beat-bg:#e6f2ea; --miss:#c0392b; --miss-bg:#fbeae7;
   --gd:#8a6d1f; --henry:#6d4bb8; --henry-bg:#efeaf8;
-  --bull:#1f7a4d; --bear:#c0392b; --neu:#8f887a; --bullmid:#2563b8;
+  --bull:#1f7a4d; --bear:#c0392b; --neu:#8f887a; --bullmid:#2563b8; --bearmid:#c2410c;
   --shadow:0 1px 2px rgba(60,50,30,.04),0 8px 24px rgba(60,50,30,.06);
   --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Songti TC","Noto Serif TC",Georgia,serif;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC",sans-serif;
@@ -287,109 +307,105 @@ html{{color-scheme:light}}
 body{{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
   -webkit-font-smoothing:antialiased;padding:20px 16px 56px;
   background-image:radial-gradient(circle at 1px 1px,rgba(120,105,75,.05) 1px,transparent 0);background-size:22px 22px}}
-.wrap{{max-width:1240px;margin:0 auto}}
+.wrap{{max-width:1280px;margin:0 auto}}
 .topnav{{display:flex;gap:7px;margin:0 0 18px;flex-wrap:wrap}}
 .topnav a{{font:600 13px var(--sans);color:var(--muted);text-decoration:none;padding:8px 15px;
   border-radius:11px;border:1px solid var(--hair);background:var(--panel);letter-spacing:.2px;box-shadow:var(--shadow)}}
 .topnav a.on{{background:var(--ink);color:var(--bg);border-color:var(--ink)}}
-
 .masthead{{margin:0 0 6px;padding-bottom:16px;border-bottom:2.5px solid var(--ink)}}
 h1{{font-family:var(--serif);font-size:31px;font-weight:600;margin:0 0 6px;letter-spacing:.2px;line-height:1.1}}
-.lede{{color:var(--ink2);font-size:13px;margin:0;line-height:1.7;max-width:80ch}}
+.lede{{color:var(--ink2);font-size:13px;margin:0;line-height:1.7;max-width:82ch}}
 .lede b{{color:var(--ink);font-weight:700}}
 .updated{{color:var(--muted);font-size:11.5px;margin-top:7px;font-family:var(--mono);letter-spacing:.3px}}
-
 .kpis{{display:flex;gap:0;flex-wrap:wrap;margin:16px 0 6px;border:1px solid var(--hair);
   border-radius:14px;overflow:hidden;background:var(--panel);box-shadow:var(--shadow)}}
 .kpi{{flex:1;min-width:120px;padding:13px 18px;border-right:1px solid var(--hair)}}
 .kpi:last-child{{border-right:0}}
 .kpi .v{{font-family:var(--serif);font-size:26px;font-weight:600;line-height:1}}
 .kpi .l{{font-size:11px;color:var(--muted);margin-top:5px;letter-spacing:.3px}}
-
 .bar{{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:20px 0 6px}}
 .bar input{{font:500 13px var(--sans);color:var(--ink);background:var(--panel);
   border:1px solid var(--line);border-radius:10px;padding:9px 13px;box-shadow:var(--shadow);min-width:210px}}
 .bar .chip{{cursor:pointer;color:var(--muted);border:1px solid var(--line);background:var(--panel);
   border-radius:20px;padding:7px 14px;font:600 12px var(--sans);box-shadow:var(--shadow);transition:all .12s}}
 .bar .chip.on{{background:var(--ink);color:var(--bg);border-color:var(--ink)}}
-
-.secthead{{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:30px 0 16px}}
-.secthead h2{{font-family:var(--serif);font-size:20px;font-weight:600;margin:0;letter-spacing:.2px;
-  display:flex;align-items:center;gap:10px}}
-.secthead .dot{{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:8px;
-  background:var(--accent);color:#fff;font:700 13px var(--sans)}}
+.secthead{{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:30px 0 14px}}
+.secthead h2{{font-family:var(--serif);font-size:20px;font-weight:600;margin:0;letter-spacing:.2px;display:flex;align-items:center;gap:10px}}
+.secthead .dot{{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:8px;background:var(--accent);color:#fff;font:700 13px var(--sans)}}
 .henry-block .secthead .dot{{background:var(--henry)}}
 .secsub{{color:var(--muted);font-size:12px;line-height:1.5}} .secsub b{{color:var(--ink)}}
-
-.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}}
+/* 立場分組帶 */
+.stance-group{{margin:0 0 8px}}
+.sband{{display:flex;align-items:center;gap:9px;margin:16px 0 11px;font:700 13px var(--sans);letter-spacing:.5px;color:var(--ink)}}
+.sband .sdot{{width:11px;height:11px;border-radius:50%;background:var(--neu)}}
+.sband em{{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--muted);
+  background:var(--panel);border:1px solid var(--hair);border-radius:20px;padding:1px 9px}}
+.sband.s-bull .sdot{{background:var(--bull)}} .sband.s-bullmid .sdot{{background:var(--bullmid)}}
+.sband.s-neu .sdot{{background:var(--neu)}} .sband.s-bearmid .sdot{{background:var(--bearmid)}}
+.sband.s-bear .sdot{{background:var(--bear)}} .sband.s-watch .sdot{{background:var(--gd)}}
+/* 卡片：兩欄、加大 */
+.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(452px,1fr));gap:16px}}
 .card{{position:relative;background:var(--panel);border:1px solid var(--hair);border-radius:16px;
-  padding:20px 20px 16px;box-shadow:var(--shadow);overflow:hidden}}
+  padding:18px 20px 14px;box-shadow:var(--shadow);overflow:hidden}}
 .card::before{{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--neu)}}
 .card.s-bull::before{{background:var(--bull)}} .card.s-bullmid::before{{background:var(--bullmid)}}
-.card.s-neu::before{{background:var(--neu)}} .card.s-bear::before{{background:var(--bear)}}
-.card.s-watch::before{{background:var(--gd)}} .card.s-henry::before{{background:var(--henry)}}
-
-.chead{{display:flex;align-items:center;gap:10px;margin-bottom:3px}}
+.card.s-neu::before{{background:var(--neu)}} .card.s-bearmid::before{{background:var(--bearmid)}}
+.card.s-bear::before{{background:var(--bear)}} .card.s-watch::before{{background:var(--gd)}}
+.chead{{display:flex;align-items:center;gap:10px;margin-bottom:12px}}
 .ident{{display:flex;align-items:baseline;gap:9px;margin-right:auto;min-width:0}}
 .sym{{font-family:var(--serif);font-weight:700;font-size:21px;letter-spacing:.3px}}
 .nm{{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
-.badge{{padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;flex:none}}
-.badge.s-bull{{background:var(--beat-bg);color:var(--bull)}}
-.badge.s-bullmid{{background:#e7effb;color:var(--bullmid)}}
-.badge.s-neu{{background:#efece5;color:var(--neu)}}
-.badge.s-bear{{background:var(--miss-bg);color:var(--bear)}}
-.badge.s-watch{{background:#f5edd8;color:var(--gd)}}
-.badge.s-henry{{background:var(--henry-bg);color:var(--henry)}}
-.qtag{{font-size:11px;color:var(--muted);letter-spacing:.4px;text-transform:uppercase;
-  margin:0 0 15px;font-family:var(--mono)}}
-.qtag .qdot{{margin-left:7px;padding-left:8px;border-left:1px solid var(--line)}}
-.qtag.src{{text-transform:none;letter-spacing:.2px}}
-
-.metrics{{display:flex;flex-direction:column;gap:16px}}
+.badge{{padding:3px 12px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap;flex:none}}
+.badge.s-bull{{background:var(--beat-bg);color:var(--bull)}} .badge.s-bullmid{{background:#e7effb;color:var(--bullmid)}}
+.badge.s-neu{{background:#efece5;color:var(--neu)}} .badge.s-bearmid{{background:#fbeee2;color:var(--bearmid)}}
+.badge.s-bear{{background:var(--miss-bg);color:var(--bear)}} .badge.s-watch{{background:#f5edd8;color:var(--gd)}}
+.qtag{{font-size:11px;color:var(--muted);letter-spacing:.2px;margin:-4px 0 12px;font-family:var(--mono)}}
+/* 兩欄 body */
+.cols{{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}}
+.col{{padding:13px 15px;display:flex;flex-direction:column;gap:13px}}
+.col+.col{{border-left:1px solid var(--line)}}
+.col-fwd{{background:var(--bg2)}}
+.col-h{{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:700;
+  display:flex;align-items:center;gap:7px}}
+.col-h .reported{{color:var(--beat);background:var(--beat-bg);border-radius:5px;padding:1px 6px;font-size:9px;letter-spacing:.3px}}
 .metric{{}}
-.mlabel{{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:5px}}
-.mbig{{font-family:var(--serif);font-size:27px;font-weight:600;line-height:1.05;
-  font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}}
-.mbig.sm{{font-size:20px}} .mbig.mut{{color:var(--muted);font-size:18px}}
-.munit{{font-family:var(--sans);font-size:11px;color:var(--muted);font-weight:600;margin-left:-3px}}
-.pill{{font-family:var(--sans);font-size:12px;font-weight:800;padding:2px 9px;border-radius:7px;letter-spacing:.2px}}
+.mlabel{{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:4px}}
+.mbig{{font-family:var(--serif);font-size:25px;font-weight:600;line-height:1.05;font-variant-numeric:tabular-nums;
+  display:flex;align-items:baseline;gap:5px;flex-wrap:wrap}}
+.mbig.sm{{font-size:19px}} .mbig.mut{{color:var(--muted);font-size:16px}}
+.munit{{font-family:var(--sans);font-size:10.5px;color:var(--muted);font-weight:600}}
+.diff{{display:flex;align-items:center;gap:8px;margin:7px 0 3px}}
+.pill{{font-family:var(--sans);font-size:11.5px;font-weight:800;padding:2px 8px;border-radius:6px;letter-spacing:.2px;flex:none}}
 .pill.beat{{background:var(--beat-bg);color:var(--beat)}} .pill.miss{{background:var(--miss-bg);color:var(--miss)}}
-.cbar{{position:relative;height:6px;background:var(--bg2);border-radius:4px;margin:9px 0 6px}}
-.cmid{{position:absolute;left:50%;top:-2px;bottom:-2px;width:1.5px;background:var(--line)}}
+.cbar{{position:relative;height:6px;background:var(--panel);border:1px solid var(--line);border-radius:4px;flex:1;min-width:44px}}
+.cmid{{position:absolute;left:50%;top:-1px;bottom:-1px;width:1.5px;background:var(--muted);opacity:.5}}
 .cf{{position:absolute;top:0;bottom:0;border-radius:4px}}
 .cf.beat{{background:var(--beat)}} .cf.miss{{background:var(--miss)}}
-.cons{{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}}
-.cons-inline{{font-size:12px;color:var(--muted);font-weight:600;margin-left:4px}}
-
-.fwd{{margin-top:16px;padding:12px 14px;background:var(--bg2);border-radius:11px}}
-.fwd-h{{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:6px}}
-.fwd-r{{display:flex;gap:16px;flex-wrap:wrap;font-size:13.5px;color:var(--ink2)}}
-.fwd-r b{{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}}
-.gd{{font-size:12px;color:var(--gd);line-height:1.6;margin-top:6px}}
-.fwd .gd{{margin-top:8px}}
-
-.stats{{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:16px;
-  background:var(--line);border-radius:11px;overflow:hidden;border:1px solid var(--line)}}
+.cons{{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}}
+.guidbox{{background:#f7edd7;border-radius:9px;padding:9px 11px;margin-top:2px}}
+.guidbox .gl{{display:block;font-size:9.5px;color:var(--gd);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:3px}}
+.guidbox .gv{{font-size:12.5px;color:#6b5416;font-weight:600;line-height:1.5}}
+.gd{{font-size:12px;color:var(--ink2);line-height:1.68}}
+.col-fwd .gd{{color:var(--ink2)}}
+.stats{{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:13px;background:var(--line);
+  border-radius:11px;overflow:hidden;border:1px solid var(--line)}}
 .stat{{background:var(--panel);padding:9px 6px;text-align:center}}
 .sl{{font-size:9.5px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px}}
 .sv{{font-family:var(--mono);font-size:13.5px;font-weight:600;font-variant-numeric:tabular-nums}}
-
-.cview{{margin:15px 0 0;padding:12px 14px 12px 16px;background:var(--henry-bg);border-left:3px solid var(--henry);
-  border-radius:0 10px 10px 0;font-size:12.5px;color:var(--ink2);line-height:1.72;font-style:normal}}
-.cview::before{{content:"“";font-family:var(--serif);color:var(--henry);font-size:20px;line-height:0;
-  margin-right:2px;vertical-align:-4px;opacity:.5}}
-
-footer{{color:var(--muted);font-size:11.5px;text-align:center;margin-top:30px;line-height:1.8;
-  padding-top:18px;border-top:1px solid var(--line)}}
+.cview{{margin:14px 0 0;padding:12px 14px 12px 16px;background:var(--henry-bg);border-left:3px solid var(--henry);
+  border-radius:0 10px 10px 0;font-size:12.5px;color:var(--ink2);line-height:1.72}}
+.cview::before{{content:"“";font-family:var(--serif);color:var(--henry);font-size:20px;line-height:0;margin-right:2px;vertical-align:-4px;opacity:.5}}
+footer{{color:var(--muted);font-size:11.5px;text-align:center;margin-top:30px;line-height:1.8;padding-top:18px;border-top:1px solid var(--line)}}
 @media(max-width:520px){{
   body{{padding:16px 12px 44px}} h1{{font-size:25px}}
   .grid{{grid-template-columns:1fr;gap:13px}} .kpi{{min-width:100px;padding:11px 13px}}
+  .cols{{grid-template-columns:1fr}} .col+.col{{border-left:0;border-top:1px solid var(--line)}}
 }}
 </style></head><body><div class="wrap">
 {NAV}
 <div class="masthead">
 <h1>美股財報區</h1>
-<p class="lede">兩位分析師的美股財報數字，各自獨立呈現。<b>韭菜王 Allen</b>＝投資 cover list 模型（Allen 預估／Bloomberg 共識／實際／公司指引）；<b>Henry</b>＝Pentimetrics「The Trace」券商彙整與市場（Bloomberg）共識。營收單位為億、各檔原幣別。</p>
+<p class="lede">兩位分析師的美股財報，<b>依多空立場分組</b>。每張卡兩欄：左＝最新季（實際 vs 共識的<b>預期差</b>），右＝下季<b>展望</b>（Allen 預估 vs 共識預期差＋公司指引）。<b>韭菜王 Allen</b>＝cover list 模型；<b>Henry</b>＝Pentimetrics「The Trace」券商彙整與 Bloomberg 共識。營收單位億、各檔原幣別。</p>
 <div class="updated">UPDATED {updated}</div>
 </div>
 <div class="kpis">
@@ -404,19 +420,19 @@ footer{{color:var(--muted);font-size:11.5px;text-align:center;margin-top:30px;li
  <span class="chip" data-s="看多" onclick="pick(this)">看多</span>
  <span class="chip" data-s="中性偏多" onclick="pick(this)">中性偏多</span>
  <span class="chip" data-s="中性" onclick="pick(this)">中性</span>
+ <span class="chip" data-s="中性偏空" onclick="pick(this)">中性偏空</span>
  <span class="chip" data-s="偏空" onclick="pick(this)">偏空</span>
 </div>
 
 <section class="src-block">
 <div class="secthead"><h2><span class="dot">A</span>韭菜王 Allen · Cover List</h2>
-<span class="secsub">每季財報模型・數字取自 cover list（股價／PE 隨 GOOGLEFINANCE 日更）。</span></div>
-<div class="grid">
-{allen_cards}
-</div></section>
+<span class="secsub">每季財報模型・依 Allen 立場分組（股價／PE 隨 GOOGLEFINANCE 日更）。</span></div>
+{allen_groups}
+</section>
 {henry_sec}
 
 <footer>Allen 數字取自 cover list（AMZN 用營業利益、PANW 用 FCF 故 EPS 留「—」；ASML／NOK 歐元、聯發科台幣，其餘美元；GOOG 2Q26 EPS 含未實現利得故 Beat% 偏高）。<br>
-Henry 數字為 Pentimetrics「The Trace」原文摘錄、標出處期號／日期；「市場預期」＝Bloomberg 共識，另附 buy side。數字一字不差、未明列者留空。<br>
+Henry 數字為 Pentimetrics「The Trace」原文摘錄、標出處期號／日期；立場依 Henry 原文評語判定；「市場預期」＝Bloomberg 共識，另附 buy side。數字一字不差、未明列者留空。<br>
 Allen 區每日重跑更新；Henry 區為精選快照。© Evan 投資工作區</footer>
 </div>
 <script>
@@ -426,8 +442,12 @@ function flt(){{
   var s=document.querySelector('.chip.on').dataset.s;
   document.querySelectorAll('.card').forEach(function(c){{
     var okQ=(!q||c.dataset.s.indexOf(q)>=0);
-    var okS=(s==='all'||!c.dataset.stance||c.dataset.stance===s);
+    var okS=(s==='all'||c.dataset.stance===s);
     c.style.display=(okQ&&okS)?'':'none';
+  }});
+  document.querySelectorAll('.stance-group').forEach(function(g){{
+    var any=[].some.call(g.querySelectorAll('.card'),x=>x.style.display!=='none');
+    g.style.display=any?'':'none';
   }});
   document.querySelectorAll('.src-block').forEach(function(b){{
     var any=[].some.call(b.querySelectorAll('.card'),x=>x.style.display!=='none');
