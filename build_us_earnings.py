@@ -69,8 +69,8 @@ def extract(wbd, wbf):
         rec = {
             "name": META[t][0], "stance": META[t][1], "date": META[t][2],
             "unit": unit, "cur_q": lab("F").replace("(E)", ""),
-            "act_rev": num(c("H", 5)), "cons_rev": num(c("G", 5)),
-            "act_eps": num(c("H", 9)), "cons_eps": num(c("G", 9)),
+            "act_rev": num(c("H", 5)), "cons_rev": num(c("G", 5)), "est_rev": num(c("F", 5)),
+            "act_eps": num(c("H", 9)), "cons_eps": num(c("G", 9)), "est_eps": num(c("F", 9)),
             "n_q": lab("I").replace("(E)", ""),
             "n_est_rev": num(c("I", 5)), "n_est_eps": num(c("I", 9)),
             "n_cons_rev": num(c("J", 5)), "n_cons_eps": num(c("J", 9)),
@@ -137,7 +137,7 @@ def diff_row(p, cons_str):
         seg = (f'<span class="cf beat" style="left:50%;width:{w:.0f}%"></span>' if p >= 0
                else f'<span class="cf miss" style="right:50%;width:{w:.0f}%"></span>')
         bar = f'<div class="cbar"><span class="cmid"></span>{seg}</div>'
-    cl = f'<div class="cons">{esc(cons_str)}</div>' if cons_str else ""
+    cl = f'<div class="cons">{cons_str}</div>' if cons_str else ""  # cons_str 已是安全 HTML
     return f'<div class="diff">{pill}{bar}</div>{cl}' if (pill or bar or cl) else ""
 
 
@@ -154,22 +154,28 @@ def metric(label, big, unit, p, cons_str, big_cls=""):
 def allen_card(t, r):
     scls = STANCE_CLS.get(r["stance"], "s-neu")
     unit = r["unit"] or "USD"
-    # 左欄：最新季
+    # 左欄：最新季（實際為主，並列 Allen 估／BBG 共識）
+    def cmp3(est, cons):
+        segs = []
+        if est is not None: segs.append(f'Allen 估 {est}')
+        if cons is not None: segs.append(f'<b>共識 {cons}</b>')
+        return " · ".join(segs)
     rev_m = metric("實際營收", bil(r["act_rev"]), unit, pct(r["act_rev"], r["cons_rev"]),
-                   f'vs 共識 {bil(r["cons_rev"])}' if bil(r["cons_rev"]) else "")
+                   cmp3(bil(r["est_rev"]), bil(r["cons_rev"])))
     eps_m = ""
     if is_eps(r["act_eps"]):
         eps_m = metric("EPS", fmt(r["act_eps"]), "", pct(r["act_eps"], r["cons_eps"]),
-                       f'vs 共識 {fmt(r["cons_eps"])}' if is_eps(r["cons_eps"]) else "", "sm")
+                       cmp3(fmt(r["est_eps"]) if is_eps(r["est_eps"]) else None,
+                            fmt(r["cons_eps"]) if is_eps(r["cons_eps"]) else None), "sm")
     left = (f'<div class="col"><div class="col-h">最新季 · {esc(r["cur_q"] or "—")}'
             f'<span class="reported">已公布</span></div>{rev_m}{eps_m}</div>')
     # 右欄：下季展望（Allen vs 共識預期差）+ 公司指引
     nq = r["n_q"] or ""
     nrev = bil(r["n_est_rev"]); neps = fmt(r["n_est_eps"]) if is_eps(r["n_est_eps"]) else None
     nrev_m = metric("Allen 營收", nrev, unit, pct(r["n_est_rev"], r["n_cons_rev"]),
-                    f'vs 共識 {bil(r["n_cons_rev"])}' if bil(r["n_cons_rev"]) else "") if nrev else ""
+                    f'<b>共識 {bil(r["n_cons_rev"])}</b>' if bil(r["n_cons_rev"]) else "") if nrev else ""
     neps_m = metric("Allen EPS", neps, "", pct(r["n_est_eps"], r["n_cons_eps"]),
-                    f'vs 共識 {fmt(r["n_cons_eps"])}' if is_eps(r["n_cons_eps"]) else "", "sm") if neps else ""
+                    f'<b>共識 {fmt(r["n_cons_eps"])}</b>' if is_eps(r["n_cons_eps"]) else "", "sm") if neps else ""
     guid = r["guid"] if isinstance(r["guid"], str) else (bil(r["guid"]) if isinstance(r["guid"], (int, float)) else None)
     guid_m = f'<div class="guidbox"><span class="gl">公司指引</span><span class="gv">{esc(guid)}</span></div>' if guid else ""
     right = ""
@@ -382,6 +388,7 @@ h1{{font-family:var(--serif);font-size:31px;font-weight:600;margin:0 0 6px;lette
 .cf{{position:absolute;top:0;bottom:0;border-radius:4px}}
 .cf.beat{{background:var(--beat)}} .cf.miss{{background:var(--miss)}}
 .cons{{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}}
+.cons b{{color:var(--ink2);font-weight:700}}
 .guidbox{{background:#f7edd7;border-radius:9px;padding:9px 11px;margin-top:2px}}
 .guidbox .gl{{display:block;font-size:9.5px;color:var(--gd);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:3px}}
 .guidbox .gv{{font-size:12.5px;color:#6b5416;font-weight:600;line-height:1.5}}
