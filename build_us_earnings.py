@@ -126,19 +126,24 @@ def pnum(s):
     return float(m.group()) if m else None
 
 
+def add_commas(s):
+    """把字串裡 4 位以上的整數加千分位（用於 Allen 指引的純數字區間，如 152200~159800）。"""
+    if not isinstance(s, str):
+        return s
+    return re.sub(r"\d{4,}", lambda m: f"{int(m.group()):,}", s)
+
+
 def diff_row(p, cons_str):
-    """預期差列：pill(▲/▼ %) + 迷你比較條 + vs 共識文字。"""
-    pill = bar = ""
+    """預期差列：pill(▲/▼ %) + vs 共識文字（比較條已移除，pill 即表達差距）。"""
+    pill = ""
     if p is not None:
         cls = "beat" if p >= 0 else "miss"
         arr = "▲" if p >= 0 else "▼"
         pill = f'<span class="pill {cls}">{arr}{abs(p):.1f}%</span>'
-        w = min(abs(p) / 25.0, 1.0) * 50.0
-        seg = (f'<span class="cf beat" style="left:50%;width:{w:.0f}%"></span>' if p >= 0
-               else f'<span class="cf miss" style="right:50%;width:{w:.0f}%"></span>')
-        bar = f'<div class="cbar"><span class="cmid"></span>{seg}</div>'
     cl = f'<div class="cons">{cons_str}</div>' if cons_str else ""  # cons_str 已是安全 HTML
-    return f'<div class="diff">{pill}{bar}</div>{cl}' if (pill or bar or cl) else ""
+    if not (pill or cl):
+        return ""
+    return f'<div class="diff">{pill}</div>{cl}' if pill else cl
 
 
 def metric(label, big, unit, p, cons_str, big_cls=""):
@@ -176,7 +181,7 @@ def allen_card(t, r):
                     f'<b>共識 {bil(r["n_cons_rev"])}</b>' if bil(r["n_cons_rev"]) else "") if nrev else ""
     neps_m = metric("Allen EPS", neps, "", pct(r["n_est_eps"], r["n_cons_eps"]),
                     f'<b>共識 {fmt(r["n_cons_eps"])}</b>' if is_eps(r["n_cons_eps"]) else "", "sm") if neps else ""
-    guid = r["guid"] if isinstance(r["guid"], str) else (bil(r["guid"]) if isinstance(r["guid"], (int, float)) else None)
+    guid = add_commas(r["guid"]) if isinstance(r["guid"], str) else (bil(r["guid"]) if isinstance(r["guid"], (int, float)) else None)
     guid_m = f'<div class="guidbox"><span class="gl">公司指引</span><span class="gv">{esc(guid)}</span></div>' if guid else ""
     right = ""
     if nrev_m or neps_m or guid_m:
