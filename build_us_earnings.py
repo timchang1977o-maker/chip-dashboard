@@ -18,6 +18,13 @@ from pathlib import Path
 
 SHEET_ID = "1Hfb1eX23xCbGMYOh-76_DjpAgwl7-8DG8TjbtxqZRD4"
 EXPORT = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=xlsx"
+# Allen 主題分類追蹤清單（全覆蓋、含 cover list 未建模者）
+WATCHLIST_ID = "13ZVfAeBo3hKFLebMh2mDPgC4iJgULYePcJuJoWLJFTg"
+WATCHLIST_EXPORT = f"https://docs.google.com/spreadsheets/d/{WATCHLIST_ID}/export?format=xlsx"
+# 主題顯示順序與中文標籤（key 用 sheet row2 header 開頭比對）
+THEME_LABELS = [("M7", "M7 大型科技"), ("Semi", "半導體 Semi"), ("WFE", "半導體設備 WFE"),
+                ("Optical", "光通訊 Optical"), ("Security", "資安 Security"),
+                ("ADs", "廣告 Ads"), ("Tech", "軟體平台 Tech"), ("AIDC", "AIDC 電力")]
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 ROOT = Path(__file__).resolve().parent
 
@@ -54,6 +61,35 @@ def load_wb():
 
 def num(v):
     return v if isinstance(v, (int, float)) else None
+
+
+def fetch_watchlist():
+    """抓 Allen 主題追蹤 sheet → [(category_header, [tickers]), ...]，保順序。失敗回 []。"""
+    try:
+        req = urllib.request.Request(WATCHLIST_EXPORT, headers={"User-Agent": UA})
+        raw = urllib.request.urlopen(req, timeout=45).read()
+        ws = openpyxl.load_workbook(io.BytesIO(raw), data_only=True).active
+    except Exception as e:
+        print("watchlist fetch fail:", e)
+        return []
+    out = []
+    for c in range(1, ws.max_column + 1):
+        hdr = ws.cell(row=2, column=c).value
+        if not hdr:
+            continue
+        hdr = str(hdr).strip()
+        tks = []
+        for r in range(3, ws.max_row + 1):
+            v = ws.cell(row=r, column=c).value
+            if v is None:
+                continue
+            s = str(v).strip()
+            # 只留像 ticker 的：英數/點/連字號、長度 1-7（濾掉中文註記、"**7/14…"）
+            if re.match(r"^[A-Za-z0-9.\-]{1,7}$", s):
+                tks.append(s)
+        if tks:
+            out.append((hdr, tks))
+    return out
 
 
 def extract(wbd, wbf):
@@ -254,12 +290,76 @@ def stance_groups(cards_by_stance):
     return "\n".join(out)
 
 
+WL_ALIAS = {"GOOGL": "GOOG", "TSMC": "TSM", "2454-TW": "MTK"}
+
+
+def stance_class(s):
+    """把 kb 各種立場用字（含「看多→中性」「看多（短線警示）」「看空」「觀察」）對映到顏色 class。"""
+    if not s:
+        return "s-none"
+    t = s.split("→")[-1]  # 轉折取箭頭後結果，如 看多→中性 視為中性
+    if "中性偏多" in t or "偏多" in t:
+        return "s-bullmid"
+    if "中性偏空" in t or "偏空" in t:
+        return "s-bearmid"
+    if t.strip() == "中性":
+        return "s-neu"
+    if "看空" in t or "偏空" in t or "看淡" in t:
+        return "s-bear"
+    if "看多" in t or "正面" in t or "加碼" in t:
+        return "s-bull"
+    if "觀察" in t or "追蹤" in t or "中立" in t:
+        return "s-watch"
+    return "s-neu"
+
+
+def mini_card(tk, uni, model_set):
+    """緊湊卡：代號＋中文名＋立場＋一句 kb 觀點；有 cover list 模型標 📊。"""
+    info = uni.get(tk, {})
+    name = info.get("name") or ""
+    stance = info.get("stance")
+    view = info.get("view")
+    has_model = WL_ALIAS.get(tk, tk) in model_set
+    scls = stance_class(stance) if stance else "s-none"
+    bucket = {"s-bull": "看多", "s-bullmid": "中性偏多", "s-neu": "中性",
+              "s-bearmid": "中性偏空", "s-bear": "偏空"}.get(scls, "")  # 對齊 chip 篩選
+    badge = f'<span class="badge {scls}">{esc(stance)}</span>' if stance else '<span class="badge s-none">—</span>'
+    model = '<span class="mtag" title="cover list 有完整模型">📊</span>' if has_model else ""
+    vline = f'<div class="mview">{esc(view)}</div>' if view else ""
+    searchtxt = f"{tk} {name}".lower()
+    return (f'<article class="mini {scls}" data-t="{esc(tk)}" data-stance="{esc(bucket)}" data-s="{searchtxt}">'
+            f'<div class="mini-h"><span class="msym">{esc(tk)}</span>'
+            f'<span class="mnm">{esc(name)}</span>{model}{badge}</div>{vline}</article>')
+
+
+def universe_section(watchlist, uni, model_set):
+    if not watchlist:
+        return ""
+    # 主題排序：先照 THEME_LABELS，未列到的接在後面
+    order = {k: i for i, (k, _) in enumerate(THEME_LABELS)}
+    label = {k: v for k, v in THEME_LABELS}
+    def rank(hdr):
+        for k, i in order.items():
+            if hdr.startswith(k):
+                return i
+        return 99
+    blocks = []
+    total = 0
+    for hdr, tks in sorted(watchlist, key=lambda x: rank(x[0])):
+        lab = next((v for k, v in THEME_LABELS if hdr.startswith(k)), hdr)
+        total += len(tks)
+        cards = "".join(mini_card(tk, uni, model_set) for tk in tks)
+        blocks.append(f'<div class="theme-group"><div class="tband">{esc(lab)}'
+                      f'<em>{len(tks)}</em></div><div class="mgrid">{cards}</div></div>')
+    return total, "\n".join(blocks)
+
+
 NAV = ('<nav class="topnav"><a href="index.html">📊 籌碼總覽</a>'
        '<a href="institutions.html">🏦 法人買賣超</a>'
        '<a href="us_earnings.html" class="on">📈 美股財報</a></nav>')
 
 
-def build_html(data, henry, updated):
+def build_html(data, henry, watchlist, uni, updated):
     # Allen 依立場分組
     a_by = {}
     for t in ORDER:
@@ -272,6 +372,17 @@ def build_html(data, henry, updated):
         h_by.setdefault(h.get("stance") or "追蹤", []).append(henry_card(h))
     henry_groups = stance_groups(h_by)
 
+    # Allen 追蹤全景（依主題）
+    model_set = set(ORDER)
+    uni_total, uni_blocks = (universe_section(watchlist, uni, model_set) if watchlist else (0, ""))
+    uni_sec = ""
+    if uni_blocks:
+        uni_sec = f"""
+<section class="src-block uni-block">
+<div class="secthead"><h2><span class="dot">A</span>Allen 追蹤全景 · 依主題</h2>
+<span class="secsub">Allen 追蹤的全部標的（含 cover list 未建模者），依他自己的主題分類。<span class="mtag">📊</span>＝上方有完整財報模型。共 {uni_total} 檔。</span></div>
+{uni_blocks}
+</section>"""
     n = len(data)
     bull = sum(1 for r in data.values() if r["stance"] == "看多")
     bear = sum(1 for r in data.values() if r["stance"] == "偏空")
@@ -409,6 +520,23 @@ h1{{font-family:var(--serif);font-size:31px;font-weight:600;margin:0 0 6px;lette
 .cview{{margin:14px 0 0;padding:12px 14px 12px 16px;background:var(--henry-bg);border-left:3px solid var(--henry);
   border-radius:0 10px 10px 0;font-size:12.5px;color:var(--ink2);line-height:1.72}}
 .cview::before{{content:"“";font-family:var(--serif);color:var(--henry);font-size:20px;line-height:0;margin-right:2px;vertical-align:-4px;opacity:.5}}
+/* Allen 追蹤全景：主題帶＋緊湊卡 */
+.theme-group{{margin:0 0 4px}}
+.tband{{display:flex;align-items:center;gap:9px;margin:16px 0 10px;font:700 13px var(--sans);letter-spacing:.5px;color:var(--ink)}}
+.tband em{{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--hair);border-radius:20px;padding:1px 9px}}
+.mgrid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:10px}}
+.mini{{position:relative;background:var(--panel);border:1px solid var(--hair);border-radius:12px;padding:11px 13px 12px;box-shadow:var(--shadow);overflow:hidden}}
+.mini::before{{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--neu)}}
+.mini.s-bull::before{{background:var(--bull)}} .mini.s-bullmid::before{{background:var(--bullmid)}}
+.mini.s-neu::before{{background:var(--neu)}} .mini.s-bearmid::before{{background:var(--bearmid)}}
+.mini.s-bear::before{{background:var(--bear)}} .mini.s-watch::before{{background:var(--gd)}}
+.mini.s-none::before{{background:var(--line)}}
+.mini-h{{display:flex;align-items:center;gap:7px}}
+.msym{{font-family:var(--serif);font-weight:700;font-size:15px;letter-spacing:.2px}}
+.mnm{{color:var(--muted);font-size:11px;margin-right:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:82px}}
+.mtag{{font-size:11px;flex:none}}
+.mview{{margin-top:7px;font-size:11px;color:var(--ink2);line-height:1.55}}
+.badge.s-none{{background:#efece5;color:var(--muted)}}
 footer{{color:var(--muted);font-size:11.5px;text-align:center;margin-top:30px;line-height:1.8;padding-top:18px;border-top:1px solid var(--line)}}
 @media(max-width:520px){{
   body{{padding:16px 12px 44px}} h1{{font-size:25px}}
@@ -443,6 +571,7 @@ footer{{color:var(--muted);font-size:11.5px;text-align:center;margin-top:30px;li
 <span class="secsub">每季財報模型・依 Allen 立場分組（股價／PE 隨 GOOGLEFINANCE 日更）。</span></div>
 {allen_groups}
 </section>
+{uni_sec}
 {henry_sec}
 
 <footer>Allen 數字取自 cover list（AMZN 用營業利益、PANW 用 FCF 故 EPS 留「—」；ASML／NOK 歐元、聯發科台幣，其餘美元；GOOG 2Q26 EPS 含未實現利得故 Beat% 偏高）。<br>
@@ -454,17 +583,17 @@ function pick(el){{document.querySelectorAll('.chip').forEach(c=>c.classList.rem
 function flt(){{
   var q=document.getElementById('q').value.trim().toLowerCase();
   var s=document.querySelector('.chip.on').dataset.s;
-  document.querySelectorAll('.card').forEach(function(c){{
+  document.querySelectorAll('.card,.mini').forEach(function(c){{
     var okQ=(!q||c.dataset.s.indexOf(q)>=0);
     var okS=(s==='all'||c.dataset.stance===s);
     c.style.display=(okQ&&okS)?'':'none';
   }});
-  document.querySelectorAll('.stance-group').forEach(function(g){{
-    var any=[].some.call(g.querySelectorAll('.card'),x=>x.style.display!=='none');
+  document.querySelectorAll('.stance-group,.theme-group').forEach(function(g){{
+    var any=[].some.call(g.querySelectorAll('.card,.mini'),x=>x.style.display!=='none');
     g.style.display=any?'':'none';
   }});
   document.querySelectorAll('.src-block').forEach(function(b){{
-    var any=[].some.call(b.querySelectorAll('.card'),x=>x.style.display!=='none');
+    var any=[].some.call(b.querySelectorAll('.card,.mini'),x=>x.style.display!=='none');
     b.style.display=any?'':'none';
   }});
 }}
@@ -482,9 +611,20 @@ def main():
             henry = json.loads(hp.read_text(encoding="utf-8"))
         except Exception as e:
             print("henry_data.json parse fail:", e)
+    # Allen 追蹤全景：清單即時抓 sheet，立場/觀點由 allen_universe.json 快照補
+    watchlist = fetch_watchlist()
+    uni = {}
+    up = ROOT / "allen_universe.json"
+    if up.exists():
+        try:
+            uni = {x["ticker"]: x for x in json.loads(up.read_text(encoding="utf-8")) if x.get("ticker")}
+        except Exception as e:
+            print("allen_universe.json parse fail:", e)
     updated = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    (ROOT / "us_earnings.html").write_text(build_html(data, henry, updated), encoding="utf-8")
-    print(f"wrote us_earnings.html  (Allen {len(data)} / Henry {len(henry)})")
+    (ROOT / "us_earnings.html").write_text(
+        build_html(data, henry, watchlist, uni, updated), encoding="utf-8")
+    n_uni = sum(len(t) for _, t in watchlist)
+    print(f"wrote us_earnings.html  (Allen {len(data)} / Henry {len(henry)} / 追蹤 {n_uni})")
 
 
 if __name__ == "__main__":
