@@ -332,22 +332,25 @@ def mini_card(tk, uni, model_set):
             f'<span class="mnm">{esc(name)}</span>{model}{badge}</div>{vline}</article>')
 
 
-def universe_section(watchlist, uni, model_set):
-    if not watchlist:
-        return ""
-    # 主題排序：先照 THEME_LABELS，未列到的接在後面
+def universe_section(uni, model_set):
+    """以 allen_universe.json（kb 驅動、完整）的 category 分組渲染。"""
+    if not uni:
+        return 0, ""
+    groups = {}
+    for tk, info in uni.items():
+        cat = (info.get("category") or "其他").strip()
+        groups.setdefault(cat, []).append(tk)
     order = {k: i for i, (k, _) in enumerate(THEME_LABELS)}
     label = {k: v for k, v in THEME_LABELS}
-    def rank(hdr):
-        for k, i in order.items():
-            if hdr.startswith(k):
-                return i
-        return 99
-    blocks = []
-    total = 0
-    for hdr, tks in sorted(watchlist, key=lambda x: rank(x[0])):
-        lab = next((v for k, v in THEME_LABELS if hdr.startswith(k)), hdr)
+    def cat_rank(cat):
+        return order.get(cat, 90 + (1 if cat == "其他" else 0))
+    def tk_key(tk):
+        return (0 if WL_ALIAS.get(tk, tk) in model_set else 1, tk)  # 有模型的排前
+    blocks, total = [], 0
+    for cat in sorted(groups, key=cat_rank):
+        tks = sorted(groups[cat], key=tk_key)
         total += len(tks)
+        lab = label.get(cat, cat)
         cards = "".join(mini_card(tk, uni, model_set) for tk in tks)
         blocks.append(f'<div class="theme-group"><div class="tband">{esc(lab)}'
                       f'<em>{len(tks)}</em></div><div class="mgrid">{cards}</div></div>')
@@ -359,7 +362,7 @@ NAV = ('<nav class="topnav"><a href="index.html">📊 籌碼總覽</a>'
        '<a href="us_earnings.html" class="on">📈 美股財報</a></nav>')
 
 
-def build_html(data, henry, watchlist, uni, updated):
+def build_html(data, henry, uni, updated):
     # Allen 依立場分組
     a_by = {}
     for t in ORDER:
@@ -372,9 +375,9 @@ def build_html(data, henry, watchlist, uni, updated):
         h_by.setdefault(h.get("stance") or "追蹤", []).append(henry_card(h))
     henry_groups = stance_groups(h_by)
 
-    # Allen 追蹤全景（依主題）
+    # Allen 追蹤全景（依主題）— 來源＝allen_universe.json（kb 驅動、完整聯集）
     model_set = set(ORDER)
-    uni_total, uni_blocks = (universe_section(watchlist, uni, model_set) if watchlist else (0, ""))
+    uni_total, uni_blocks = universe_section(uni, model_set)
     uni_sec = ""
     if uni_blocks:
         uni_sec = f"""
@@ -611,8 +614,7 @@ def main():
             henry = json.loads(hp.read_text(encoding="utf-8"))
         except Exception as e:
             print("henry_data.json parse fail:", e)
-    # Allen 追蹤全景：清單即時抓 sheet，立場/觀點由 allen_universe.json 快照補
-    watchlist = fetch_watchlist()
+    # Allen 追蹤全景：完整清單＋立場/觀點/主題皆來自 allen_universe.json（kb 驅動快照）
     uni = {}
     up = ROOT / "allen_universe.json"
     if up.exists():
@@ -622,9 +624,8 @@ def main():
             print("allen_universe.json parse fail:", e)
     updated = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     (ROOT / "us_earnings.html").write_text(
-        build_html(data, henry, watchlist, uni, updated), encoding="utf-8")
-    n_uni = sum(len(t) for _, t in watchlist)
-    print(f"wrote us_earnings.html  (Allen {len(data)} / Henry {len(henry)} / 追蹤 {n_uni})")
+        build_html(data, henry, uni, updated), encoding="utf-8")
+    print(f"wrote us_earnings.html  (Allen {len(data)} / Henry {len(henry)} / 追蹤 {len(uni)})")
 
 
 if __name__ == "__main__":

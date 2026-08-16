@@ -46,14 +46,35 @@ then
 fi
 rm -f "$JSON.bak"
 
+# ④b Allen 追蹤全景 enrichment（kb 驅動、完整聯集）→ allen_universe.json
+UNI="$CHIP/allen_universe.json"
+echo "④b claude 重萃 Allen 全景（kb∪sheet）…" | tee -a "$LOG"
+cp "$UNI" "$UNI.bak" 2>/dev/null || true
+if claude -p "$(cat "$CHIP/allen_universe_prompt.txt")" \
+        --model "$MODEL" --dangerously-skip-permissions >>"$LOG" 2>&1 \
+   && python3 - "$UNI" <<'PY'
+import json,sys
+d=json.load(open(sys.argv[1]))
+assert isinstance(d,list) and len(d)>=30, f"筆數太少：{len(d)}"
+bad=[x.get("ticker") for x in d if not x.get("ticker") or not x.get("category")]
+assert not bad, f"缺 ticker/category：{bad}"
+print(f"OK Allen 全景 {len(d)} 檔")
+PY
+then
+  rm -f "$UNI.bak"
+else
+  echo "  Allen 全景重萃失敗/驗證未過，還原舊快照（不擋主流程）" | tee -a "$LOG"
+  [ -f "$UNI.bak" ] && mv "$UNI.bak" "$UNI"
+fi
+
 # ⑤ 重建頁面（同時抓 cover list 最新 Allen 數字）
-echo "④ 重建 us_earnings.html…" | tee -a "$LOG"
+echo "⑤ 重建 us_earnings.html…" | tee -a "$LOG"
 ( cd "$CHIP" && python3 build_us_earnings.py ) | tee -a "$LOG"
 
 # ⑥ commit + push（push 走 gh 認證；無變更就跳過）
-echo "⑤ 部署…" | tee -a "$LOG"
+echo "⑥ 部署…" | tee -a "$LOG"
 cd "$CHIP"
-git add henry_data.json us_earnings.html
+git add henry_data.json allen_universe.json us_earnings.html
 if git diff --staged --quiet; then
   echo "（無變更，不用部署）" | tee -a "$LOG"; exit 0
 fi

@@ -1,0 +1,25 @@
+你是資料萃取工。自己動手用 bash/python3/sqlite3/openpyxl 完成，不要問我、不要派 subagent，最後把結果寫成 JSON 檔。
+
+## 目標
+重建 Allen（韭菜王）完整追蹤清單 enrichment，覆寫：
+`/Users/mac/chip-dashboard/allen_universe.json`（JSON 陣列）。
+涵蓋**聯集**：kb 有的所有個股 ∪ Allen 分類 sheet 上的所有個股。**只抄來源、沒有的 null、絕不編造。**
+
+## 來源（本機）
+1. kb（主來源）：`/Users/mac/Downloads/Evan.agent/kb/INDEX.md`＋`/Users/mac/Downloads/Evan.agent/kb/tickers/*.md`
+   （檔名即 ticker；聯發科.md 對映 ticker "MTK" name "聯發科"）
+2. 分類 sheet（拿來對 category 主題）：
+   `curl -sL -A "Mozilla/5.0" "https://docs.google.com/spreadsheets/d/13ZVfAeBo3hKFLebMh2mDPgC4iJgULYePcJuJoWLJFTg/export?format=xlsx" -o /tmp/allen_wl.xlsx`
+   openpyxl 讀 active sheet：欄=主題、row2 標頭、row3+ 是 ticker（濾掉含中文/「**」的註記格）。主題：M7/Semi/WFE/Optical/Security/ADs/Tech/AIDC。sheet 的 2454-TW = MTK。
+
+## 每檔欄位
+ticker（kb 檔名代號；聯發科→MTK，且與 sheet 2454-TW 去重合一）、name、category、stance、view、src_date、note
+- category：在 sheet 某主題欄→用該主題；只在 kb→依 kb 產業描述歸最合適主題，不合再用 "其他"（把依據寫 note）。
+- stance：照 kb INDEX 最新那列原文用字（看多／中性偏多／中性／中性偏空／偏空／看空／觀察／看多→中性／看多（短線警示）等原樣）；kb 無→null。
+- view：kb INDEX 該檔最新列論點濃縮 ≤50 字，照原文語氣；kb 無→null。
+- src_date：該列日期；無→null。
+- kb 多筆取最新日期。sheet-only（kb 無檔，如 CRDO/CRWD）：category 用 sheet 主題、name 給常用名、其餘 null。
+
+## 完成後
+寫出 `/Users/mac/chip-dashboard/allen_universe.json`，最後印一行：
+`DONE n=<檔數> kb_only=<數> sheet_only=<數> cats=<各主題檔數>`
