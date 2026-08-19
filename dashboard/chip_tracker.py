@@ -62,36 +62,48 @@ def _F(s):
 
 
 # ----------------------------- fetchers -----------------------------
-def fetch_futures(start, end, existing=None):
-    """臺股期貨 三大法人 未平倉口數淨額（口）。
+def fetch_futures(start, end, existing=None, existing_mtx=None, existing_tmf=None):
+    """臺股期貨（大台）三大法人未平倉口數淨額（口）＋順便從同一份回應
+    抓小台(MTX)/微台(TMF) 三大法人多方/空方未平倉口數合計（供散戶多空比用）。
 
     ⚠️ 失敗保底：TAIFEX 對雲端 IP 偶爾封鎖／回空。3 次重試，全空就「保留既有、不清空」
     （未平倉為歷史不變值，全量成功時 merge 進既有＝自癒缺口；失敗時絕不覆蓋成空）。
+    commodity_id 參數該端點實測會忽略、一律回傳全商品清單，故單一請求可同時取三種商品。
     """
     fut = dict(existing or {})
+    mtx = dict(existing_mtx or {})
+    tmf = dict(existing_tmf or {})
     for _ in range(3):
         t = _post("https://www.taifex.com.tw/cht/3/futContractsDateDown",
                   {"firstDate": "", "lastDate": "", "queryStartDate": start,
                    "queryEndDate": end, "commodity_id": "TXF"})
-        new = {}
+        new, new_mtx, new_tmf = {}, {}, {}
         for ln in t.splitlines():
             c = ln.split(",")
-            if len(c) < 14 or c[1] != "臺股期貨":  # 臺股期貨
+            if len(c) < 14:
                 continue
-            r = new.setdefault(c[0], {})
-            who = c[2]
-            if "外資" in who:            # 外資
-                r["foreign"] = _I(c[13])
-            elif who == "投信":          # 投信
-                r["trust"] = _I(c[13])
-            elif who == "自營商":    # 自營商
-                r["dealer"] = _I(c[13])
+            name, who = c[1], c[2]
+            if name == "臺股期貨":
+                r = new.setdefault(c[0], {})
+                if "外資" in who:
+                    r["foreign"] = _I(c[13])
+                elif who == "投信":
+                    r["trust"] = _I(c[13])
+                elif who == "自營商":
+                    r["dealer"] = _I(c[13])
+            elif name in ("小型臺指期貨", "微型臺指期貨") and who in ("外資及陸資", "投信", "自營商"):
+                bucket = new_mtx if name == "小型臺指期貨" else new_tmf
+                r = bucket.setdefault(c[0], {"long": 0, "short": 0})
+                r["long"] += _I(c[9])    # 多方未平倉口數
+                r["short"] += _I(c[11])  # 空方未平倉口數
         if new:
             fut.update(new)
-            return fut
+            mtx.update(new_mtx)
+            tmf.update(new_tmf)
+            return fut, mtx, tmf
         time.sleep(1.0)
     print("  futures BAD → 保留既有不清空", file=sys.stderr)
-    return fut
+    return fut, mtx, tmf
 
 
 def fetch_options(start, end, existing=None):
@@ -158,6 +170,95 @@ def fetch_price(start_date, end_date, existing=None):
         d = de + datetime.timedelta(days=1)
         time.sleep(0.6)
     return price
+
+
+def fetch_total_oi(commodity_id, start_date, end_date, existing=None):
+    """商品全市場未沖銷契約量（口，全月份加總，供散戶多空比的分母用）。
+
+    ← TAIFEX futDataDown；每個非價差月份的「一般」盤 row 各報一次未沖銷契約數，
+    加總即為當日全市場未平倉。日行情有 ~31 天區間上限故分段抓；existing 有值時走
+    增量（歷史為不變值，只補最近 ~45 天）。
+    """
+    oi = dict(existing or {})
+    d = (end_date - datetime.timedelta(days=45)) if existing else start_date
+    while d <= end_date:
+        de = min(d + datetime.timedelta(days=27), end_date)  # MTX/TMF 欄位多，30 天窗會超過 TAIFEX 上限（比 TX 更嚴）
+        ok = False
+        for _ in range(3):
+            t = _post("https://www.taifex.com.tw/cht/3/futDataDown",
+                      {"down_type": "1", "commodity_id": commodity_id,
+                       "queryStartDate": d.strftime("%Y/%m/%d"),
+                       "queryEndDate": de.strftime("%Y/%m/%d")})
+            lines = t.splitlines()
+            if lines and lines[0].startswith("交易日期"):
+                day_sum = {}
+                for ln in lines[1:]:
+                    c = [x.strip() for x in ln.split(",")]
+                    if len(c) < 12 or c[1] != commodity_id:
+                        continue
+                    if "/" in c[2]:  # 排除價差契約
+                        continue
+                    sess = c[17] if len(c) > 17 else ""
+                    if sess and "一般" not in sess:  # 未沖銷只在一般盤那筆報一次
+                        continue
+                    v = _F(c[11])
+                    if v is not None:
+                        day_sum[c[0]] = day_sum.get(c[0], 0) + int(v)
+                if day_sum:
+                    oi.update(day_sum)
+                ok = True
+                break
+            time.sleep(1.0)
+        if not ok:
+            print(f"  oi({commodity_id}) BAD {d}~{de}", file=sys.stderr)
+        d = de + datetime.timedelta(days=1)
+        time.sleep(0.6)
+    return oi
+
+
+def fetch_treasury_yields(years_needed, existing=None):
+    """美國公債殖利率（5/10/20/30年期，%）← 美國財政部 Daily Treasury Par Yield Curve Rates（官方免費 CSV）。
+
+    以「年」為單位整批下載（每年一支 CSV），不像 TAIFEX 行情有 31 天上限；
+    逐年 merge 進既有＝自癒缺口，年度欄位（如是否含 1.5 Month）逐年會變，故用表頭欄名對應、不用固定 index。
+    """
+    ty = dict(existing or {})
+    for y in years_needed:
+        url = (f"https://home.treasury.gov/resource-center/data-chart-center/interest-rates/"
+               f"daily-treasury-rates.csv/{y}/all?type=daily_treasury_yield_curve"
+               f"&field_tdr_date_value={y}&page&_format=csv")
+        ok = False
+        for _ in range(3):
+            try:
+                raw = _get(url)
+                text = raw.decode("utf-8-sig", "replace")
+                rows = list(__import__("csv").reader(text.splitlines()))
+                if not rows or not rows[0]:
+                    raise ValueError("empty csv")
+                hdr = rows[0]
+                idx = {name.strip(): i for i, name in enumerate(hdr)}
+                want = {"y5": "5 Yr", "y10": "10 Yr", "y20": "20 Yr", "y30": "30 Yr"}
+                for row in rows[1:]:
+                    if not row or not row[0]:
+                        continue
+                    m, d, yy = row[0].split("/")
+                    iso = f"{yy}-{m.zfill(2)}-{d.zfill(2)}"
+                    rec = {}
+                    for key, col in want.items():
+                        j = idx.get(col)
+                        v = _F(row[j]) if j is not None and j < len(row) else None
+                        if v is not None:
+                            rec[key] = v
+                    if rec:
+                        ty[iso] = rec
+                ok = True
+                break
+            except Exception as ex:
+                print(f"  treasury {y} retry: {ex}", file=sys.stderr)
+                time.sleep(1.0)
+        if not ok:
+            print(f"  treasury {y} BAD → 保留既有不清空", file=sys.stderr)
+    return ty
 
 
 def _margin_one(ds):
@@ -262,8 +363,16 @@ def fetch_all(years=2, prior=None):
     s, e = start_date.strftime("%Y/%m/%d"), end_date.strftime("%Y/%m/%d")
     # 期/選單一區間全量請求；成功 merge 進既有＝自癒缺口，失敗保留既有不清空（防雲端 IP 被擋洗檔）
     print("fetching futures...", file=sys.stderr)
-    fut = fetch_futures(s, e, existing=prior.get("futures"))
+    prior_retail = prior.get("retail") or {}
+    fut, mtx_inst, tmf_inst = fetch_futures(
+        s, e, existing=prior.get("futures"),
+        existing_mtx=prior_retail.get("mtx_inst"), existing_tmf=prior_retail.get("tmf_inst"))
     print(f"  {len(fut)} days", file=sys.stderr)
+    print("fetching total OI (mtx/tmf, incremental)...", file=sys.stderr)
+    prior_oi = prior.get("oi") or {}
+    mtx_oi = fetch_total_oi("MTX", start_date, end_date, existing=prior_oi.get("mtx"))
+    tmf_oi = fetch_total_oi("TMF", start_date, end_date, existing=prior_oi.get("tmf"))
+    print(f"  mtx {len(mtx_oi)} / tmf {len(tmf_oi)} days", file=sys.stderr)
     print("fetching options...", file=sys.stderr)
     opt = fetch_options(s, e, existing=prior.get("options"))
     print(f"  {len(opt)} days", file=sys.stderr)
@@ -279,10 +388,17 @@ def fetch_all(years=2, prior=None):
     print(f"  {len(inst)} days", file=sys.stderr)
     maintain = load_maintain(prior.get("maintain"))
     print(f"  maintain {len(maintain)} days", file=sys.stderr)
+    print("fetching treasury yields...", file=sys.stderr)
+    years_needed = list(range(start_date.year, end_date.year + 1))
+    treasury = fetch_treasury_yields(years_needed, existing=prior.get("treasury"))
+    print(f"  {len(treasury)} days", file=sys.stderr)
     return {
         "generated": end_date.isoformat(),
         "futures": fut, "price": price, "options": opt, "margin": margin,
         "institutions": inst, "maintain": maintain,
+        "retail": {"mtx_inst": mtx_inst, "tmf_inst": tmf_inst},
+        "oi": {"mtx": mtx_oi, "tmf": tmf_oi},
+        "treasury": treasury,
     }
 
 
@@ -343,6 +459,7 @@ _TEMPLATE = r"""<!doctype html>
   --up:#d0342c; --down:#1f9d57;               /* 台股慣例：紅漲綠跌 */
   --foreign:#2f6df0; --trust:#e8912b; --dealer:#1faf7a;
   --call:#2f6df0; --put:#e0533d; --price:#2a3444; --fill:#3d7bf0;
+  --tsy5:#7c5cff; --tsy10:#2f6df0; --tsy20:#1faf7a; --tsy30:#d0342c;
   --shadow:0 1px 2px rgba(20,30,50,.05),0 6px 20px rgba(20,30,50,.06);
   --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC",sans-serif;
 }
@@ -353,6 +470,7 @@ _TEMPLATE = r"""<!doctype html>
     --up:#ff5a4d; --down:#25c274;
     --foreign:#4d89ff; --trust:#f0a53a; --dealer:#2fc78e;
     --call:#4d89ff; --put:#ff6f57; --price:#c6d0dc; --fill:#4d89ff;
+    --tsy5:#9b87ff; --tsy10:#4d89ff; --tsy20:#2fc78e; --tsy30:#ff5a4d;
     --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
   }
 }
@@ -361,6 +479,7 @@ _TEMPLATE = r"""<!doctype html>
   --grid:#eef1f5; --axis:#aab2be; --sub:#8b95a4;
   --up:#d0342c; --down:#1f9d57; --foreign:#2f6df0; --trust:#e8912b; --dealer:#1faf7a;
   --call:#2f6df0; --put:#e0533d; --price:#2a3444; --fill:#3d7bf0;
+  --tsy5:#7c5cff; --tsy10:#2f6df0; --tsy20:#1faf7a; --tsy30:#d0342c;
   --shadow:0 1px 2px rgba(20,30,50,.05),0 6px 20px rgba(20,30,50,.06);
 }
 :root[data-theme="dark"]{
@@ -368,6 +487,7 @@ _TEMPLATE = r"""<!doctype html>
   --grid:#1c232e; --axis:#3a4552; --sub:#7c8798;
   --up:#ff5a4d; --down:#25c274; --foreign:#4d89ff; --trust:#f0a53a; --dealer:#2fc78e;
   --call:#4d89ff; --put:#ff6f57; --price:#c6d0dc; --fill:#4d89ff;
+  --tsy5:#9b87ff; --tsy10:#4d89ff; --tsy20:#2fc78e; --tsy30:#ff5a4d;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
@@ -477,6 +597,8 @@ footer a{color:var(--foreign);text-decoration:none}
       未平倉淨口數為多空未平倉口數淨額（口），正=淨多、負=淨空 · 現貨買賣超/融資餘額為上市市場合計、每交易日<br>
       三大法人現貨買賣超取 TWSE BFI82U「買賣差額」（外資＝外資及陸資，自營＝自行買賣＋避險）<br>
       大盤融資維持率＝Σ融資股票市值 ÷ 融資金額餘額（上市+上櫃、含 ETF 市場通用口徑）；警戒線 <span style="color:var(--down)">≥170 🟢</span> / 160–170 🟡 / <span style="color:var(--up)">&lt;160 🔴</span><br>
+      散戶多空比＝(散戶多單-散戶空單)÷全市場未平倉×100%，散戶多單/空單＝全市場未平倉-三大法人多方/空方未平倉合計（小台/微台）<br>
+      美國公債殖利率為財政部 Daily Treasury Par Yield Curve Rates 收盤值，非交易日不更新<br>
       數字直接取自官方公開資料，未經第三方加工 · 台股慣例 <span style="color:var(--up)">紅漲</span> / <span style="color:var(--down)">綠跌</span>
     </footer>
   </section>
@@ -817,6 +939,47 @@ function build(){
              {name:"整體(去ETF)",color:cssv("--price"),data:EX,width:1.6,dash:"5 3"},
              {name:"上市",color:cssv("--dealer"),data:TW,width:1.2},
              {name:"上櫃",color:cssv("--trust"),data:TP,width:1.2}]}));
+  }
+
+  // ⑦⑧ 散戶多空比（小台／微台）＝(散戶多單-散戶空單)/全市場未平倉×100%
+  //    散戶多單＝全市場未平倉-三大法人多方未平倉合計、散戶空單＝全市場未平倉-三大法人空方未平倉合計
+  function retailRatioPanel(key, title, instObj, oiObj, color){
+    const dates=Object.keys(instObj||{}).filter(d=>(oiObj||{})[d]!=null).sort().filter(inRange);
+    const R=dates.map(d=>{
+      const oiv=oiObj[d], inst=instObj[d];
+      if(!oiv || !inst) return null;
+      return (oiv-inst.long-(oiv-inst.short))/oiv*100;
+    });
+    const last=R[R.length-1], prev=R[R.length-2];
+    if(last==null) return null;
+    return panel({key,title,unit:"%",valueTxt:fmtSign1(last)+"%",
+      delta:(last!=null&&prev!=null?last-prev:0),dfmt:v=>v.toFixed(1)+"%",
+      baseline:true,fill:true,labels:dates,
+      yfmt:v=>Math.round(v)+"%",vfmt:v=>fmtSign1(v)+"%",
+      lines:[{name:"散戶多空比",color,data:R}]});
+  }
+  {
+    const retail=DATA.retail||{}, oi=DATA.oi||{};
+    const p1=retailRatioPanel("retailMtx","小台・散戶多空比",retail.mtx_inst,oi.mtx,cssv("--up"));
+    if(p1) panels.push(p1);
+    const p2=retailRatioPanel("retailTmf","微台・散戶多空比",retail.tmf_inst,oi.tmf,cssv("--up"));
+    if(p2) panels.push(p2);
+  }
+
+  // ⑨ 美國公債殖利率（5/10/20/30年期）
+  if(DATA.treasury && Object.keys(DATA.treasury).length){
+    const s=series(DATA.treasury), k=s.labels.filter(inRange);
+    const Y5=k.map(d=>s.get(d).y5??null), Y10=k.map(d=>s.get(d).y10??null),
+          Y20=k.map(d=>s.get(d).y20??null), Y30=k.map(d=>s.get(d).y30??null);
+    const last=Y10[Y10.length-1], prev=Y10[Y10.length-2];
+    panels.push(panel({key:"tsy",title:"美國公債殖利率",unit:"%",who:"10年",
+      valueTxt:(last!=null?last.toFixed(2):"—"),
+      delta:(last!=null&&prev!=null?last-prev:0),dfmt:v=>v.toFixed(2),labels:k,
+      yfmt:v=>v.toFixed(1)+"%",vfmt:v=>v.toFixed(2)+"%",
+      lines:[{name:"5年",color:cssv("--tsy5"),data:Y5},
+             {name:"10年",color:cssv("--tsy10"),data:Y10},
+             {name:"20年",color:cssv("--tsy20"),data:Y20},
+             {name:"30年",color:cssv("--tsy30"),data:Y30}]}));
   }
 
   panels.forEach(p=>{grid.appendChild(p._el); drawChart(p);});
