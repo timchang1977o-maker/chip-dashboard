@@ -36,6 +36,17 @@ jobs:
         with:
           python-version: "3.12"
 
+      # 大盤融資維持率（第 6 面板）。原本靠 workspace 的 korea-leverage workflow 產出、
+      # 再由 Mac 備援腳本同步過來；2026-08-24 那個 workflow 隨推播清理被刪 → 面板從
+      # 8/21 靜默凍結到 9/5。改成這裡自己算，不再依賴 Mac 開機或跨 repo 同步。
+      # 容錯：TWSE 偶爾擋雲端 IP，失敗只警告；update_history 會在之後的班次補回缺日。
+      - name: Update 大盤融資維持率 history
+        env:
+          TZ: Asia/Taipei
+        run: |
+          pip install --quiet requests
+          python dashboard/tw_margin.py || echo "::warning::tw_margin update failed（維持率沿用既有）"
+
       - name: Fetch chip data + institution rankings + regenerate HTML
         env:
           TZ: Asia/Taipei
@@ -63,7 +74,8 @@ jobs:
                   "chip_reports/法人買賣超.html" \
                   dashboard/chip_data.json \
                   dashboard/institution_data.json \
-                  dashboard/institution_cache.json
+                  dashboard/institution_cache.json \
+                  dashboard/tw_margin_history.json
           if git diff --staged --quiet; then
             echo "No chip changes to commit"
           else
