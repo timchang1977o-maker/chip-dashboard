@@ -25,3 +25,10 @@ python3 make_icons.py                 # 重新產圖示（改設計時才需要�
 ```
 
 > chip_tracker.py 與私有主 repo（evan-portfolio-dashboard）保持同步；Pages 專屬的東西只加在 build_page.py / manifest / 圖示，不動 chip_tracker.py。
+
+
+## 🚦 負訊號分頁（2026-09-12 起）
+
+`neg_signals.html`＝台股負訊號看板（現增定價折價、主動 ETF 一窩蜂建倉）＋弱正訊號（剛被 2 家投信主動 ETF 建倉）。
+來源 `chip_reports/負訊號看板.html` 由私有 workspace `Evan.agent/neg_signals/run_daily.sh`（Mac launchd，平日 18:40）產出並經 `sync_pages.sh` 推上來；本 repo 的 `build_page.py` 只負責套 PWA＋頂部導覽。Mac 沒開就不更新（看板右上「產出」時間）。
+美股財報分頁同日移除。

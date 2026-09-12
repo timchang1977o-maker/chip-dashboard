@@ -3,8 +3,8 @@
 
 做三件事：
   1. 在 <head> 注入 PWA 標籤（manifest / apple-touch-icon / theme-color）。
-  2. 在 .wrap 頂端注入共用頂部導覽（籌碼總覽 ↔ 法人買賣超），當前頁高亮。
-  3. 寫成 repo 根目錄的 index.html / institutions.html，供 Pages 直接服務。
+  2. 在 .wrap 頂端注入共用頂部導覽（籌碼總覽 ↔ 法人買賣超 ↔ 負訊號），當前頁高亮。
+  3. 寫成 repo 根目錄的 index.html / institutions.html / neg_signals.html，供 Pages 直接服務。
 
 tracker 本身（chip_tracker.py / institution_tracker.py）維持與私有 repo 同步、不改，
 所有 Pages 專屬（PWA、跨頁導覽）都集中在這裡加。
@@ -42,11 +42,15 @@ NAV_STYLE = """
 PAGES = [
     ("籌碼儀表板.html", "index.html", "chips"),
     ("法人買賣超.html", "institutions.html", "inst"),
+    # 負訊號看板：來源由 Evan.agent/neg_signals/run_daily.sh（Mac launchd 平日 18:40）產出後
+    # 複製到 chip_reports/ 並推上來；GHA daily 只是用同一份來源重套導覽，不會自己算。
+    ("負訊號看板.html", "neg_signals.html", "neg"),
 ]
 
 TABS = [("index.html", "chips", "📊 籌碼總覽"),
         ("institutions.html", "inst", "🏦 法人買賣超"),
-        ("us_earnings.html", "us", "📈 美股財報")]
+        ("neg_signals.html", "neg", "🚦 負訊號")]
+# 2026-09-12：美股財報分頁（us_earnings.html／build_us_earnings.py／Henry 素材）依 Evan 要求整組移除。
 
 
 def nav_html(current):
