@@ -49,20 +49,20 @@ footer{font-size:12px;color:var(--mute);margin-top:36px;border-top:1px solid var
 @media (max-width:760px){.kpis{grid-template-columns:1fr 1fr} .evid{grid-template-columns:1fr} header{grid-template-columns:1fr} .meta{text-align:left}}
 </style>
 <div class="wrap">
-<header><div><h1>負訊號看板</h1><p class="sub">主動 ETF 共識建倉訊號看板：≥4 家投信同時建倉（負訊號）、剛好 2 家（弱正訊號），對照當下正在觸發的台股。回測數字來自 etf_lifecycle_study，每個平日 18:40 自動更新。</p></div>
-<div class="meta">產出 2026-09-24 20:10<br>ETF PCF 最新 2026-09-29・27 檔</div></header>
+<header><div><h1>負訊號看板</h1><p class="sub">主動 ETF 共識建倉訊號看板：≥4 家投信同時建倉（負訊號，樣本極少）、3 家（偏負，小樣本）、剛好 2 家（2026-09-24 重跑後已無訊號），對照當下正在觸發的台股。回測數字來自 etf_lifecycle_study，每個平日 18:40 自動更新。</p></div>
+<div class="meta">產出 2026-09-24 20:32<br>ETF PCF 最新 2026-09-29・27 檔</div></header>
 
 <div class="kpis">
 <div class="kpi"><div class="l">ETF 資料涵蓋</div><div class="v">27/27</div><div class="d">檔 PCF 跟上・最新 2026-09-29</div></div>
-<div class="kpi"><div class="l">2 家共識・10 日內有效</div><div class="v" style="color:var(--pos)">2</div><div class="d">弱正訊號；只做 10 個交易日</div></div>
+<div class="kpi"><div class="l">2 家共識・10 日內</div><div class="v">0</div><div class="d">2026-09-24 重跑：無訊號，僅列名</div></div>
 <div class="kpi"><div class="l">ETF 一窩蜂・≥4 檔建倉</div><div class="v warn">1</div><div class="d">近 45 日觸發、仍在 20 日內</div></div>
-<div class="kpi"><div class="l">剛觸發・2～3 檔建倉</div><div class="v" style="color:var(--pos)">1</div><div class="d">最近 3 個 PCF 日（2026-09-23 起）；另 0 檔 1 檔候選</div></div>
+<div class="kpi"><div class="l">剛觸發・2～3 檔建倉</div><div class="v">1</div><div class="d">最近 3 個 PCF 日（2026-09-23 起）；另 0 檔 1 檔候選</div></div>
 </div>
 
 <section>
 <h2><span class="tag pos">NEW</span>剛觸發：最近 3 個 PCF 日被 2～3 家投信建倉的台股</h2>
-<p class="note">弱正訊號的進場點：剛好 2 家 10 日超額 +3.3%（t=2.4，隔日進場 +2.0%）。3 家經嚴格重算已無訊號，列出只為看它會不會變 4 家。計算只採成立滿 40 個 PCF 日的 ETF、同投信算 1 家。PCF 最新 2026-09-29，「最近 3 個 PCF 日」＝2026-09-23 起。只看台股。</p>
-<h3>剛觸發 <span class="cnt">1 檔</span></h3><p class="note">綠＝2 家、灰＝3 家。進場價＝最後一檔建倉日收盤。</p>
+<p class="note"><b>2026-09-24 重跑（價格至 9/24，可重跑腳本 etf_herd_backtest.py）</b>：剛好 2 家 10 日超額只剩 +0.3%（t=0.2，n=115），9/12 的 +3.3% 已不成立；3 家反而偏負（10 日 −7.0%／勝率 14%／t=−1.7，n=14；隔日進場 5 日 −6.7%／t=−3.5），但樣本太小。這裡列名是為了看它會不會累積成 3～4 家。計算只採成立滿 40 個 PCF 日的 ETF、同投信算 1 家。PCF 最新 2026-09-29，「最近 3 個 PCF 日」＝2026-09-23 起。只看台股。</p>
+<h3>剛觸發 <span class="cnt">1 檔</span></h3><p class="note">2 家＝無訊號、3 家＝偏負（小樣本）。進場價＝最後一檔建倉日收盤。</p>
 <div class="tw"><table><thead><tr><th></th><th>股票</th><th>投信家數</th><th>建倉首日／末日</th><th>合計權重</th><th>建倉後動作</th><th>末日收盤</th><th>最新收盤</th><th>交易日</th><th>至今</th><th>10 日</th><th>20 日</th><th>建倉 ETF</th></tr></thead>
 <tbody><tr class="mild"><td class="stripe"></td><td><b>1560</b> 中砂</td><td class="num big">3<span class="mk">4 檔</span></td>
 <td class="num">2026-09-18<br>2026-09-23 <span class="chip mild">新</span></td><td><span class="num">1.82</span>%</td><td>無</td><td><span class="num">955.00</span></td><td><span class="num">971.00</span></td><td class="num">1</td><td><span class="num pos">+1.7%</span></td><td><span class="na">—</span></td><td><span class="na">—</span></td><td class="etfs"><span class="etf">00408A(主動第一金優股息)</span> <span class="etf">00994A(主動第一金台股優)</span> <span class="etf">00995A(主動中信台灣卓越)</span> <span class="etf">00993A(主動安聯台灣)</span></td></tr></tbody></table></div>
@@ -76,7 +76,7 @@ footer{font-size:12px;color:var(--mute);margin-top:36px;border-top:1px solid var
 <section>
 <h2><span class="tag">#2</span>主動 ETF 一窩蜂建倉</h2>
 <div class="evid">
-<div><b>回測</b>　原版（含新 ETF、不分投信）：≥4 檔 5 日內建倉後 20 日超額 <span class="stat">−12.1%</span>／勝率 25%（n=36）。<b>2026-09-12 嚴格重算</b>（ETF 成立滿 40 個 PCF 日、同投信算 1 家）：樣本只剩 6 筆，隔日進場 20 日 −11.9%／勝率 25%（n=8，放寬到滿 10 日）——方向一致但已不足以下統計結論。</div>
+<div><b>回測</b>　原版（含新 ETF、不分投信）：≥4 檔 5 日內建倉後 20 日超額 <span class="stat">−12.1%</span>／勝率 25%（n=36）。<b>2026-09-24 嚴格重跑</b>（ETF 成立滿 40 個 PCF 日、同投信算 1 家、台股、價格至 9/24）：≥4 家只有 4 筆（聯電 +23%、禾伸堂 −11%、萬潤 −4%、精測未滿 20 日），無法下結論；放寬到 ≥3 家 n=18：10 日超額 −6.0%／勝率 22%／t=−1.6，隔日進場 5 日 −5.4%／勝率 11%／t=−2.7——方向偏負，但仍是小樣本。</div>
 <div><b>機制</b>　多家同時進場＝籌碼一次到位、後續沒有增量買盤，且常發生在急漲末端。<b>污染來源</b>：新上市 ETF 前 10 個 PCF 日建倉率是成熟期 1.7 倍，00408A／00404A 之後還連續建倉數週；同投信雙檔同步換股占 2 檔共識 14%。看板已改成滿 40 日＋不同投信才計。</div>
 </div>
 <h3>觸發：≥4 家投信 5 日內同時建倉 <span class="cnt">3 檔</span></h3><p class="note">深紅＝5 家以上、琥珀＝4 家。「建倉後動作」是最後一檔建倉之後其他 ETF 的清倉／減碼次數，越多代表籌碼已在鬆動。</p>
@@ -85,7 +85,7 @@ footer{font-size:12px;color:var(--mute);margin-top:36px;border-top:1px solid var
 <td class="num">2026-09-02<br>2026-09-07</td><td><span class="num">2.26</span>%</td><td>2 清倉／4 減碼</td><td><span class="num">3,470.00</span></td><td><span class="num">3,310.00</span></td><td class="num">13</td><td><span class="num neg">-4.6%</span></td><td><span class="num pos">+0.4%</span></td><td><span class="na">—</span></td><td class="etfs"><span class="etf">00407A(主動凱基台灣)</span> <span class="etf">00995A(主動中信台灣卓越)</span> <span class="etf">00987A(主動台新優勢成長)</span> <span class="etf">00993A(主動安聯台灣)</span> <span class="etf">00996A(主動兆豐台灣豐收)</span></td></tr><tr class="warn"><td class="stripe"></td><td><b>6187</b> 萬潤</td><td class="num big">4</td>
 <td class="num">2026-08-13<br>2026-08-18</td><td><span class="num">2.52</span>%</td><td>1 清倉／16 減碼</td><td><span class="num">1,260.00</span></td><td><span class="num">1,195.00</span></td><td class="num">27</td><td><span class="num neg">-5.2%</span></td><td><span class="num pos">+9.1%</span></td><td><span class="num neg">-3.6%</span></td><td class="etfs"><span class="etf">00994A(主動第一金台股優)</span> <span class="etf">00987A(主動台新優勢成長)</span> <span class="etf">00992A(主動群益科技創新)</span> <span class="etf">00993A(主動安聯台灣)</span></td></tr><tr class="warn"><td class="stripe"></td><td><b>8996</b> 高力</td><td class="num big">4</td>
 <td class="num">2026-08-11<br>2026-08-18</td><td><span class="num">2.32</span>%</td><td>1 清倉／8 減碼</td><td><span class="num">1,175.00</span></td><td><span class="num">1,530.00</span></td><td class="num">27</td><td><span class="num pos">+30.2%</span></td><td><span class="num ">+0.0%</span></td><td><span class="num pos">+3.8%</span></td><td class="etfs"><span class="etf">00987A(主動台新優勢成長)</span> <span class="etf">00996A(主動兆豐台灣豐收)</span> <span class="etf">00994A(主動第一金台股優)</span> <span class="etf">00993A(主動安聯台灣)</span></td></tr></tbody></table></div>
-<h3>3 家共識：無訊號 <span class="cnt">5 檔</span></h3><p class="note">原本的 +9.4%／t=3.1 是新上市 ETF 建倉期造成的假象：排除成立未滿 40 日的 ETF 後剩 +0.8%（t=0.2），不同投信計再變 −2.5%（隔日進場 10 日）。只列名、不當訊號。</p>
+<h3>3 家共識：偏負（小樣本） <span class="cnt">5 檔</span></h3><p class="note">原本的 +9.4%／t=3.1 是新上市 ETF 建倉期假象；2026-09-24 重跑 n=14：10 日超額 −7.0%／勝率 14%／t=−1.7、20 日 −6.4%（n=11）。方向與一窩蜂一致，當觀察名單，不加碼。</p>
 <div class="tw"><table><thead><tr><th></th><th>股票</th><th>投信家數</th><th>建倉首日／末日</th><th>合計權重</th><th>建倉後動作</th><th>末日收盤</th><th>最新收盤</th><th>交易日</th><th>至今</th><th>10 日</th><th>20 日</th><th>建倉 ETF</th></tr></thead>
 <tbody><tr class="mild"><td class="stripe"></td><td><b>1560</b> 中砂</td><td class="num big">3<span class="mk">4 檔</span></td>
 <td class="num">2026-09-18<br>2026-09-23 <span class="chip mild">新</span></td><td><span class="num">1.82</span>%</td><td>無</td><td><span class="num">955.00</span></td><td><span class="num">971.00</span></td><td class="num">1</td><td><span class="num pos">+1.7%</span></td><td><span class="na">—</span></td><td><span class="na">—</span></td><td class="etfs"><span class="etf">00408A(主動第一金優股息)</span> <span class="etf">00994A(主動第一金台股優)</span> <span class="etf">00995A(主動中信台灣卓越)</span> <span class="etf">00993A(主動安聯台灣)</span></td></tr><tr class="mild"><td class="stripe"></td><td><b>2449</b> 京元電子</td><td class="num big">3</td>
@@ -96,19 +96,17 @@ footer{font-size:12px;color:var(--mute);margin-top:36px;border-top:1px solid var
 </section>
 
 <section>
-<h2><span class="tag pos">#2b</span>兩家共識建倉（弱正訊號）</h2>
-<div class="evid good">
-<div><b>回測</b>　同一檔台股 ±5 日內剛好被 2 家不同投信的主動 ETF 建倉（ETF 成立滿 40 個 PCF 日、同檔 5 日窗口去重）：當日收盤起 10 日超額 <span class="stat up">+3.3%</span>／勝率 53%／t=2.4（n=112）；隔日進場 <span class="stat up">+2.0%</span>／勝率 50%／t=1.4（n=111）；20 日 +1.1%、中位 −4.6%（散掉）。門檻拉到滿 60 日只剩 +1.0%（t=0.5，n=65）。</div>
-<div><b>解讀</b>　這是唯一勉強撐過嚴格篩選的正訊號，但隔日進場版 t 只有 1.4，樣本也在 100 出頭；只能當弱訊號、10 個交易日內的波段，且多頭段外未驗證。看板實況對帳持續累積中。</div>
+<h2><span class="tag">#2b</span>兩家共識建倉（無訊號）</h2>
+<div class="evid">
+<div><b>回測</b>　同一檔台股 5 日內剛好被 2 家不同投信的主動 ETF 建倉（ETF 成立滿 40 個 PCF 日、同檔聚類去重）。2026-09-12 算出 10 日超額 +3.3%／t=2.4；<b>2026-09-24 用可重跑腳本重算（n=115，價格至 9/24）：10 日 <span class="stat">+0.3%</span>／勝率 44%／t=0.2，隔日進場 +0.6%／t=0.4，20 日 0.0%</b>；對照組（只 1 家建倉，n=1,058）10 日 +0.9%。按月看正負交錯（1～4 月正、5～7 月負、8 月正、9 月負）。</div>
+<div><b>解讀</b>　9/12 的弱正訊號沒有撐過重跑，現在視為無訊號；名單保留只為追蹤它會不會累積成 3～4 家。9/12 那次是臨時腳本、未留檔，無法逐筆對帳差在哪。</div>
 </div>
-<h3>有效：最後一檔建倉後 10 個交易日內 <span class="cnt">2 檔</span></h3><p class="note">綠＝2 檔正訊號。「建倉後動作」若已有清倉，共識正在瓦解。</p>
+
+<h3>已過 10 日 <span class="cnt">12 檔</span></h3><p class="note">對照用：10 日欄實況對帳。</p>
 <div class="tw"><table><thead><tr><th></th><th>股票</th><th>投信家數</th><th>建倉首日／末日</th><th>合計權重</th><th>建倉後動作</th><th>末日收盤</th><th>最新收盤</th><th>交易日</th><th>至今</th><th>10 日</th><th>20 日</th><th>建倉 ETF</th></tr></thead>
 <tbody><tr class="good"><td class="stripe"></td><td><b>3264</b> 欣銓</td><td class="num big">2<span class="mk">3 檔</span></td>
 <td class="num">2026-09-18<br>2026-09-22</td><td><span class="num">1.03</span>%</td><td>1 清倉／0 減碼</td><td><span class="num">276.50</span></td><td><span class="num">246.00</span></td><td class="num">2</td><td><span class="num neg">-11.0%</span></td><td><span class="na">—</span></td><td><span class="na">—</span></td><td class="etfs"><span class="etf">00994A(主動第一金台股優)</span> <span class="etf">00408A(主動第一金優股息)</span> <span class="etf">00406A(主動中信台灣收益)</span></td></tr><tr class="good"><td class="stripe"></td><td><b>2883</b> 凱基金融控股股份有限公司</td><td class="num big">2</td>
-<td class="num">2026-09-09<br>2026-09-14</td><td><span class="num">1.58</span>%</td><td>無</td><td><span class="num">38.80</span></td><td><span class="num">38.95</span></td><td class="num">8</td><td><span class="num pos">+0.4%</span></td><td><span class="na">—</span></td><td><span class="na">—</span></td><td class="etfs"><span class="etf">00404A(主動聯博動能50)</span> <span class="etf">00984A(主動安聯台灣高息)</span></td></tr></tbody></table></div>
-<h3>已過 10 日 <span class="cnt">10 檔</span></h3><p class="note">對照用：看 10 日欄是否如回測為正。</p>
-<div class="tw"><table><thead><tr><th></th><th>股票</th><th>投信家數</th><th>建倉首日／末日</th><th>合計權重</th><th>建倉後動作</th><th>末日收盤</th><th>最新收盤</th><th>交易日</th><th>至今</th><th>10 日</th><th>20 日</th><th>建倉 ETF</th></tr></thead>
-<tbody><tr class="good"><td class="stripe"></td><td><b>2360</b> 致茂</td><td class="num big">2</td>
+<td class="num">2026-09-09<br>2026-09-14</td><td><span class="num">1.58</span>%</td><td>無</td><td><span class="num">38.80</span></td><td><span class="num">38.95</span></td><td class="num">8</td><td><span class="num pos">+0.4%</span></td><td><span class="na">—</span></td><td><span class="na">—</span></td><td class="etfs"><span class="etf">00404A(主動聯博動能50)</span> <span class="etf">00984A(主動安聯台灣高息)</span></td></tr><tr class="good"><td class="stripe"></td><td><b>2360</b> 致茂</td><td class="num big">2</td>
 <td class="num">2026-09-08<br>2026-09-09</td><td><span class="num">0.97</span>%</td><td>0 清倉／8 減碼</td><td><span class="num">2,335.00</span></td><td><span class="num">2,295.00</span></td><td class="num">11</td><td><span class="num neg">-1.7%</span></td><td><span class="num neg">-0.4%</span></td><td><span class="na">—</span></td><td class="etfs"><span class="etf">00990A(主動元大AI新經濟)</span> <span class="etf">00408A(主動第一金優股息)</span></td></tr><tr class="good"><td class="stripe"></td><td><b>2882</b> 國泰金</td><td class="num big">2</td>
 <td class="num">2026-09-02<br>2026-09-03</td><td><span class="num">0.40</span>%</td><td>2 清倉／0 減碼</td><td><span class="num">112.50</span></td><td><span class="num">110.50</span></td><td class="num">15</td><td><span class="num neg">-1.8%</span></td><td><span class="num neg">-0.4%</span></td><td><span class="na">—</span></td><td class="etfs"><span class="etf">00403A(主動統一升級50)</span> <span class="etf">00994A(主動第一金台股優)</span></td></tr><tr class="good"><td class="stripe"></td><td><b>6213</b> 聯茂</td><td class="num big">2<span class="mk">3 檔</span></td>
 <td class="num">2026-08-18<br>2026-08-21</td><td><span class="num">0.86</span>%</td><td>2 清倉／3 減碼</td><td><span class="num">513.00</span></td><td><span class="num">595.00</span></td><td class="num">24</td><td><span class="num pos">+16.0%</span></td><td><span class="num pos">+0.8%</span></td><td><span class="num neg">-1.6%</span></td><td class="etfs"><span class="etf">00992A(主動群益科技創新)</span> <span class="etf">00982A(主動群益台灣強棒)</span> <span class="etf">00993A(主動安聯台灣)</span></td></tr><tr class="good"><td class="stripe"></td><td><b>2637</b> 慧洋-KY</td><td class="num big">2</td>
@@ -130,7 +128,7 @@ footer{font-size:12px;color:var(--mute);margin-top:36px;border-top:1px solid var
 
 <div class="rules"><h2>怎麼用</h2><ul>
 <li>持股出現在 #2 觸發名單：20 個交易日內設好停損，不加碼。</li>
-<li>#2b 兩家共識是唯一勉強成立的弱正訊號：10 個交易日內的波段，超過就不算；3 家已證實無訊號。</li>
+<li>#2b 兩家共識 2026-09-24 重跑後無訊號，不當進場依據；3 家偏負（小樣本），跟 ≥4 家一樣當風險名單看。</li>
 <li>兩張名單都不是放空名單：回測是「超額報酬為負」，多頭段絕對報酬未必是負。</li>
 <li>每個平日 18:40 由本機 launchd（com.evan.neg-signals-daily）自動重跑並同步到 chip-dashboard；現增定價（另一個負訊號）2026-09-12 起暫不追蹤。</li>
 </ul></div>
