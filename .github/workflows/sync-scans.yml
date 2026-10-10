@@ -1,0 +1,59 @@
+name: Sync Scans (TW/US/JP)
+
+# 台／美／日股掃描頁由私有 repo evan-portfolio-dashboard（本機 Evan.agent）的 GHA 產出（tw-scan-daily 17:30、global-scan-us 06:30、
+# global-scan-jp 16:00 TW，實際常延遲 1–7 小時）。這裡定時把最新 HTML 拉過來重套導覽；沒變就不 commit。
+# 需要 secret EVAN_AGENT_TOKEN（能讀私有 repo 的 token）。52 週高選股池刻意不同步（實戰策略不公開）。
+on:
+  schedule:
+    - cron: "15 1,3,5 * * 2-6"      # TW 09:15/11:15/13:15：美股盤後掃描
+    - cron: "15 10,12,15 * * 1-5"   # TW 18:15/20:15/23:15：台股、日股掃描
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chip-daily
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Fetch scan HTML from evan-portfolio-dashboard
+        env:
+          GH_TOKEN: ${{ secrets.EVAN_AGENT_TOKEN }}
+        run: |
+          set -e
+          if [ -z "$GH_TOKEN" ]; then echo "::warning::未設定 secret EVAN_AGENT_TOKEN，跳過同步"; exit 0; fi
+          fetch() {
+            gh api -H "Accept: application/vnd.github.raw" \
+              "repos/timchang1977o-maker/evan-portfolio-dashboard/contents/$1?ref=main" > "/tmp/scan.html"
+            # 防呆：抓到的不像完整頁就不覆蓋（保留舊版）
+            if [ "$(wc -c < /tmp/scan.html)" -gt 5000 ] && grep -q '<div class="wrap">' /tmp/scan.html; then
+              cp /tmp/scan.html "chip_reports/$2"
+            else
+              echo "::warning::$1 抓取異常，沿用舊版"
+            fi
+          }
+          fetch "tw_scan/%E5%8F%B0%E8%82%A1150%E6%8E%83%E6%8F%8F.html" "台股150掃描.html"
+          fetch "tw_scan/us/%E7%BE%8E%E8%82%A150%E6%8E%83%E6%8F%8F.html" "美股50掃描.html"
+          fetch "tw_scan/jp/%E6%97%A5%E8%82%A130%E6%8E%83%E6%8F%8F.html" "日股30掃描.html"
+          python build_page.py
+
+      - name: Commit + push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add chip_reports/台股150掃描.html chip_reports/美股50掃描.html chip_reports/日股30掃描.html \
+                  scan_tw.html scan_us.html scan_jp.html
+          if git diff --staged --quiet; then echo "No scan changes"; exit 0; fi
+          git commit -m "chore(scan): sync TW/US/JP scans $(TZ=Asia/Taipei date +%Y-%m-%d_%H%M)"
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin main && git push && exit 0
+            git rebase --abort 2>/dev/null || true; sleep 10
+          done
+          exit 1

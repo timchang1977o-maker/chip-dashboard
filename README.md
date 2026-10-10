@@ -32,3 +32,9 @@ python3 make_icons.py                 # 重新產圖示（改設計時才需要�
 `neg_signals.html`＝台股負訊號看板（現增定價折價、主動 ETF 一窩蜂建倉）＋弱正訊號（剛被 2 家投信主動 ETF 建倉）。
 來源 `chip_reports/負訊號看板.html` 由私有 workspace `Evan.agent/neg_signals/run_daily.sh`（Mac launchd，平日 18:40）產出並經 `sync_pages.sh` 推上來；本 repo 的 `build_page.py` 只負責套 PWA＋頂部導覽。Mac 沒開就不更新（看板右上「產出」時間）。
 美股財報分頁同日移除。
+
+## 🔭 台／美／日股掃描分頁（2026-10-10 起）
+
+`scan_tw.html`／`scan_us.html`／`scan_jp.html`＝週/日 EMA 多頭排列×52 週高技術掃描（台股市值前 150、美股 NDX50、日股 30）。
+來源由私有 repo `evan-portfolio-dashboard` 的 GHA 產出（`tw_scan/`），本 repo `sync-scans.yml` 平日多班用 secret `EVAN_AGENT_TOKEN`（需能讀該私有 repo）拉進 `chip_reports/`，`build_page.py` 套導覽並把頁內 `/scan*` 連結改成本站靜態頁。secret 未設定時同步會跳過、頁面停在最後一次推上來的版本。
+52 週高選股池（/h52）是實戰策略，刻意不放公開站。

@@ -1,0 +1,190 @@
+<title>美股NDX50 多頭排列與新高掃描</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#eef1f5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="籌碼">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" href="favicon.ico">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#F3F4F6; --panel:#FFFFFF; --ink:#1B1E23; --ink2:#5C626B; --line:#D9DCE1; --line2:#EBEDF0;
+  --up:#C43A2F; --up-soft:#F6E1DE; --align:#2F5D8C; --align-soft:#DEE7F1; --warn:#A8730F; --warn-soft:#F4E9D2;
+  --bar:#E4E7EB; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --sans:"IBM Plex Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#15171B; --panel:#1D2025; --ink:#E6E6E2; --ink2:#9AA0A8; --line:#30343B; --line2:#262A30;
+  --up:#E0584B; --up-soft:#3A2321; --align:#6FA1D6; --align-soft:#1F2F41; --warn:#D9A544; --warn-soft:#3A2F17; --bar:#2A2E35;}}
+:root[data-theme="dark"]{
+  --bg:#15171B; --panel:#1D2025; --ink:#E6E6E2; --ink2:#9AA0A8; --line:#30343B; --line2:#262A30;
+  --up:#E0584B; --up-soft:#3A2321; --align:#6FA1D6; --align-soft:#1F2F41; --warn:#D9A544; --warn-soft:#3A2F17; --bar:#2A2E35;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 20px 60px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:18px}
+h1{font-size:24px;font-weight:700;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--ink2);font-size:13px;margin-top:4px}
+.asof{font-family:var(--mono);font-size:12px;color:var(--ink2);text-align:right;line-height:1.7}
+.crit{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;font-size:13px;color:var(--ink2);margin-bottom:16px;display:flex;flex-wrap:wrap;gap:6px 22px}
+.crit b{color:var(--ink);font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.kpi:hover{border-color:var(--ink2)} .kpi[aria-pressed="true"]{border-color:var(--align);box-shadow:inset 0 0 0 1px var(--align)}
+.kpi .n{font-family:var(--mono);font-size:26px;font-weight:500;line-height:1.1}
+.kpi .l{font-size:12px;color:var(--ink2);margin-top:4px;letter-spacing:.02em}
+.kpi.up .n{color:var(--up)} .kpi.al .n{color:var(--align)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.tools select,.tools input{font:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--line);border-radius:5px;background:var(--panel);color:var(--ink)}
+.tools input{width:170px}
+.chip{font:inherit;font-size:12.5px;padding:5px 11px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink2);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:focus-visible,.kpi:focus-visible,th:focus-visible{outline:2px solid var(--align);outline-offset:2px}
+.count{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink2)}
+.tbl{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:1080px;font-variant-numeric:tabular-nums}
+th{position:sticky;top:0;background:var(--panel);z-index:1;text-align:left;font-size:11.5px;letter-spacing:.04em;color:var(--ink2);font-weight:500;padding:10px 10px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none;white-space:nowrap}
+th.num,td.num{text-align:right}
+th .arr{opacity:.35;font-size:10px;margin-left:3px} th[data-dir]{color:var(--ink)} th[data-dir] .arr{opacity:1}
+td{padding:7px 10px;border-bottom:1px solid var(--line2);vertical-align:middle;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:color-mix(in srgb,var(--line2) 55%,transparent)}
+td.num,td.mono{font-family:var(--mono);font-size:13px}
+.rk{color:var(--ink2);font-size:12px}
+.nm{font-weight:600} .nm small{font-family:var(--mono);font-weight:400;color:var(--ink2);margin-left:6px;font-size:12px}
+.sec{font-size:12px;color:var(--ink2)}
+.st{display:inline-block;min-width:44px;text-align:center;font-size:11.5px;padding:2px 7px;border-radius:4px;font-weight:500}
+.st.y{background:var(--align-soft);color:var(--align)} .st.n{background:var(--line2);color:var(--ink2)} .st.p{background:var(--warn-soft);color:var(--warn)}
+.bar{display:inline-flex;align-items:center;gap:8px;justify-content:flex-end}
+.bar i{display:inline-block;width:90px;height:7px;background:var(--bar);border-radius:2px;position:relative;overflow:hidden}
+.bar i b{position:absolute;right:0;top:0;bottom:0;background:var(--up);border-radius:2px}
+.bar i b.far{background:var(--ink2);opacity:.55}
+.dist{width:56px;display:inline-block;text-align:right}
+.dist.hot{color:var(--up);font-weight:500}
+.bias{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end}
+.bias i{display:inline-block;width:56px;height:6px;background:var(--bar);border-radius:2px;position:relative;overflow:hidden}
+.bias i b{position:absolute;left:0;top:0;bottom:0;background:var(--align);border-radius:2px}
+.bias i b.neg{background:var(--up)}
+.tag{display:inline-block;font-size:11px;padding:2px 6px;border-radius:3px;margin-right:4px;font-weight:600}
+.tag.nh{background:var(--up);color:#fff} .tag.ch{background:var(--up-soft);color:var(--up)} .tag.ath{background:var(--warn-soft);color:var(--warn);font-weight:500}
+.hd{color:var(--ink2);font-size:12px}
+.foot{margin-top:14px;font-size:12px;color:var(--ink2);line-height:1.7}
+.foot b{color:var(--ink);font-weight:600}
+.empty{padding:30px;text-align:center;color:var(--ink2)}
+</style>
+<div class="wrap">
+
+<style id="topnav-style">
+.topnav{display:flex;gap:6px;margin:0 2px 12px;flex-wrap:wrap}
+.topnav a{font:600 13px var(--font,-apple-system,"PingFang TC",sans-serif);
+  color:var(--muted,#6b7686);text-decoration:none;padding:7px 14px;border-radius:10px;
+  border:1px solid var(--hair,#e4e8ee);background:var(--panel,#fff);letter-spacing:.2px;
+  box-shadow:var(--shadow,0 1px 2px rgba(20,30,50,.05));transition:color .12s,background .12s}
+.topnav a:hover{color:var(--ink,#1a2230)}
+.topnav a.on{background:var(--fill,#3d7bf0);color:#fff;border-color:var(--fill,#3d7bf0)}
+</style>
+<nav class="topnav"><a href="index.html">📊 籌碼總覽</a><a href="institutions.html">🏦 法人買賣超</a><a href="neg_signals.html">🚦 負訊號</a><a href="scan_tw.html">🔭 台股掃描</a><a href="scan_us.html" class="on">🔭 美股掃描</a><a href="scan_jp.html">🔭 日股掃描</a></nav>
+<header>
+  <div>
+    <h1>美股 NDX 市值前 50 大 · 多頭排列與 52 週高點掃描</h1>
+    <div class="sub">資料來源：Yahoo Finance 日線（週線由日線合成）；EMA 算法與 TradingView 對過，誤差 &lt;0.1%</div>
+    <div class="sub"><a href="scan_tw.html">台股150</a> · <a href="scan_us.html">美股NDX50</a> · <a href="scan_jp.html">日股30</a></div>
+  </div>
+  <div class="asof">收盤基準 2026-10-09<br>掃描 2026-10-10 09:51 · 49/50 檔成功</div>
+</header>
+<div class="crit">
+  <span><b>多頭排列</b>＝EMA5 &gt; EMA30 &gt; EMA60 &gt; EMA120（週線、日線各自判定）</span>
+  <span><b>距高</b>＝收盤 ÷ 近 250 個交易日最高價 − 1</span>
+  <span><b>新高</b>＝10/9 盤中高於先前 52 週高　<b>收盤新高</b>＝10/9 收盤為 52 週最高收盤　<b>6 年高</b>＝高於近 300 週最高價</span>
+  <span><b>乖離</b>＝收盤相對 EMA30</span>
+</div>
+<div class="kpis" id="kpis">
+  <button class="kpi" data-preset="all"><div class="n">50</div><div class="l">掃描檔數（Nasdaq-100 市值前 50）</div></button>
+  <button class="kpi al" data-preset="both"><div class="n" id="k-both">–</div><div class="l">週＋日皆多頭排列</div></button>
+  <button class="kpi up" data-preset="near"><div class="n" id="k-near">–</div><div class="l">距 52 週高 &lt; 10%</div></button>
+  <button class="kpi up" data-preset="nh"><div class="n" id="k-nh">–</div><div class="l">10/9 創 52 週新高（盤中或收盤）</div></button>
+  <button class="kpi" data-preset="strong"><div class="n" id="k-strong">–</div><div class="l">多頭排列 且 距高 &lt; 10%</div></button>
+</div>
+<div class="tools">
+  <button class="chip" data-f="both" aria-pressed="false">週日多頭排列</button>
+  <button class="chip" data-f="wonly" aria-pressed="false">僅週線排列</button>
+  <button class="chip" data-f="near" aria-pressed="false">距高 &lt;10%</button>
+  <button class="chip" data-f="nh" aria-pressed="false">創新高</button>
+  <button class="chip" data-f="above5" aria-pressed="false">日收盤仍在 EMA5 上</button>
+  <select id="sec"><option value="">全部產業</option></select>
+  <input id="q" type="search" placeholder="代號或名稱">
+  <span class="count" id="count"></span>
+</div>
+<div class="tbl"><table id="t">
+<thead><tr>
+  <th data-k="rank" class="num">市值序<span class="arr">↕</span></th>
+  <th data-k="name">個股<span class="arr">↕</span></th>
+  <th data-k="sector">產業<span class="arr">↕</span></th>
+  <th data-k="close" class="num">收盤<span class="arr">↕</span></th>
+  <th data-k="w_st">週排列<span class="arr">↕</span></th>
+  <th data-k="d_st">日排列<span class="arr">↕</span></th>
+  <th data-k="w_bias30" class="num">週乖離30<span class="arr">↕</span></th>
+  <th data-k="d_bias30" class="num">日乖離30<span class="arr">↕</span></th>
+  <th data-k="dist" class="num">距 52 週高<span class="arr">↕</span></th>
+  <th data-k="days_since" class="num">高點日<span class="arr">↕</span></th>
+  <th data-k="tags">標記<span class="arr">↕</span></th>
+</tr></thead>
+<tbody id="tb"></tbody>
+</table><div class="empty" id="empty" hidden>沒有符合的個股</div></div>
+<div class="foot">
+  <b>讀法</b>：週排列＝大趨勢、日排列＝短趨勢；「僅週線」代表日線正在整理。日收盤跌破 EMA5 只是短線回檔，不影響排列判定，但可用上方篩選排除。
+  距高欄的紅色長條越滿代表越接近高點；高點日為 52 週高點出現日（括號為距今交易日數）。
+  乖離為正表示收盤在 EMA30 之上；乖離過大僅作追價風險提示，不是賣訊。價格為美元。
+  上市未滿 200 週者週線 EMA120 仍在暖機、不可信，週排列一律標「不足」、不計入多頭排列。
+</div>
+</div>
+<script>
+const DATA=[{"code":"NVDA","name":"NVIDIA","rank":1,"sector":"半導體","close":229.27999877929688,"d_st":true,"w_st":true,"d_close_gt5":false,"w_close_gt5":true,"d_bias30":1.4,"w_bias30":9.1,"dist":-5.79,"hdate":"10/06","days_since":3,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":82,"h52":243.3699951171875,"wbars":522},{"code":"AAPL","name":"Apple","rank":2,"sector":"大型科技/平台","close":336.6400146484375,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":1.8,"w_bias30":9.7,"dist":-2.52,"hdate":"09/22","days_since":13,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":91,"h52":345.3399963378906,"wbars":522},{"code":"GOOGL","name":"Alphabet","rank":3,"sector":"大型科技/平台","close":351.6600036621094,"d_st":false,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":1.9,"w_bias30":3.4,"dist":-13.94,"hdate":"05/18","days_since":100,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":66,"h52":408.6099853515625,"wbars":522},{"code":"GOOG","name":"Alphabet","rank":4,"sector":"大型科技/平台","close":347.8599853515625,"d_st":false,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":1.7,"w_bias30":2.9,"dist":-14.0,"hdate":"05/18","days_since":100,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":65,"h52":404.4700012207031,"wbars":522},{"code":"MSFT","name":"Microsoft","rank":5,"sector":"大型科技/平台","close":535.0700073242188,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":5.7,"w_bias30":16.2,"dist":-3.37,"hdate":"10/28","days_since":238,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":91,"h52":553.719970703125,"wbars":522},{"code":"AMZN","name":"Amazon.com","rank":6,"sector":"大型科技/平台","close":262.42999267578125,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":3.3,"w_bias30":5.2,"dist":-8.62,"hdate":"08/03","days_since":48,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":73,"h52":287.20001220703125,"wbars":522},{"code":"META","name":"Meta Platforms","rank":8,"sector":"大型科技/平台","close":718.6699829101562,"d_st":true,"w_st":true,"d_close_gt5":false,"w_close_gt5":true,"d_bias30":4.0,"w_bias30":12.9,"dist":-7.84,"hdate":"09/24","days_since":11,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":76,"h52":779.8200073242188,"wbars":522},{"code":"AVGO","name":"Broadcom","rank":9,"sector":"半導體","close":361.5400085449219,"d_st":false,"w_st":false,"d_close_gt5":false,"w_close_gt5":true,"d_bias30":-0.2,"w_bias30":-2.2,"dist":-26.96,"hdate":"06/03","days_since":89,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":35,"h52":495.0,"wbars":522},{"code":"TSLA","name":"Tesla","rank":10,"sector":"電動車/太空","close":382.70001220703125,"d_st":false,"w_st":false,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":4.4,"w_bias30":1.9,"dist":-23.28,"hdate":"12/22","days_since":200,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":42,"h52":498.8299865722656,"wbars":522},{"code":"MU","name":"Micron Technology","rank":11,"sector":"半導體","close":1029.0,"d_st":true,"w_st":true,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":0.6,"w_bias30":22.8,"dist":-18.01,"hdate":"06/25","days_since":74,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":79,"h52":1255.0,"wbars":522},{"code":"AMD","name":"Advanced Micro Devices","rank":12,"sector":"半導體","close":608.0999755859375,"d_st":true,"w_st":true,"d_close_gt5":false,"w_close_gt5":true,"d_bias30":5.3,"w_bias30":30.9,"dist":-7.66,"hdate":"10/06","days_since":3,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":89,"h52":658.52001953125,"wbars":522},{"code":"WMT","name":"Walmart","rank":13,"sector":"消費/零售","close":111.3499984741211,"d_st":false,"w_st":false,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":3.2,"w_bias30":-1.2,"dist":-17.62,"hdate":"05/19","days_since":99,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":34,"h52":135.16000366210938,"wbars":522},{"code":"ASML","name":"ASML Holding N.V. New York Registry Shares","rank":14,"sector":"半導體設備","close":1780.3399658203125,"d_st":true,"w_st":true,"d_close_gt5":false,"w_close_gt5":true,"d_bias30":1.2,"w_bias30":8.8,"dist":-10.98,"hdate":"06/30","days_since":71,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":79,"h52":1999.9599609375,"wbars":522},{"code":"INTC","name":"Intel","rank":15,"sector":"半導體","close":104.69999694824219,"d_st":true,"w_st":true,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-4.6,"w_bias30":10.6,"dist":-26.45,"hdate":"06/30","days_since":71,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":66,"h52":142.35000610351562,"wbars":522},{"code":"PLTR","name":"Palantir Technologies","rank":16,"sector":"軟體/資安","close":209.0500030517578,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":13.7,"w_bias30":30.2,"dist":-0.25,"hdate":"10/09","days_since":0,"new_high":true,"new_close_high":true,"ath6y":true,"pos52":99,"h52":209.5800018310547,"wbars":315},{"code":"CSCO","name":"Cisco Systems","rank":17,"sector":"光通訊/網通","close":118.38999938964844,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":6.0,"w_bias30":11.7,"dist":-9.19,"hdate":"06/04","days_since":88,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":81,"h52":130.3699951171875,"wbars":522},{"code":"COST","name":"Costco Wholesale","rank":18,"sector":"消費/零售","close":946.9199829101562,"d_st":false,"w_st":false,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":2.3,"w_bias30":-0.1,"dist":-13.64,"hdate":"05/19","days_since":99,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":41,"h52":1096.5,"wbars":522},{"code":"AMAT","name":"Applied Materials","rank":19,"sector":"半導體設備","close":507.0299987792969,"d_st":true,"w_st":true,"d_close_gt5":false,"w_close_gt5":true,"d_bias30":2.6,"w_bias30":9.2,"dist":-31.45,"hdate":"06/30","days_since":71,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":57,"h52":739.6699829101562,"wbars":522},{"code":"LRCX","name":"Lam Research","rank":20,"sector":"半導體設備","close":318.8399963378906,"d_st":true,"w_st":true,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":0.9,"w_bias30":8.3,"dist":-27.29,"hdate":"06/30","days_since":71,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":61,"h52":438.5,"wbars":522},{"code":"PANW","name":"Palo Alto Networks","rank":21,"sector":"軟體/資安","close":418.7799987792969,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":9.5,"w_bias30":35.3,"dist":-3.13,"hdate":"10/06","days_since":3,"new_high":false,"new_close_high":false,"ath6y":true,"pos52":95,"h52":432.3299865722656,"wbars":522},{"code":"NFLX","name":"Netflix","rank":22,"sector":"大型科技/平台","close":70.30000305175781,"d_st":false,"w_st":false,"d_close_gt5":true,"w_close_gt5":false,"d_bias30":-3.2,"w_bias30":-12.3,"dist":-43.7,"hdate":"10/21","days_since":243,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":9,"h52":124.86000061035156,"wbars":522},{"code":"ARM","name":"Arm Holdings","rank":23,"sector":"半導體","close":266.2799987792969,"d_st":true,"w_st":false,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-5.7,"w_bias30":4.2,"dist":-41.18,"hdate":"06/18","days_since":78,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":47,"h52":452.70001220703125,"wbars":161},{"code":"CRWD","name":"CrowdStrike","rank":24,"sector":"軟體/資安","close":275.0400085449219,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":11.3,"w_bias30":44.3,"dist":-4.16,"hdate":"10/06","days_since":3,"new_high":false,"new_close_high":false,"ath6y":true,"pos52":94,"h52":286.989990234375,"wbars":383},{"code":"TXN","name":"Texas Instruments","rank":25,"sector":"半導體","close":283.739990234375,"d_st":true,"w_st":true,"d_close_gt5":false,"w_close_gt5":true,"d_bias30":2.2,"w_bias30":6.8,"dist":-15.06,"hdate":"06/22","days_since":77,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":72,"h52":334.0299987792969,"wbars":522},{"code":"KLAC","name":"KLA","rank":26,"sector":"半導體設備","close":195.57000732421875,"d_st":false,"w_st":true,"d_close_gt5":false,"w_close_gt5":true,"d_bias30":2.3,"w_bias30":4.7,"dist":-36.37,"hdate":"06/30","days_since":71,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":46,"h52":307.3699951171875,"wbars":522},{"code":"MRVL","name":"Marvell Technology","rank":27,"sector":"半導體","close":275.2799987792969,"d_st":true,"w_st":true,"d_close_gt5":false,"w_close_gt5":true,"d_bias30":8.5,"w_bias30":32.7,"dist":-16.55,"hdate":"06/18","days_since":78,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":79,"h52":329.8800048828125,"wbars":522},{"code":"SNDK","name":"Sandisk","rank":28,"sector":"儲存/記憶體","close":1581.8199462890625,"d_st":false,"w_st":false,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-4.9,"w_bias30":12.5,"dist":-32.81,"hdate":"06/22","days_since":77,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":65,"h52":2354.389892578125,"wbars":87},{"code":"AMGN","name":"Amgen","rank":29,"sector":"醫療","close":414.8699951171875,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":1.9,"w_bias30":9.1,"dist":-7.19,"hdate":"08/25","days_since":32,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":80,"h52":447.0299987792969,"wbars":522},{"code":"LIN","name":"Linde","rank":30,"sector":"能源/公用","close":483.7300109863281,"d_st":false,"w_st":false,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":1.4,"w_bias30":-0.7,"dist":-11.76,"hdate":"07/07","days_since":67,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":60,"h52":548.2000122070312,"wbars":522},{"code":"SHOP","name":"Shopify Inc. Class A Subordinate Voting Shares","rank":31,"sector":"軟體/資安","close":170.85000610351562,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":15.3,"w_bias30":27.2,"dist":-6.22,"hdate":"10/29","days_since":237,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":87,"h52":182.19000244140625,"wbars":522},{"code":"ADI","name":"Analog Devices","rank":32,"sector":"半導體","close":406.19000244140625,"d_st":true,"w_st":true,"d_close_gt5":false,"w_close_gt5":true,"d_bias30":3.9,"w_bias30":9.1,"dist":-8.91,"hdate":"06/22","days_since":77,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":82,"h52":445.9100036621094,"wbars":522},{"code":"GILD","name":"Gilead Sciences","rank":33,"sector":"醫療","close":151.1699981689453,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":2.8,"w_bias30":9.3,"dist":-3.89,"hdate":"02/11","days_since":166,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":86,"h52":157.2899932861328,"wbars":522},{"code":"QCOM","name":"QUALCOMM","rank":34,"sector":"半導體","close":175.5,"d_st":false,"w_st":true,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-2.7,"w_bias30":-0.3,"dist":-32.48,"hdate":"05/29","days_since":92,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":39,"h52":259.9200134277344,"wbars":522},{"code":"STX","name":"Seagate Technology Holdings PLC","rank":35,"sector":"儲存/記憶體","close":783.0,"d_st":false,"w_st":true,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-8.4,"w_bias30":3.6,"dist":-31.62,"hdate":"06/18","days_since":78,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":61,"h52":1145.0,"wbars":522},{"code":"PEP","name":"PepsiCo","rank":36,"sector":"消費/零售","close":125.97000122070312,"d_st":false,"w_st":false,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-3.9,"w_bias30":-10.3,"dist":-26.54,"hdate":"02/12","days_since":165,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":5,"h52":171.47999572753906,"wbars":522},{"code":"TMUS","name":"T-Mobile US","rank":37,"sector":"電信/媒體","close":148.5800018310547,"d_st":false,"w_st":false,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-12.3,"w_bias30":-18.9,"dist":-35.58,"hdate":"10/14","days_since":248,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":1,"h52":230.64999389648438,"wbars":522},{"code":"ISRG","name":"Intuitive Surgical","rank":38,"sector":"醫療","close":423.9599914550781,"d_st":false,"w_st":false,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":7.0,"w_bias30":2.3,"dist":-29.79,"hdate":"01/07","days_since":190,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":35,"h52":603.8800048828125,"wbars":522},{"code":"WDC","name":"Western Digital","rank":39,"sector":"儲存/記憶體","close":397.2799987792969,"d_st":false,"w_st":false,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-10.3,"w_bias30":-8.2,"dist":-50.33,"hdate":"06/18","days_since":78,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":41,"h52":799.8699951171875,"wbars":522},{"code":"FTNT","name":"Fortinet","rank":40,"sector":"軟體/資安","close":194.75,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":11.1,"w_bias30":35.0,"dist":-0.1,"hdate":"10/09","days_since":0,"new_high":true,"new_close_high":true,"ath6y":true,"pos52":100,"h52":194.9499969482422,"wbars":522},{"code":"VRTX","name":"Vertex Pharmaceuticals","rank":41,"sector":"醫療","close":510.0799865722656,"d_st":false,"w_st":true,"d_close_gt5":true,"w_close_gt5":false,"d_bias30":-1.1,"w_bias30":4.3,"dist":-8.95,"hdate":"09/03","days_since":25,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":68,"h52":560.25,"wbars":522},{"code":"MNST","name":"Monster Beverage","rank":42,"sector":"消費/零售","close":43.63999938964844,"d_st":false,"w_st":true,"d_close_gt5":true,"w_close_gt5":false,"d_bias30":-0.5,"w_bias30":0.0,"dist":-13.02,"hdate":"07/17","days_since":59,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":62,"h52":50.16999816894531,"wbars":522},{"code":"BKNG","name":"Booking","rank":43,"sector":"消費/零售","close":160.33999633789062,"d_st":false,"w_st":false,"d_close_gt5":true,"w_close_gt5":false,"d_bias30":-5.9,"w_bias30":-11.6,"dist":-27.38,"hdate":"12/16","days_since":204,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":14,"h52":220.80599975585938,"wbars":522},{"code":"PDD","name":"PDD","rank":44,"sector":"消費/零售","close":81.3499984741211,"d_st":false,"w_st":false,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":1.8,"w_bias30":-7.9,"dist":-41.65,"hdate":"10/29","days_since":237,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":14,"h52":139.41000366210938,"wbars":429},{"code":"ADP","name":"Automatic Data Processing","rank":45,"sector":"工業/運輸","close":270.8800048828125,"d_st":false,"w_st":false,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":1.4,"w_bias30":7.0,"dist":-5.94,"hdate":"09/01","days_since":27,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":83,"h52":288.0,"wbars":522},{"code":"CEG","name":"Constellation Energy","rank":46,"sector":"能源/公用","close":298.07000732421875,"d_st":false,"w_st":false,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":8.8,"w_bias30":6.4,"dist":-27.78,"hdate":"10/15","days_since":247,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":38,"h52":412.70001220703125,"wbars":247},{"code":"DDOG","name":"Datadog","rank":47,"sector":"軟體/資安","close":293.260009765625,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":14.0,"w_bias30":32.4,"dist":-0.25,"hdate":"10/09","days_since":0,"new_high":true,"new_close_high":true,"ath6y":true,"pos52":100,"h52":294.0,"wbars":369},{"code":"SBUX","name":"Starbucks","rank":48,"sector":"消費/零售","close":90.75,"d_st":false,"w_st":false,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-6.6,"w_bias30":-8.7,"dist":-17.88,"hdate":"08/13","days_since":40,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":39,"h52":110.51000213623047,"wbars":522},{"code":"LITE","name":"Lumentum","rank":49,"sector":"光通訊/網通","close":1103.35498046875,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":12.9,"w_bias30":33.4,"dist":-3.47,"hdate":"10/09","days_since":0,"new_high":true,"new_close_high":false,"ath6y":true,"pos52":96,"h52":1143.0,"wbars":522},{"code":"ABNB","name":"Airbnb","rank":50,"sector":"消費/零售","close":165.8699951171875,"d_st":false,"w_st":true,"d_close_gt5":true,"w_close_gt5":false,"d_bias30":0.6,"w_bias30":7.4,"dist":-14.26,"hdate":"08/24","days_since":33,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":67,"h52":193.4530029296875,"wbars":305}];
+const $=s=>document.querySelector(s);
+const secs=[...new Set(DATA.map(d=>d.sector))];
+for(const s of secs){const o=document.createElement('option');o.value=s;o.textContent=s;$('#sec').appendChild(o);}
+const isNH=d=>d.new_high||d.new_close_high;
+const both=d=>d.d_st&&d.w_st;
+DATA.forEach(d=>{d.tags=(isNH(d)?2:0)+(d.ath6y?1:0)+(d.dist>=-10?0.5:0);d.short=d.w_st===false&&d.wbars<200;});
+$('#k-both').textContent=DATA.filter(both).length;
+$('#k-near').textContent=DATA.filter(d=>d.dist>=-10).length;
+$('#k-nh').textContent=DATA.filter(isNH).length;
+$('#k-strong').textContent=DATA.filter(d=>both(d)&&d.dist>=-10).length;
+const F={both:false,wonly:false,near:false,nh:false,above5:false};
+let sortK='rank',sortDir=1;
+const PRESETS={all:{},both:{both:true},near:{near:true},nh:{nh:true},strong:{both:true,near:true}};
+function applyPreset(p){for(const k in F)F[k]=!!PRESETS[p][k];syncChips();document.querySelectorAll('.kpi').forEach(b=>b.setAttribute('aria-pressed',b.dataset.preset===p));render();}
+function syncChips(){document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',String(F[c.dataset.f])));}
+document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{F[c.dataset.f]=!F[c.dataset.f];if(c.dataset.f==='both'&&F.both)F.wonly=false;if(c.dataset.f==='wonly'&&F.wonly)F.both=false;syncChips();document.querySelectorAll('.kpi').forEach(b=>b.setAttribute('aria-pressed','false'));render();}));
+document.querySelectorAll('.kpi').forEach(b=>b.addEventListener('click',()=>applyPreset(b.dataset.preset)));
+$('#sec').addEventListener('change',render);$('#q').addEventListener('input',render);
+document.querySelectorAll('th').forEach(th=>{th.tabIndex=0;const go=()=>{const k=th.dataset.k;if(sortK===k)sortDir*=-1;else{sortK=k;sortDir=(k==='rank'||k==='name'||k==='sector'||k==='days_since')?1:-1;}document.querySelectorAll('th').forEach(x=>x.removeAttribute('data-dir'));th.dataset.dir=sortDir>0?'asc':'desc';th.querySelector('.arr').textContent=sortDir>0?'↑':'↓';render();};th.addEventListener('click',go);th.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});});
+const fmt=(n,d=1)=>(n>0?'+':'')+n.toFixed(d)+'%';
+const price=n=>n>=1000?n.toLocaleString('en-US',{maximumFractionDigits:0}):n.toLocaleString('en-US',{minimumFractionDigits:n<100?2:1,maximumFractionDigits:2});
+function stCell(v,short,gt5){if(short)return '<span class="st n">不足</span>';return v?'<span class="st y">多頭</span>':'<span class="st n">否</span>';}
+function render(){
+  const q=$('#q').value.trim().toLowerCase(),sec=$('#sec').value;
+  let rows=DATA.filter(d=>{
+    if(F.both&&!both(d))return false;
+    if(F.wonly&&!(d.w_st&&!d.d_st))return false;
+    if(F.near&&d.dist<-10)return false;
+    if(F.nh&&!isNH(d))return false;
+    if(F.above5&&!d.d_close_gt5)return false;
+    if(sec&&d.sector!==sec)return false;
+    if(q&&!(d.code.includes(q)||d.name.toLowerCase().includes(q)))return false;
+    return true;});
+  rows.sort((a,b)=>{let x=a[sortK],y=b[sortK];if(typeof x==='boolean'){x=+x;y=+y;}if(typeof x==='string')return x.localeCompare(y,'zh-Hant')*sortDir;return (x-y)*sortDir||a.rank-b.rank;});
+  $('#count').textContent=rows.length+' / 50 檔';
+  $('#empty').hidden=rows.length>0;
+  $('#tb').innerHTML=rows.map(d=>{
+    const w=Math.max(0,Math.min(100,100+d.dist*3.3));
+    const tags=(d.new_high?'<span class="tag nh">新高</span>':'')+(d.new_close_high?'<span class="tag ch">收盤新高</span>':'')+(d.ath6y?'<span class="tag ath">6年高</span>':'');
+    const bias=(v)=>`<span class="bias"><i><b class="${v<0?'neg':''}" style="width:${Math.min(100,Math.abs(v)*2.5)}%"></b></i><span style="display:inline-block;width:52px">${fmt(v)}</span></span>`;
+    return `<tr><td class="num rk">${d.rank}</td><td class="nm">${d.name}<small>${d.code}</small></td><td class="sec">${d.sector}</td><td class="num">${price(d.close)}</td><td>${stCell(d.w_st,d.short)}</td><td>${stCell(d.d_st,false)}${d.d_st&&!d.d_close_gt5?' <span class="st p" title="收盤已跌破日EMA5">破5</span>':''}</td><td class="num">${bias(d.w_bias30)}</td><td class="num">${bias(d.d_bias30)}</td><td class="num"><span class="bar"><i><b class="${d.dist<-10?'far':''}" style="width:${w}%"></b></i><span class="dist ${d.dist>=-10?'hot':''}">${fmt(d.dist)}</span></span></td><td class="num hd">${d.hdate} <span style="opacity:.7">(${d.days_since===0?'今':d.days_since+'日前'})</span></td><td>${tags}</td></tr>`;}).join('');
+}
+applyPreset('both');
+</script>

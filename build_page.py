@@ -3,7 +3,7 @@
 
 做三件事：
   1. 在 <head> 注入 PWA 標籤（manifest / apple-touch-icon / theme-color）。
-  2. 在 .wrap 頂端注入共用頂部導覽（籌碼總覽 ↔ 法人買賣超 ↔ 負訊號），當前頁高亮。
+  2. 在 .wrap 頂端注入共用頂部導覽（籌碼總覽 ↔ 法人買賣超 ↔ 負訊號 ↔ 台/美/日股掃描），當前頁高亮。
   3. 寫成 repo 根目錄的 index.html / institutions.html / neg_signals.html，供 Pages 直接服務。
 
 tracker 本身（chip_tracker.py / institution_tracker.py）維持與私有 repo 同步、不改，
@@ -45,11 +45,20 @@ PAGES = [
     # 負訊號看板：來源由 Evan.agent/neg_signals/run_daily.sh（Mac launchd 平日 18:40）產出後
     # 複製到 chip_reports/ 並推上來；GHA daily 只是用同一份來源重套導覽，不會自己算。
     ("負訊號看板.html", "neg_signals.html", "neg"),
+    # 台／美／日股掃描：來源在私有 repo evan-portfolio-dashboard（本機 Evan.agent）的 tw_scan/（各自 GHA 產出），
+    # 由本 repo 的 sync-scans.yml 用 EVAN_AGENT_TOKEN 拉進 chip_reports/ 再重套導覽。
+    # 52 週高選股池（/h52）是實戰策略、刻意不放公開站（2026-10-10 Evan 決定）。
+    ("台股150掃描.html", "scan_tw.html", "scan_tw"),
+    ("美股50掃描.html", "scan_us.html", "scan_us"),
+    ("日股30掃描.html", "scan_jp.html", "scan_jp"),
 ]
 
 TABS = [("index.html", "chips", "📊 籌碼總覽"),
         ("institutions.html", "inst", "🏦 法人買賣超"),
-        ("neg_signals.html", "neg", "🚦 負訊號")]
+        ("neg_signals.html", "neg", "🚦 負訊號"),
+        ("scan_tw.html", "scan_tw", "🔭 台股掃描"),
+        ("scan_us.html", "scan_us", "🔭 美股掃描"),
+        ("scan_jp.html", "scan_jp", "🔭 日股掃描")]
 # 2026-09-12：美股財報分頁（us_earnings.html／build_us_earnings.py／Henry 素材）依 Evan 要求整組移除。
 
 
@@ -71,6 +80,9 @@ def build_one(src_name, out_name, current):
     # 改指本 repo 內的自含靜態頁 etf.html（免登入）。tracker 原始碼維持與私有 repo 同源。
     html = html.replace('.setAttribute("src","/etf")', '.setAttribute("src","etf.html")')
     html = html.replace('href="/etf"', 'href="etf.html"')
+    # 掃描頁內建的市場切換連結指向 Render 路由，改指本站靜態頁（先換長的，避免 /scan 吃掉 /scan/us）。
+    for route, page in (("/scan/us", "scan_us.html"), ("/scan/jp", "scan_jp.html"), ("/scan", "scan_tw.html")):
+        html = html.replace(f'href="{route}"', f'href="{page}"')
     if "manifest.webmanifest" not in html and "</title>" in html:
         html = html.replace("</title>", "</title>" + PWA_HEAD, 1)
     if 'class="topnav"' not in html and '<div class="wrap">' in html:

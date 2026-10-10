@@ -1,0 +1,190 @@
+<title>日股30 多頭排列與新高掃描</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#eef1f5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="籌碼">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" href="favicon.ico">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#F3F4F6; --panel:#FFFFFF; --ink:#1B1E23; --ink2:#5C626B; --line:#D9DCE1; --line2:#EBEDF0;
+  --up:#C43A2F; --up-soft:#F6E1DE; --align:#2F5D8C; --align-soft:#DEE7F1; --warn:#A8730F; --warn-soft:#F4E9D2;
+  --bar:#E4E7EB; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --sans:"IBM Plex Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#15171B; --panel:#1D2025; --ink:#E6E6E2; --ink2:#9AA0A8; --line:#30343B; --line2:#262A30;
+  --up:#E0584B; --up-soft:#3A2321; --align:#6FA1D6; --align-soft:#1F2F41; --warn:#D9A544; --warn-soft:#3A2F17; --bar:#2A2E35;}}
+:root[data-theme="dark"]{
+  --bg:#15171B; --panel:#1D2025; --ink:#E6E6E2; --ink2:#9AA0A8; --line:#30343B; --line2:#262A30;
+  --up:#E0584B; --up-soft:#3A2321; --align:#6FA1D6; --align-soft:#1F2F41; --warn:#D9A544; --warn-soft:#3A2F17; --bar:#2A2E35;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 20px 60px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:18px}
+h1{font-size:24px;font-weight:700;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--ink2);font-size:13px;margin-top:4px}
+.asof{font-family:var(--mono);font-size:12px;color:var(--ink2);text-align:right;line-height:1.7}
+.crit{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;font-size:13px;color:var(--ink2);margin-bottom:16px;display:flex;flex-wrap:wrap;gap:6px 22px}
+.crit b{color:var(--ink);font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.kpi:hover{border-color:var(--ink2)} .kpi[aria-pressed="true"]{border-color:var(--align);box-shadow:inset 0 0 0 1px var(--align)}
+.kpi .n{font-family:var(--mono);font-size:26px;font-weight:500;line-height:1.1}
+.kpi .l{font-size:12px;color:var(--ink2);margin-top:4px;letter-spacing:.02em}
+.kpi.up .n{color:var(--up)} .kpi.al .n{color:var(--align)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.tools select,.tools input{font:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--line);border-radius:5px;background:var(--panel);color:var(--ink)}
+.tools input{width:170px}
+.chip{font:inherit;font-size:12.5px;padding:5px 11px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink2);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:focus-visible,.kpi:focus-visible,th:focus-visible{outline:2px solid var(--align);outline-offset:2px}
+.count{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink2)}
+.tbl{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:1080px;font-variant-numeric:tabular-nums}
+th{position:sticky;top:0;background:var(--panel);z-index:1;text-align:left;font-size:11.5px;letter-spacing:.04em;color:var(--ink2);font-weight:500;padding:10px 10px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none;white-space:nowrap}
+th.num,td.num{text-align:right}
+th .arr{opacity:.35;font-size:10px;margin-left:3px} th[data-dir]{color:var(--ink)} th[data-dir] .arr{opacity:1}
+td{padding:7px 10px;border-bottom:1px solid var(--line2);vertical-align:middle;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:color-mix(in srgb,var(--line2) 55%,transparent)}
+td.num,td.mono{font-family:var(--mono);font-size:13px}
+.rk{color:var(--ink2);font-size:12px}
+.nm{font-weight:600} .nm small{font-family:var(--mono);font-weight:400;color:var(--ink2);margin-left:6px;font-size:12px}
+.sec{font-size:12px;color:var(--ink2)}
+.st{display:inline-block;min-width:44px;text-align:center;font-size:11.5px;padding:2px 7px;border-radius:4px;font-weight:500}
+.st.y{background:var(--align-soft);color:var(--align)} .st.n{background:var(--line2);color:var(--ink2)} .st.p{background:var(--warn-soft);color:var(--warn)}
+.bar{display:inline-flex;align-items:center;gap:8px;justify-content:flex-end}
+.bar i{display:inline-block;width:90px;height:7px;background:var(--bar);border-radius:2px;position:relative;overflow:hidden}
+.bar i b{position:absolute;right:0;top:0;bottom:0;background:var(--up);border-radius:2px}
+.bar i b.far{background:var(--ink2);opacity:.55}
+.dist{width:56px;display:inline-block;text-align:right}
+.dist.hot{color:var(--up);font-weight:500}
+.bias{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end}
+.bias i{display:inline-block;width:56px;height:6px;background:var(--bar);border-radius:2px;position:relative;overflow:hidden}
+.bias i b{position:absolute;left:0;top:0;bottom:0;background:var(--align);border-radius:2px}
+.bias i b.neg{background:var(--up)}
+.tag{display:inline-block;font-size:11px;padding:2px 6px;border-radius:3px;margin-right:4px;font-weight:600}
+.tag.nh{background:var(--up);color:#fff} .tag.ch{background:var(--up-soft);color:var(--up)} .tag.ath{background:var(--warn-soft);color:var(--warn);font-weight:500}
+.hd{color:var(--ink2);font-size:12px}
+.foot{margin-top:14px;font-size:12px;color:var(--ink2);line-height:1.7}
+.foot b{color:var(--ink);font-weight:600}
+.empty{padding:30px;text-align:center;color:var(--ink2)}
+</style>
+<div class="wrap">
+
+<style id="topnav-style">
+.topnav{display:flex;gap:6px;margin:0 2px 12px;flex-wrap:wrap}
+.topnav a{font:600 13px var(--font,-apple-system,"PingFang TC",sans-serif);
+  color:var(--muted,#6b7686);text-decoration:none;padding:7px 14px;border-radius:10px;
+  border:1px solid var(--hair,#e4e8ee);background:var(--panel,#fff);letter-spacing:.2px;
+  box-shadow:var(--shadow,0 1px 2px rgba(20,30,50,.05));transition:color .12s,background .12s}
+.topnav a:hover{color:var(--ink,#1a2230)}
+.topnav a.on{background:var(--fill,#3d7bf0);color:#fff;border-color:var(--fill,#3d7bf0)}
+</style>
+<nav class="topnav"><a href="index.html">📊 籌碼總覽</a><a href="institutions.html">🏦 法人買賣超</a><a href="neg_signals.html">🚦 負訊號</a><a href="scan_tw.html">🔭 台股掃描</a><a href="scan_us.html">🔭 美股掃描</a><a href="scan_jp.html" class="on">🔭 日股掃描</a></nav>
+<header>
+  <div>
+    <h1>日股市值前 30 大 · 多頭排列與 52 週高點掃描</h1>
+    <div class="sub">資料來源：Yahoo Finance 日線（週線由日線合成）；EMA 算法與 TradingView 對過，誤差 &lt;0.1%</div>
+    <div class="sub"><a href="scan_tw.html">台股150</a> · <a href="scan_us.html">美股NDX50</a> · <a href="scan_jp.html">日股30</a></div>
+  </div>
+  <div class="asof">收盤基準 2026-10-09<br>掃描 2026-10-09 22:53 · 30/30 檔成功</div>
+</header>
+<div class="crit">
+  <span><b>多頭排列</b>＝EMA5 &gt; EMA30 &gt; EMA60 &gt; EMA120（週線、日線各自判定）</span>
+  <span><b>距高</b>＝收盤 ÷ 近 250 個交易日最高價 − 1</span>
+  <span><b>新高</b>＝10/9 盤中高於先前 52 週高　<b>收盤新高</b>＝10/9 收盤為 52 週最高收盤　<b>6 年高</b>＝高於近 300 週最高價</span>
+  <span><b>乖離</b>＝收盤相對 EMA30</span>
+</div>
+<div class="kpis" id="kpis">
+  <button class="kpi" data-preset="all"><div class="n">30</div><div class="l">掃描檔數（日本市值前 30，東證）</div></button>
+  <button class="kpi al" data-preset="both"><div class="n" id="k-both">–</div><div class="l">週＋日皆多頭排列</div></button>
+  <button class="kpi up" data-preset="near"><div class="n" id="k-near">–</div><div class="l">距 52 週高 &lt; 10%</div></button>
+  <button class="kpi up" data-preset="nh"><div class="n" id="k-nh">–</div><div class="l">10/9 創 52 週新高（盤中或收盤）</div></button>
+  <button class="kpi" data-preset="strong"><div class="n" id="k-strong">–</div><div class="l">多頭排列 且 距高 &lt; 10%</div></button>
+</div>
+<div class="tools">
+  <button class="chip" data-f="both" aria-pressed="false">週日多頭排列</button>
+  <button class="chip" data-f="wonly" aria-pressed="false">僅週線排列</button>
+  <button class="chip" data-f="near" aria-pressed="false">距高 &lt;10%</button>
+  <button class="chip" data-f="nh" aria-pressed="false">創新高</button>
+  <button class="chip" data-f="above5" aria-pressed="false">日收盤仍在 EMA5 上</button>
+  <select id="sec"><option value="">全部產業</option></select>
+  <input id="q" type="search" placeholder="代號或名稱">
+  <span class="count" id="count"></span>
+</div>
+<div class="tbl"><table id="t">
+<thead><tr>
+  <th data-k="rank" class="num">市值序<span class="arr">↕</span></th>
+  <th data-k="name">個股<span class="arr">↕</span></th>
+  <th data-k="sector">產業<span class="arr">↕</span></th>
+  <th data-k="close" class="num">收盤<span class="arr">↕</span></th>
+  <th data-k="w_st">週排列<span class="arr">↕</span></th>
+  <th data-k="d_st">日排列<span class="arr">↕</span></th>
+  <th data-k="w_bias30" class="num">週乖離30<span class="arr">↕</span></th>
+  <th data-k="d_bias30" class="num">日乖離30<span class="arr">↕</span></th>
+  <th data-k="dist" class="num">距 52 週高<span class="arr">↕</span></th>
+  <th data-k="days_since" class="num">高點日<span class="arr">↕</span></th>
+  <th data-k="tags">標記<span class="arr">↕</span></th>
+</tr></thead>
+<tbody id="tb"></tbody>
+</table><div class="empty" id="empty" hidden>沒有符合的個股</div></div>
+<div class="foot">
+  <b>讀法</b>：週排列＝大趨勢、日排列＝短趨勢；「僅週線」代表日線正在整理。日收盤跌破 EMA5 只是短線回檔，不影響排列判定，但可用上方篩選排除。
+  距高欄的紅色長條越滿代表越接近高點；高點日為 52 週高點出現日（括號為距今交易日數）。
+  乖離為正表示收盤在 EMA30 之上；乖離過大僅作追價風險提示，不是賣訊。價格為日圓（東證）。
+  上市未滿 200 週者週線 EMA120 仍在暖機、不可信，週排列一律標「不足」、不計入多頭排列。
+</div>
+</div>
+<script>
+const DATA=[{"code":"8306","name":"三菱日聯","rank":1,"sector":"金融","close":3462.0,"d_st":false,"w_st":true,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-4.1,"w_bias30":4.4,"dist":-9.21,"hdate":"07/27","days_since":50,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":78,"h52":3813.0,"wbars":521},{"code":"7203","name":"豐田","rank":2,"sector":"汽車/機械","close":2910.5,"d_st":false,"w_st":false,"d_close_gt5":true,"w_close_gt5":false,"d_bias30":-2.0,"w_bias30":-4.0,"dist":-27.24,"hdate":"02/09","days_since":162,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":17,"h52":4000.0,"wbars":521},{"code":"9984","name":"軟銀集團","rank":3,"sector":"投資/網路","close":5803.0,"d_st":true,"w_st":true,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-4.5,"w_bias30":3.0,"dist":-36.05,"hdate":"06/02","days_since":88,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":43,"h52":9074.0,"wbars":521},{"code":"6857","name":"愛德萬","rank":4,"sector":"半導體/電子零件","close":41610.0,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":16.5,"w_bias30":35.5,"dist":-0.9,"hdate":"10/07","days_since":2,"new_high":false,"new_close_high":false,"ath6y":true,"pos52":99,"h52":41990.0,"wbars":521},{"code":"8035","name":"東京威力","rank":5,"sector":"半導體/電子零件","close":12445.0,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":7.3,"w_bias30":14.2,"dist":-23.42,"hdate":"07/01","days_since":67,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":66,"h52":16252.0,"wbars":521},{"code":"285A","name":"鎧俠","rank":6,"sector":"半導體/電子零件","close":17505.0,"d_st":false,"w_st":false,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-3.7,"w_bias30":4.0,"dist":-53.4,"hdate":"06/22","days_since":74,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":44,"h52":37566.66796875,"wbars":95},{"code":"6501","name":"日立","rank":7,"sector":"電子/電機","close":5669.0,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":3.8,"w_bias30":9.7,"dist":-6.13,"hdate":"02/10","days_since":161,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":83,"h52":6039.0,"wbars":521},{"code":"8316","name":"三井住友","rank":8,"sector":"金融","close":3256.0,"d_st":false,"w_st":true,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-4.1,"w_bias30":2.7,"dist":-10.3,"hdate":"07/27","days_since":50,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":78,"h52":3630.0,"wbars":521},{"code":"6098","name":"Recruit","rank":9,"sector":"投資/網路","close":17755.0,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":7.9,"w_bias30":36.9,"dist":-2.53,"hdate":"08/31","days_since":26,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":96,"h52":18215.0,"wbars":521},{"code":"6758","name":"索尼","rank":10,"sector":"電子/電機","close":3814.0,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":2.0,"w_bias30":4.9,"dist":-20.14,"hdate":"11/13","days_since":219,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":44,"h52":4776.0,"wbars":521},{"code":"9983","name":"迅銷","rank":11,"sector":"消費/醫藥","close":71780.0,"d_st":false,"w_st":false,"d_close_gt5":false,"w_close_gt5":true,"d_bias30":0.1,"w_bias30":-0.1,"dist":-19.07,"hdate":"07/08","days_since":62,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":62,"h52":88690.0,"wbars":521},{"code":"8411","name":"瑞穗","rank":12,"sector":"金融","close":8214.0,"d_st":false,"w_st":true,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-3.7,"w_bias30":5.5,"dist":-7.74,"hdate":"10/07","days_since":2,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":84,"h52":8903.0,"wbars":521},{"code":"6861","name":"基恩斯","rank":13,"sector":"電子/電機","close":80540.0,"d_st":true,"w_st":true,"d_close_gt5":false,"w_close_gt5":true,"d_bias30":1.2,"w_bias30":7.3,"dist":-8.39,"hdate":"08/06","days_since":42,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":80,"h52":87920.0,"wbars":521},{"code":"8058","name":"三菱商事","rank":14,"sector":"商社","close":4596.0,"d_st":false,"w_st":true,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-3.9,"w_bias30":-3.0,"dist":-23.55,"hdate":"05/15","days_since":100,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":45,"h52":6012.0,"wbars":521},{"code":"8001","name":"伊藤忠","rank":15,"sector":"商社","close":2155.0,"d_st":false,"w_st":true,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-1.3,"w_bias30":5.0,"dist":-10.17,"hdate":"09/17","days_since":13,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":67,"h52":2399.0,"wbars":521},{"code":"8766","name":"東京海上","rank":16,"sector":"保險","close":525.7000122070312,"d_st":false,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":0.5,"w_bias30":6.3,"dist":-6.88,"hdate":"07/29","days_since":48,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":82,"h52":564.5333251953125,"wbars":521},{"code":"6981","name":"村田","rank":17,"sector":"半導體/電子零件","close":7970.0,"d_st":true,"w_st":true,"d_close_gt5":false,"w_close_gt5":true,"d_bias30":0.3,"w_bias30":11.1,"dist":-38.19,"hdate":"06/22","days_since":74,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":52,"h52":12895.0,"wbars":521},{"code":"9432","name":"NTT","rank":18,"sector":"電信","close":172.89999389648438,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":1.2,"w_bias30":7.5,"dist":-4.0,"hdate":"09/18","days_since":12,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":81,"h52":180.10000610351562,"wbars":521},{"code":"8031","name":"三井物產","rank":19,"sector":"商社","close":4775.0,"d_st":false,"w_st":false,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-3.8,"w_bias30":-4.6,"dist":-28.46,"hdate":"04/08","days_since":123,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":38,"h52":6675.0,"wbars":521},{"code":"2914","name":"日本菸草","rank":20,"sector":"消費/醫藥","close":7230.0,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":5.0,"w_bias30":11.8,"dist":-0.92,"hdate":"10/09","days_since":0,"new_high":true,"new_close_high":true,"ath6y":true,"pos52":97,"h52":7297.0,"wbars":521},{"code":"7011","name":"三菱重工","rank":21,"sector":"汽車/機械","close":3669.0,"d_st":false,"w_st":false,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-4.2,"w_bias30":-7.7,"dist":-29.55,"hdate":"03/02","days_since":149,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":15,"h52":5208.0,"wbars":521},{"code":"9434","name":"軟銀電信","rank":22,"sector":"電信","close":242.0,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":0.7,"w_bias30":6.1,"dist":-4.31,"hdate":"09/15","days_since":15,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":78,"h52":252.89999389648438,"wbars":407},{"code":"7182","name":"郵儲銀行","rank":23,"sector":"金融","close":3178.0,"d_st":false,"w_st":true,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-4.2,"w_bias30":3.9,"dist":-9.66,"hdate":"09/30","days_since":7,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":82,"h52":3518.0,"wbars":521},{"code":"4063","name":"信越化學","rank":24,"sector":"半導體/電子零件","close":6085.0,"d_st":false,"w_st":false,"d_close_gt5":false,"w_close_gt5":true,"d_bias30":1.0,"w_bias30":-2.4,"dist":-23.27,"hdate":"06/01","days_since":89,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":48,"h52":7930.0,"wbars":521},{"code":"9433","name":"KDDI","rank":25,"sector":"電信","close":2893.0,"d_st":false,"w_st":true,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-1.7,"w_bias30":2.2,"dist":-7.31,"hdate":"07/30","days_since":47,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":72,"h52":3121.0,"wbars":521},{"code":"6503","name":"三菱電機","rank":26,"sector":"電子/電機","close":5143.0,"d_st":false,"w_st":false,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-3.0,"w_bias30":-6.0,"dist":-23.08,"hdate":"05/27","days_since":92,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":49,"h52":6686.0,"wbars":521},{"code":"6752","name":"松下","rank":27,"sector":"電子/電機","close":4451.0,"d_st":true,"w_st":true,"d_close_gt5":false,"w_close_gt5":true,"d_bias30":0.3,"w_bias30":15.4,"dist":-10.66,"hdate":"08/14","days_since":37,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":85,"h52":4982.0,"wbars":521},{"code":"4519","name":"中外製藥","rank":28,"sector":"消費/醫藥","close":6019.0,"d_st":false,"w_st":false,"d_close_gt5":false,"w_close_gt5":false,"d_bias30":-6.6,"w_bias30":-17.1,"dist":-43.75,"hdate":"02/25","days_since":152,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":1,"h52":10700.0,"wbars":521},{"code":"7974","name":"任天堂","rank":29,"sector":"消費/醫藥","close":8146.0,"d_st":false,"w_st":false,"d_close_gt5":true,"w_close_gt5":false,"d_bias30":0.3,"w_bias30":-2.5,"dist":-44.32,"hdate":"11/06","days_since":224,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":20,"h52":14630.0,"wbars":521},{"code":"4502","name":"武田","rank":30,"sector":"消費/醫藥","close":5843.0,"d_st":true,"w_st":true,"d_close_gt5":true,"w_close_gt5":true,"d_bias30":1.5,"w_bias30":6.3,"dist":-3.15,"hdate":"04/02","days_since":127,"new_high":false,"new_close_high":false,"ath6y":false,"pos52":90,"h52":6033.0,"wbars":521}];
+const $=s=>document.querySelector(s);
+const secs=[...new Set(DATA.map(d=>d.sector))];
+for(const s of secs){const o=document.createElement('option');o.value=s;o.textContent=s;$('#sec').appendChild(o);}
+const isNH=d=>d.new_high||d.new_close_high;
+const both=d=>d.d_st&&d.w_st;
+DATA.forEach(d=>{d.tags=(isNH(d)?2:0)+(d.ath6y?1:0)+(d.dist>=-10?0.5:0);d.short=d.w_st===false&&d.wbars<200;});
+$('#k-both').textContent=DATA.filter(both).length;
+$('#k-near').textContent=DATA.filter(d=>d.dist>=-10).length;
+$('#k-nh').textContent=DATA.filter(isNH).length;
+$('#k-strong').textContent=DATA.filter(d=>both(d)&&d.dist>=-10).length;
+const F={both:false,wonly:false,near:false,nh:false,above5:false};
+let sortK='rank',sortDir=1;
+const PRESETS={all:{},both:{both:true},near:{near:true},nh:{nh:true},strong:{both:true,near:true}};
+function applyPreset(p){for(const k in F)F[k]=!!PRESETS[p][k];syncChips();document.querySelectorAll('.kpi').forEach(b=>b.setAttribute('aria-pressed',b.dataset.preset===p));render();}
+function syncChips(){document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',String(F[c.dataset.f])));}
+document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{F[c.dataset.f]=!F[c.dataset.f];if(c.dataset.f==='both'&&F.both)F.wonly=false;if(c.dataset.f==='wonly'&&F.wonly)F.both=false;syncChips();document.querySelectorAll('.kpi').forEach(b=>b.setAttribute('aria-pressed','false'));render();}));
+document.querySelectorAll('.kpi').forEach(b=>b.addEventListener('click',()=>applyPreset(b.dataset.preset)));
+$('#sec').addEventListener('change',render);$('#q').addEventListener('input',render);
+document.querySelectorAll('th').forEach(th=>{th.tabIndex=0;const go=()=>{const k=th.dataset.k;if(sortK===k)sortDir*=-1;else{sortK=k;sortDir=(k==='rank'||k==='name'||k==='sector'||k==='days_since')?1:-1;}document.querySelectorAll('th').forEach(x=>x.removeAttribute('data-dir'));th.dataset.dir=sortDir>0?'asc':'desc';th.querySelector('.arr').textContent=sortDir>0?'↑':'↓';render();};th.addEventListener('click',go);th.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});});
+const fmt=(n,d=1)=>(n>0?'+':'')+n.toFixed(d)+'%';
+const price=n=>n>=1000?n.toLocaleString('en-US',{maximumFractionDigits:0}):n.toLocaleString('en-US',{minimumFractionDigits:n<100?2:1,maximumFractionDigits:2});
+function stCell(v,short,gt5){if(short)return '<span class="st n">不足</span>';return v?'<span class="st y">多頭</span>':'<span class="st n">否</span>';}
+function render(){
+  const q=$('#q').value.trim().toLowerCase(),sec=$('#sec').value;
+  let rows=DATA.filter(d=>{
+    if(F.both&&!both(d))return false;
+    if(F.wonly&&!(d.w_st&&!d.d_st))return false;
+    if(F.near&&d.dist<-10)return false;
+    if(F.nh&&!isNH(d))return false;
+    if(F.above5&&!d.d_close_gt5)return false;
+    if(sec&&d.sector!==sec)return false;
+    if(q&&!(d.code.includes(q)||d.name.toLowerCase().includes(q)))return false;
+    return true;});
+  rows.sort((a,b)=>{let x=a[sortK],y=b[sortK];if(typeof x==='boolean'){x=+x;y=+y;}if(typeof x==='string')return x.localeCompare(y,'zh-Hant')*sortDir;return (x-y)*sortDir||a.rank-b.rank;});
+  $('#count').textContent=rows.length+' / 30 檔';
+  $('#empty').hidden=rows.length>0;
+  $('#tb').innerHTML=rows.map(d=>{
+    const w=Math.max(0,Math.min(100,100+d.dist*3.3));
+    const tags=(d.new_high?'<span class="tag nh">新高</span>':'')+(d.new_close_high?'<span class="tag ch">收盤新高</span>':'')+(d.ath6y?'<span class="tag ath">6年高</span>':'');
+    const bias=(v)=>`<span class="bias"><i><b class="${v<0?'neg':''}" style="width:${Math.min(100,Math.abs(v)*2.5)}%"></b></i><span style="display:inline-block;width:52px">${fmt(v)}</span></span>`;
+    return `<tr><td class="num rk">${d.rank}</td><td class="nm">${d.name}<small>${d.code}</small></td><td class="sec">${d.sector}</td><td class="num">${price(d.close)}</td><td>${stCell(d.w_st,d.short)}</td><td>${stCell(d.d_st,false)}${d.d_st&&!d.d_close_gt5?' <span class="st p" title="收盤已跌破日EMA5">破5</span>':''}</td><td class="num">${bias(d.w_bias30)}</td><td class="num">${bias(d.d_bias30)}</td><td class="num"><span class="bar"><i><b class="${d.dist<-10?'far':''}" style="width:${w}%"></b></i><span class="dist ${d.dist>=-10?'hot':''}">${fmt(d.dist)}</span></span></td><td class="num hd">${d.hdate} <span style="opacity:.7">(${d.days_since===0?'今':d.days_since+'日前'})</span></td><td>${tags}</td></tr>`;}).join('');
+}
+applyPreset('both');
+</script>
