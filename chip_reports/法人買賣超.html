@@ -14,28 +14,12 @@
   --shadow:0 1px 2px rgba(20,30,50,.05),0 6px 20px rgba(20,30,50,.06);
   --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC",sans-serif;
 }
-@media (prefers-color-scheme:dark){
-  :root{
-    --bg:#0e1218; --panel:#161c26; --ink:#e8edf4; --muted:#8b97a8; --hair:#242c38;
-    --grid:#1c232e; --axis:#3a4552; --sub:#7c8798;
-    --up:#ff5a4d; --down:#25c274; --foreign:#4d89ff; --trust:#f0a53a; --fill:#4d89ff;
-    --buybg:rgba(255,90,77,.13); --sellbg:rgba(37,194,116,.13);
-    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
-  }
-}
 :root[data-theme="light"]{
   --bg:#eef1f5; --panel:#ffffff; --ink:#1a2230; --muted:#6b7686; --hair:#e4e8ee;
   --grid:#eef1f5; --axis:#aab2be; --sub:#8b95a4;
   --up:#d0342c; --down:#1f9d57; --foreign:#2f6df0; --trust:#e8912b; --fill:#3d7bf0;
   --buybg:rgba(208,52,44,.09); --sellbg:rgba(31,157,87,.10);
   --shadow:0 1px 2px rgba(20,30,50,.05),0 6px 20px rgba(20,30,50,.06);
-}
-:root[data-theme="dark"]{
-  --bg:#0e1218; --panel:#161c26; --ink:#e8edf4; --muted:#8b97a8; --hair:#242c38;
-  --grid:#1c232e; --axis:#3a4552; --sub:#7c8798;
-  --up:#ff5a4d; --down:#25c274; --foreign:#4d89ff; --trust:#f0a53a; --fill:#4d89ff;
-  --buybg:rgba(255,90,77,.13); --sellbg:rgba(37,194,116,.13);
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
@@ -103,7 +87,6 @@ footer{color:var(--muted);font-size:11.5px;text-align:center;margin-top:18px;lin
     <div class="seg" id="periods">
       <button data-p="1">1日</button><button data-p="5">5日</button><button data-p="20">20日</button>
     </div>
-    <button id="themeBtn" class="pill" type="button" title="切換淺色／深色主題">🌙 深色</button>
   </div>
   <div class="grid" id="grid"></div>
   <footer>
@@ -118,9 +101,7 @@ let P = "1";
 try{ if(["1","5","20"].includes(localStorage.getItem("instP"))) P=localStorage.getItem("instP"); }catch(e){}
 const PLABEL={"1":"近 1 日","5":"近 5 日","20":"近 20 日"};
 
-let THEME="light";
-try{ if(localStorage.getItem("chipTheme")==="dark") THEME="dark"; }catch(e){}
-document.documentElement.setAttribute("data-theme",THEME);
+// 主題：一律淺色（深色切換已移除）
 
 const fmt = n => (n<0?"-":"")+Math.abs(n).toLocaleString("en-US");
 function badge(st){
@@ -158,15 +139,6 @@ function build(){
 document.querySelectorAll("#periods button").forEach(b=>{
   b.addEventListener("click",()=>{P=b.dataset.p;try{localStorage.setItem("instP",P);}catch(e){}build();});
 });
-const themeBtn=document.getElementById("themeBtn");
-function syncTheme(){themeBtn.textContent=THEME==="dark"?"☀️ 淺色":"🌙 深色";}
-themeBtn.addEventListener("click",()=>{
-  THEME=THEME==="dark"?"light":"dark";
-  document.documentElement.setAttribute("data-theme",THEME);
-  try{localStorage.setItem("chipTheme",THEME);}catch(e){}
-  syncTheme();
-});
-syncTheme();
 build();
 </script>
 </body>

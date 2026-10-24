@@ -50,10 +50,13 @@ jobs:
       - name: Fetch chip data + institution rankings + regenerate HTML
         env:
           TZ: Asia/Taipei
+        # 三支各自跑：chip_tracker 被 TWSE/TAIFEX 520 擋時，法人排行與導覽仍要更新；最後有任一失敗才標紅
         run: |
-          python dashboard/chip_tracker.py
-          python dashboard/institution_tracker.py
-          python build_page.py
+          fail=0
+          python dashboard/chip_tracker.py || { echo "::warning::chip_tracker failed"; fail=1; }
+          python dashboard/institution_tracker.py || { echo "::warning::institution_tracker failed"; fail=1; }
+          python build_page.py || fail=1
+          echo "TRACKER_FAIL=$fail" >> "$GITHUB_ENV"
 
       # 負訊號看板（neg_signals.html）不在這裡算：來源 chip_reports/負訊號看板.html 由 Mac
       # launchd（Evan.agent/neg_signals/run_daily.sh，平日 18:40）產出並推上來，build_page.py 只重套導覽。
@@ -85,3 +88,9 @@ jobs:
               exit 1
             fi
           fi
+
+      - name: 有抓取失敗就標紅（已成功的部分照樣 commit 了）
+        if: env.TRACKER_FAIL == '1'
+        run: |
+          echo "::error::chip_tracker 或 institution_tracker 失敗，見上方 warning"
+          exit 1

@@ -463,17 +463,6 @@ _TEMPLATE = r"""<!doctype html>
   --shadow:0 1px 2px rgba(20,30,50,.05),0 6px 20px rgba(20,30,50,.06);
   --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC",sans-serif;
 }
-@media (prefers-color-scheme:dark){
-  :root{
-    --bg:#0e1218; --panel:#161c26; --ink:#e8edf4; --muted:#8b97a8; --hair:#242c38;
-    --grid:#1c232e; --axis:#3a4552; --sub:#7c8798;
-    --up:#ff5a4d; --down:#25c274;
-    --foreign:#4d89ff; --trust:#f0a53a; --dealer:#2fc78e;
-    --call:#4d89ff; --put:#ff6f57; --price:#c6d0dc; --fill:#4d89ff;
-    --tsy5:#9b87ff; --tsy10:#4d89ff; --tsy20:#2fc78e; --tsy30:#ff5a4d;
-    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
-  }
-}
 :root[data-theme="light"]{
   --bg:#eef1f5; --panel:#ffffff; --ink:#1a2230; --muted:#6b7686; --hair:#e4e8ee;
   --grid:#eef1f5; --axis:#aab2be; --sub:#8b95a4;
@@ -481,14 +470,6 @@ _TEMPLATE = r"""<!doctype html>
   --call:#2f6df0; --put:#e0533d; --price:#2a3444; --fill:#3d7bf0;
   --tsy5:#7c5cff; --tsy10:#2f6df0; --tsy20:#1faf7a; --tsy30:#d0342c;
   --shadow:0 1px 2px rgba(20,30,50,.05),0 6px 20px rgba(20,30,50,.06);
-}
-:root[data-theme="dark"]{
-  --bg:#0e1218; --panel:#161c26; --ink:#e8edf4; --muted:#8b97a8; --hair:#242c38;
-  --grid:#1c232e; --axis:#3a4552; --sub:#7c8798;
-  --up:#ff5a4d; --down:#25c274; --foreign:#4d89ff; --trust:#f0a53a; --dealer:#2fc78e;
-  --call:#4d89ff; --put:#ff6f57; --price:#c6d0dc; --fill:#4d89ff;
-  --tsy5:#9b87ff; --tsy10:#4d89ff; --tsy20:#2fc78e; --tsy30:#ff5a4d;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
@@ -577,8 +558,10 @@ footer a{color:var(--foreign);text-decoration:none}
 <div class="wrap">
   <header>
     <h1>台股籌碼儀表板</h1>
-    <div class="sub">資料截至 <b>__GEN__</b> · <span id="rlabel">近 1 年</span> · 來源：TAIFEX 期交所／TWSE 證交所（官方免費）</div>
+    <div class="sub"><a href="/" id="homeLink" style="display:none;color:inherit">← 資產儀表板</a> 資料截至 <b>__GEN__</b> · <span id="rlabel">近 1 年</span> · 來源：TAIFEX 期交所／TWSE 證交所（官方免費）</div>
   </header>
+  <div id="stale" data-asof="__GEN__" style="display:none"></div>
+  <script>if(/onrender\.com$|^localhost$/.test(location.hostname))document.getElementById("homeLink").style.display="";(function(){var el=document.getElementById('stale');if(!el)return;var s=String(el.dataset.asof||'').replace(/^(\d{4})(\d{2})(\d{2})$/,'$1-$2-$3').slice(0,10);var d=new Date(s+'T00:00:00');if(isNaN(d))return;var t=new Date();t.setHours(0,0,0,0);var lag=0;for(var x=new Date(d);x<t;x.setDate(x.getDate()+1)){var w=x.getDay();if(w&&w<6)lag++;}if(lag>2||(lag>1&&new Date().getHours()>=19)){el.style.cssText='display:block;margin:6px 0 10px;padding:6px 10px;border-radius:6px;background:#FDECEC;color:#B0413E;font-size:13px;font-weight:600';el.textContent='⚠ 資料可能過期：資料日 '+s+'，落後 '+lag+' 個工作日（排程可能失敗）';}})();</script>
   <div class="tabs" id="tabs">
     <button data-tab="chip" class="on">籌碼總覽</button>
     <button data-tab="etf">主動 ETF 追蹤</button>
@@ -589,7 +572,6 @@ footer a{color:var(--foreign);text-decoration:none}
         <button data-r="1W">1W</button><button data-r="1M">1M</button><button data-r="6M">6M</button><button data-r="YTD">YTD</button><button data-r="1Y">1Y</button><button data-r="2Y">2Y</button>
       </div>
       <button id="linkBtn" class="linktoggle" type="button" aria-pressed="false" title="開啟後：滑過任一張圖，各圖會在同一天同步顯示十字線與數值">🔗 多圖連動</button>
-      <button id="themeBtn" class="linktoggle" type="button" title="切換淺色／深色主題">🌙 深色</button>
     </div>
     <div class="streaks" id="streaks"></div>
     <div class="grid" id="grid"></div>
@@ -616,10 +598,8 @@ try{ if(RANGES[localStorage.getItem("chipRange")]) RANGE=localStorage.getItem("c
 // 四圖連動（crosshair / tooltip 跨圖同步，依日期對齊）；localStorage 記住
 window.LINK=false;
 try{ window.LINK = localStorage.getItem("chipLink")==="1"; }catch(e){}
-// 主題：預設淺色（白底），localStorage 記住；<html data-theme="light"> 先擋首屏閃深色
-let THEME="light";
-try{ if(localStorage.getItem("chipTheme")==="dark") THEME="dark"; }catch(e){}
-document.documentElement.setAttribute("data-theme",THEME);
+// 主題：一律淺色（深色切換已移除）
+const THEME="light";
 
 // 依目前區間算最早保留日期（ISO 字串比較即可）；"" = 不裁切
 const RANGE_DAYS={"1W":7,"1M":31,"6M":183,"1Y":365};
@@ -1012,17 +992,6 @@ linkBtn.addEventListener("click",()=>{
 });
 syncLinkUI();
 
-// 主題切換（淺色／深色）；切換後重繪，讓 SVG 內以 cssv() 讀的色彩（格線/軸/圓點）跟著更新
-const themeBtn=document.getElementById("themeBtn");
-function syncThemeUI(){themeBtn.textContent=THEME==="dark"?"☀️ 淺色":"🌙 深色";}
-themeBtn.addEventListener("click",()=>{
-  THEME=THEME==="dark"?"light":"dark";
-  document.documentElement.setAttribute("data-theme",THEME);
-  try{localStorage.setItem("chipTheme",THEME);}catch(e){}
-  syncThemeUI();
-  document.getElementById("grid").innerHTML="";build();
-});
-syncThemeUI();
 
 build();
 

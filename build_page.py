@@ -83,6 +83,16 @@ def build_one(src_name, out_name, current):
     # 掃描頁內建的市場切換連結指向 Render 路由，改指本站靜態頁（先換長的，避免 /scan 吃掉 /scan/us）。
     for route, page in (("/scan/us", "scan_us.html"), ("/scan/jp", "scan_jp.html"), ("/scan", "scan_tw.html")):
         html = html.replace(f'href="{route}"', f'href="{page}"')
+    # 來源是給 Artifact 用的片段時（負訊號、掃描頁）缺 doctype／charset／viewport，手機會進 quirks mode 用 980px 渲染
+    if not html.lstrip().lower().startswith("<!doctype"):
+        head = '<!doctype html>\n<html lang="zh-Hant">\n'
+        if "charset" not in html[:600]:
+            head += '<meta charset="utf-8">\n'
+        if 'name="viewport"' not in html[:2000]:
+            head += '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
+        html = head + html
+    # 掃描頁的「← 主頁」指向 Render 資產儀表板，公開站沒有
+    html = html.replace('<a href="/">← 主頁</a> · ', '')
     if "manifest.webmanifest" not in html and "</title>" in html:
         html = html.replace("</title>", "</title>" + PWA_HEAD, 1)
     if 'class="topnav"' not in html and '<div class="wrap">' in html:
