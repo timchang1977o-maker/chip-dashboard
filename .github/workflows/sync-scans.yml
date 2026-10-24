@@ -28,7 +28,7 @@ jobs:
           GH_TOKEN: ${{ secrets.EVAN_AGENT_TOKEN }}
         run: |
           set -e
-          if [ -z "$GH_TOKEN" ]; then echo "::warning::未設定 secret EVAN_AGENT_TOKEN，跳過同步"; exit 0; fi
+          if [ -z "$GH_TOKEN" ]; then echo "::error::未設定 secret EVAN_AGENT_TOKEN，無法同步（2026-10 曾因此靜默卡 2 週）"; exit 1; fi
           fetch() {
             gh api -H "Accept: application/vnd.github.raw" \
               "repos/timchang1977o-maker/evan-portfolio-dashboard/contents/$1?ref=main" > "/tmp/scan.html"
