@@ -1552,5 +1552,19 @@
   "foreign_twse_e8": -6.8,
   "foreign_tpex_e8": 6.6,
   "foreign_total_e8": -0.2
+ },
+ "20261113": {
+  "twse_ratio": 170.67,
+  "tpex_ratio": 166.84,
+  "total_ratio": 169.74,
+  "twse_ratio_exetf": 160.83,
+  "tpex_ratio_exetf": 165.84,
+  "total_ratio_exetf": 162.05,
+  "twse_fin_e8": 5366.0,
+  "tpex_fin_e8": 1720.2,
+  "miss": 13,
+  "foreign_twse_e8": 288.4,
+  "foreign_tpex_e8": 37.9,
+  "foreign_total_e8": 326.3
  }
 }
